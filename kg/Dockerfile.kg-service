@@ -1,0 +1,36 @@
+# KG service — serves /chat (agentic), /expand, /resolve, /paper over the
+# Neo4j knowledge graph + Ollama. Run on the KG server so tool calls never
+# leave the machine.
+#
+#   docker build -f Dockerfile.kg-service -t kg-service .
+#
+# For deployment on the KG server use docker-compose.kg-service.yml (host
+# networking, API bound to 127.0.0.1:8080). Manual equivalent:
+#   docker run -d --name kg-service --restart unless-stopped \
+#     --network host --env-file .env \
+#     kg-service \
+#     uvicorn service.kg_service:app --host 127.0.0.1 --port 8080
+#
+# .env must contain NEO4J_URI / NEO4J_USER / NEO4J_PASSWORD / NEO4J_DATABASE,
+# OLLAMA_HOST + OLLAMA_PORT, OLLAMA_LLM_MODEL, OLLAMA_EMBED_MODEL,
+# VECTOR_INDEX_NAME and KG_API_KEY (long random string shared with the
+# app's env in Vercel). Never publish 8080 publicly — only via the tunnel.
+
+FROM python:3.13-slim
+
+RUN pip install --no-cache-dir uv
+
+WORKDIR /app
+COPY pyproject.toml uv.lock README.md ./
+COPY config.py ./
+COPY service ./service
+
+RUN uv sync --frozen --no-dev --no-install-project
+
+ENV PATH="/app/.venv/bin:$PATH"
+EXPOSE 8080
+
+HEALTHCHECK --interval=60s --timeout=10s --retries=3 \
+  CMD python -c "import urllib.request;urllib.request.urlopen('http://localhost:8080/health')"
+
+CMD ["uvicorn", "service.kg_service:app", "--host", "0.0.0.0", "--port", "8080"]

@@ -2,6 +2,8 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   basePath: '/investment-tech-tree',
+  // Slim self-contained server for the dockerized deploy (kg/ stack)
+  output: 'standalone',
   images: {
     unoptimized: true,
   },

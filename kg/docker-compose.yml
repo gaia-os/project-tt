@@ -1,0 +1,130 @@
+# SMR stack: app (Next.js) + Neo4j + Ollama + MongoDB + kg-service in one
+# network — the fully self-hosted deployment, no Vercel/Atlas needed.
+# Sibling of the fusion-kg stack (fusion_kg_builder repo) — runs alongside
+# it on the same server, on 33xxx ports instead of 22xxx/11xxx/7xxx.
+#
+#   docker compose up -d --build
+#   curl localhost:33337/investment-tech-tree
+#   curl localhost:33336/health
+#
+# Internal addressing (inside smr-kg-net):
+#   Neo4j   -> neo4j://neo4j:7687      (container port, not the published 33334)
+#   Ollama  -> http://ollama:11434     (container port, not the published 33332)
+#   MongoDB -> mongodb://mongodb:27017 (not published publicly — the app
+#             reaches it over smr-kg-net; 33335 is loopback-only for
+#             scripts/tunnels)
+#
+# Published ports (host):
+#   33333 -> Neo4j Browser, 33334 -> bolt, 33332 -> Ollama,
+#   33337 -> app (the only public-facing port)
+#   33335 -> MongoDB, 33336 -> kg-service — both on 127.0.0.1 only:
+#            reachable via SSH forward / tunnel on the host, NOT the LAN.
+#            Drop the "127.0.0.1:" prefix only if LAN access is ever needed.
+#
+# NOTE — Ollama shares the models dir /mnt/data2/ollama_fusion_tt with the
+# fusion-kg stack's ollama. Concurrent reads are fine, but don't run
+# `ollama pull` on both instances at the same time.
+#
+# .env requirements: see env.example. First deploy also needs the MongoDB
+# data migration: ./scripts/mongo-migrate.sh
+
+name: smr
+
+services:
+  neo4j:
+    container_name: neo4j_smr_tt
+    image: neo4j:5
+    ports:
+      - "${NEO4J_HTTP_PORT:-33333}:7474"
+      - "${NEO4J_BOLT_PORT:-33334}:7687"
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-password}
+      # APOC is required by the entity resolution step (apoc.refactor.mergeNodes)
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+    networks: [smr-kg-net]
+
+  ollama:
+    container_name: ollama_fusion_smr
+    image: ollama/ollama:0.35.0
+    ports:
+      - "${OLLAMA_PUBLISHED_PORT:-33332}:11434"
+    volumes:
+      - /mnt/data2/ollama_fusion_tt:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks: [smr-kg-net]
+
+  mongodb:
+    container_name: mongodb_smr_tt
+    image: mongo:8
+    restart: unless-stopped
+    # Loopback only — the app connects over smr-kg-net; 33335 stays usable
+    # for mongo-migrate.sh (docker exec) and SSH-tunneled seed scripts.
+    ports:
+      - "127.0.0.1:${MONGO_PORT:-33335}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-mongo}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?Set MONGO_PASSWORD in .env}
+    volumes:
+      - ./mongo/data:/data/db
+    networks: [smr-kg-net]
+
+  kg-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.kg-service
+    container_name: kg_service_smr_tt
+    restart: unless-stopped
+    # Published only on the host's loopback -> reachable via SSH forward /
+    # tunnel on the host, not from the LAN.
+    ports:
+      - "127.0.0.1:${KG_SERVICE_PORT:-33336}:8080"
+    environment:
+      # Internal container ports — unaffected by the host port mapping.
+      NEO4J_URI: neo4j://neo4j:7687
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_DATABASE: ${NEO4J_DATABASE:-neo4j}
+      OLLAMA_HOST: ollama
+      OLLAMA_PORT: "11434"
+      OLLAMA_LLM_MODEL: ${OLLAMA_LLM_MODEL:-qwen3.8:27b}
+      OLLAMA_EMBED_MODEL: ${OLLAMA_EMBED_MODEL:-qwen3-embedding:8b}
+      OLLAMA_NUM_CTX: ${OLLAMA_NUM_CTX:-16384}
+      VECTOR_INDEX_NAME: ${VECTOR_INDEX_NAME:-chunk_embeddings}
+      KG_API_KEY: ${KG_API_KEY}
+    depends_on:
+      - neo4j
+      - ollama
+    networks: [smr-kg-net]
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: app_smr_tt
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-33337}:3000"
+    environment:
+      # Internal container ports — unaffected by the host port mapping.
+      MONGODB_URI: mongodb://${MONGO_USER:-mongo}:${MONGO_PASSWORD}@mongodb:27017/?authSource=admin
+      KG_SERVICE_URL: http://kg-service:8080
+      KG_API_KEY: ${KG_API_KEY}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      VOTE_SECRET: ${VOTE_SECRET:?Set VOTE_SECRET in .env}
+    depends_on:
+      - mongodb
+      - kg-service
+    networks: [smr-kg-net]
+
+networks:
+  smr-kg-net:

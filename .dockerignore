@@ -1,0 +1,21 @@
+.git
+node_modules
+.next
+out
+
+# docker stack data dirs + secrets
+kg/mongo
+kg/neo4j
+kg/dump
+.env*
+*.env
+
+# not needed at runtime (seeding/dev only)
+# NOTE: data/ IS needed — imported by WorldExplorer.tsx at build time.
+docs
+outputs
+scripts
+tests
+simulations
+Dockerfile
+docker-compose*.yml

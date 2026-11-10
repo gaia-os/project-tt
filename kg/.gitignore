@@ -1,0 +1,10 @@
+# Docker bind-mount data dirs (created on the server)
+neo4j/data/
+neo4j/logs/
+neo4j/import/
+mongo/data/
+
+# Migration dumps
+dump/
+
+__pycache__/
