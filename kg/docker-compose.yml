@@ -25,6 +25,9 @@
 # fusion-kg stack's ollama. Concurrent reads are fine, but don't run
 # `ollama pull` on both instances at the same time.
 #
+# Persistent data lives in ${SMR_DATA_DIR:-/mnt/data2/smr_tt_data}:
+#   neo4j/{data,logs,import}  mongo/data
+#
 # .env requirements: see env.example. First deploy also needs the MongoDB
 # data migration: ./scripts/mongo-migrate.sh
 
@@ -42,9 +45,9 @@ services:
       # APOC is required by the entity resolution step (apoc.refactor.mergeNodes)
       NEO4J_PLUGINS: '["apoc"]'
     volumes:
-      - ./neo4j/data:/data
-      - ./neo4j/logs:/logs
-      - ./neo4j/import:/var/lib/neo4j/import
+      - ${SMR_DATA_DIR:-/mnt/data2/smr_tt_data}/neo4j/data:/data
+      - ${SMR_DATA_DIR:-/mnt/data2/smr_tt_data}/neo4j/logs:/logs
+      - ${SMR_DATA_DIR:-/mnt/data2/smr_tt_data}/neo4j/import:/var/lib/neo4j/import
     networks: [smr-kg-net]
 
   ollama:
@@ -75,7 +78,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-mongo}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:?Set MONGO_PASSWORD in .env}
     volumes:
-      - ./mongo/data:/data/db
+      - ${SMR_DATA_DIR:-/mnt/data2/smr_tt_data}/mongo/data:/data/db
     networks: [smr-kg-net]
 
   kg-service:

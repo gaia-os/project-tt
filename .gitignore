@@ -266,5 +266,6 @@ __marimo__/
 # Folders
 simulations/outputs/*
 data/pdfs/
+data/extracted/
 
 #==========================

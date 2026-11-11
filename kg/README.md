@@ -22,7 +22,16 @@ kg/
   config.py              # kg-service settings (env-driven)
   service/               # FastAPI service copied from fusion_kg_builder
   scripts/mongo-migrate.sh
-  neo4j/  mongo/         # bind-mount data dirs (created by docker)
+  scripts/dev-tunnel.sh
+```
+
+Persistent data lives outside the repo in `SMR_DATA_DIR`
+(default `/mnt/data2/smr_tt_data`):
+
+```
+/mnt/data2/smr_tt_data/
+  neo4j/{data,logs,import}   # bind-mounted into neo4j_smr_tt
+  mongo/data                 # bind-mounted into mongodb_smr_tt
 ```
 
 ## Ports (host)

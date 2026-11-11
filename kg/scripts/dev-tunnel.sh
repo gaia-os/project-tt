@@ -20,9 +20,16 @@ set -euo pipefail
 
 SERVER="${1:-${KG_SERVER:?usage: $0 <server>  (or set KG_SERVER)}}"
 
-exec ssh -N \
+# Dedicated forwarding-only key on the server (authorized_keys: restrict,
+# permitopen=localhost:33xxx, command=/bin/false). Falls back to the
+# default key/agent if not present.
+SSH_KEY="${SSH_KEY:-$HOME/.ssh/ds3_tunnel}"
+KEY_OPT=()
+[[ -f "$SSH_KEY" ]] && KEY_OPT=(-i "$SSH_KEY")
+
+exec ssh -N -o ExitOnForwardFailure=yes \
   -L 33335:localhost:33335 \
   -L 33336:localhost:33336 \
   -L 33333:localhost:33333 \
   -L 33334:localhost:33334 \
-  "$SERVER"
+  "${KEY_OPT[@]}" "$SERVER"
