@@ -152,6 +152,7 @@ const TabPanel = ({
               topic={topic}
               activeSubView={nodeDetailsSubView}
               onSubViewChange={setNodeDetailsSubView}
+              onSelectNode={onNodeSelect}
             />
           </TabsContent>
 

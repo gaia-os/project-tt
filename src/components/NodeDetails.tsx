@@ -6,6 +6,7 @@ import { LABEL_COLORS, UiNode, CompanyInfo } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { Manual } from './Manual';
 import CompanyDetails from './CompanyDetails';
+import { SmrNodeDetails } from './SmrNodeDetails';
 import {
   Accordion,
   AccordionContent,
@@ -26,6 +27,7 @@ type NodeDetailsProps = {
   topic: TopicKey;
   activeSubView: NodeDetailsSubView;
   onSubViewChange: (v: NodeDetailsSubView) => void;
+  onSelectNode?: (nodeId: string) => void;
 };
 
 interface InfactAnalysis {
@@ -54,7 +56,7 @@ const getProbabilityColor = (probabilityText: string): string => {
   return 'bg-green-600';
 };
 
-const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange }: NodeDetailsProps) => {
+const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange, onSelectNode }: NodeDetailsProps) => {
   const [showInfactModal, setShowInfactModal] = useState(false);
   const [companies, setCompanies] = useState<CompanyInfo[]>([]);
   const [companiesLoading, setCompaniesLoading] = useState(false);
@@ -145,7 +147,7 @@ const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange }: No
           <DialogTitle className="sr-only">
             {modalCompany?.canonical_name ?? 'Company Details'}
           </DialogTitle>
-          {modalCompany && <CompanyDetails company={modalCompany} />}
+          {modalCompany && <CompanyDetails company={modalCompany} topic={topic} />}
         </DialogContent>
       </Dialog>
 
@@ -173,6 +175,11 @@ const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange }: No
 
           {/* Node Info sub-view */}
           <TabsContent value="info" className="flex-1 overflow-auto mt-0">
+            {selectedNode.data.smr ? (
+              <CardContent className="pt-4">
+                <SmrNodeDetails nodeId={selectedNode.id} topic={topic} onSelectNode={onSelectNode} />
+              </CardContent>
+            ) : (
             <CardContent className="space-y-4 pt-4">
               {typeof selectedNode.data.trl_current === 'string' && (
                 <div className="space-y-2 pb-2 border-b-2">
@@ -273,6 +280,7 @@ const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange }: No
                 </div>
               )}
             </CardContent>
+            )}
           </TabsContent>
 
           {/* Associated Companies sub-view */}

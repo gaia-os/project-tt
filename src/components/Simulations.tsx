@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { TopicKey } from '@/lib/topicConfig';
+import { TOPICS, TopicKey } from '@/lib/topicConfig';
 import { TechTree } from '@/lib/types';
 import { SimulationMode, MODE_LABELS, McsData, DistributionData } from './simulations/mcsTypes';
 import { DeterministicView } from './simulations/DeterministicView';
@@ -11,7 +11,8 @@ interface SimulationData {
   statusData: Record<string, Record<string, string>>;
 }
 
-const TREE_FOLDER: Record<TopicKey, string> = {
+// Topics without an entry have no precomputed simulation outputs.
+const TREE_FOLDER: Partial<Record<TopicKey, string>> = {
   nuclear: 'nuclear_tt',
   fossil_fuels: 'fossil_fuel_tt_v2',
 };
@@ -40,8 +41,10 @@ const Simulations: React.FC<Props> = ({ topic, techTree, onNodeSelect }) => {
   const [detLoading, setDetLoading] = useState(true);
   const [detError, setDetError] = useState<string | null>(null);
 
+  const hasSimulations = !!TREE_FOLDER[topic];
+
   useEffect(() => {
-    if (mode !== 'deterministic') return;
+    if (mode !== 'deterministic' || !hasSimulations) return;
     setDetLoading(true);
     setDetError(null);
     fetch(`/investment-tech-tree/api/simulation?years=${selectedYears}&topic=${topic}`)
@@ -52,7 +55,7 @@ const Simulations: React.FC<Props> = ({ topic, techTree, onNodeSelect }) => {
       .then(setDetData)
       .catch((e) => setDetError(e.message))
       .finally(() => setDetLoading(false));
-  }, [selectedYears, topic, mode]);
+  }, [selectedYears, topic, mode, hasSimulations]);
 
   // ── MCS ──────────────────────────────────────────────────────────────────
   const [mcsData, setMcsData] = useState<McsData | null>(null);
@@ -60,7 +63,7 @@ const Simulations: React.FC<Props> = ({ topic, techTree, onNodeSelect }) => {
   const [mcsError, setMcsError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (mode === 'deterministic') return;
+    if (mode === 'deterministic' || !hasSimulations) return;
     const base = `/investment-tech-tree/outputs/${TREE_FOLDER[topic]}`;
 
     setMcsLoading(true);
@@ -101,7 +104,18 @@ const Simulations: React.FC<Props> = ({ topic, techTree, onNodeSelect }) => {
         setMcsLoading(false);
       }
     })();
-  }, [mode, topic]);
+  }, [mode, topic, hasSimulations]);
+
+  if (!hasSimulations) {
+    return (
+      <div className="p-6 bg-white">
+        <h2 className="text-2xl font-bold text-gray-800 mb-3">Investment Simulation Results</h2>
+        <p className="text-sm text-gray-500">
+          Simulations are not yet available for {TOPICS[topic].label}.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-white">

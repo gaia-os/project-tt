@@ -142,7 +142,10 @@ export function WorldExplorer({
   );
   const locationGroups = useMemo(() => {
     if (!data?.available || layer !== 'headquarters') return [];
-    const groups = groupCompanyLocations(COMPANY_LOCATIONS, data.companies);
+    const groups = groupCompanyLocations(
+      data.locations ?? COMPANY_LOCATIONS,
+      data.companies,
+    );
     return groups.filter((group) => {
       if (!aggregateByCountry.has(group.countryIso)) return false;
       return !activeCountryIso || group.countryIso === activeCountryIso;

@@ -101,7 +101,7 @@ export function CompanySelectionDetails({
             <LoadingSpinner />
           </div>
         ) : (
-          <CompanyDetails company={displayedCompany} />
+          <CompanyDetails company={displayedCompany} topic={topic} />
         )}
       </div>
     </div>

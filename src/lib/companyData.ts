@@ -1,6 +1,7 @@
 import type { Document } from 'mongodb';
 import {
   CompanyInfo,
+  CompanyLocation,
   CompanySummary,
   CompanyTechnologyMapping,
   CompanyViewResponse,
@@ -9,6 +10,7 @@ import { TOPICS, TopicKey } from '@/lib/topicConfig';
 
 export const COMPANIES_COLLECTION = 'tt_companies';
 export const COMPANY_TECH_EDGES_COLLECTION = 'company_tech_tree_edges';
+export const COMPANY_LOCATIONS_COLLECTION = 'tt_company_locations';
 
 const COMPANY_SUMMARY_PROJECTION = {
   _id: 0,
@@ -27,6 +29,7 @@ const COMPANY_SUMMARY_PROJECTION = {
   domain: 1,
   geopolitical_risk_score: 1,
   geopolitical_risk_label: 1,
+  logo_image_id: 1,
 } as const;
 
 const COMPANY_MAPPING_PROJECTION = {
@@ -72,6 +75,23 @@ function toCompanySummary(document: Document): CompanySummary {
     domain: nullableString(document.domain),
     geopolitical_risk_score: nullableNumber(document.geopolitical_risk_score),
     geopolitical_risk_label: nullableString(document.geopolitical_risk_label),
+    logo_image_id: nullableString(document.logo_image_id),
+  };
+}
+
+function toCompanyLocation(document: Document): CompanyLocation | null {
+  const latitude = nullableNumber(document.latitude);
+  const longitude = nullableNumber(document.longitude);
+  const countryIso = nullableString(document.country_iso)?.toUpperCase();
+  if (latitude === null || longitude === null || !countryIso) return null;
+  return {
+    company_id: String(document.company_id),
+    label: nullableString(document.label) ?? countryIso,
+    country_iso: countryIso,
+    latitude,
+    longitude,
+    source_field: document.source_field === 'hq' ? 'hq' : 'linkedin_headquarters',
+    source_url: nullableString(document.source_url),
   };
 }
 
@@ -94,6 +114,7 @@ export function buildCompanyViewResponse(
   companyDocuments: Document[],
   mappingDocuments: Document[],
   topicLabel: string,
+  locationDocuments: Document[] = [],
 ): CompanyViewResponse {
   const mappedCompanyIds = new Set(
     mappingDocuments.map((mapping) => String(mapping.company_id)),
@@ -140,11 +161,16 @@ export function buildCompanyViewResponse(
     };
   }
 
+  const locations = locationDocuments
+    .map(toCompanyLocation)
+    .filter((location): location is CompanyLocation => location !== null);
+
   return {
     available: true,
     companies: mappedCompanies,
     mappings,
     coverage,
+    ...(locations.length ? { locations } : {}),
   };
 }
 
@@ -155,7 +181,7 @@ export async function getCompanyViewData(
   const client = await clientPromise;
   const db = client.db(TOPICS[topic].dbName);
 
-  const [companyDocuments, mappingDocuments] = await Promise.all([
+  const [companyDocuments, mappingDocuments, locationDocuments] = await Promise.all([
     db
       .collection(COMPANIES_COLLECTION)
       .find({}, { projection: COMPANY_SUMMARY_PROJECTION })
@@ -164,12 +190,17 @@ export async function getCompanyViewData(
       .collection(COMPANY_TECH_EDGES_COLLECTION)
       .find({}, { projection: COMPANY_MAPPING_PROJECTION })
       .toArray(),
+    db
+      .collection(COMPANY_LOCATIONS_COLLECTION)
+      .find({}, { projection: { _id: 0 } })
+      .toArray(),
   ]);
 
   return buildCompanyViewResponse(
     companyDocuments,
     mappingDocuments,
     TOPICS[topic].label,
+    locationDocuments,
   );
 }
 

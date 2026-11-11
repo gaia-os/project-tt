@@ -35,7 +35,22 @@ interface GroupSelectorProps {
   selectedCategory: string;
   categories: string[];
   onCategoryChange: (category: string) => void;
+  /** SMR-style trees: minimum technology decision relevance (0 = show all). */
+  minRelevance?: number;
+  onMinRelevanceChange?: (value: number) => void;
+  visibleNodeCount?: number;
+  sourceBackedOnly?: boolean;
+  onSourceBackedOnlyChange?: (value: boolean) => void;
 }
+
+const RELEVANCE_LABELS: Record<number, string> = {
+  0: 'all',
+  1: 'rel ≥ 1',
+  2: 'rel ≥ 2',
+  3: 'rel ≥ 3',
+  4: 'rel ≥ 4',
+  5: 'rel 5',
+};
 
 export const GroupSelector: React.FC<GroupSelectorProps> = ({
   currentMode,
@@ -60,6 +75,11 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
   selectedCategory,
   categories,
   onCategoryChange,
+  minRelevance,
+  onMinRelevanceChange,
+  visibleNodeCount,
+  sourceBackedOnly,
+  onSourceBackedOnlyChange,
 }) => {
   const groupingOptions: GroupingMode[] = ['None', ...NODE_LABELS];
 
@@ -155,6 +175,53 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            )}
+
+            {/* Detail level (technology decision relevance) */}
+            {minRelevance !== undefined && onMinRelevanceChange && (
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="relevance-filter"
+                    className="text-sm font-medium text-gray-700 whitespace-nowrap"
+                    title="Minimum decision relevance (1-5) of technologies shown. Drag right for more detail. Reactors are always shown."
+                  >
+                    Detail:
+                  </label>
+                  <input
+                    id="relevance-filter"
+                    type="range"
+                    min={0}
+                    max={5}
+                    step={1}
+                    value={5 - minRelevance}
+                    onChange={(e) => onMinRelevanceChange(5 - Number(e.target.value))}
+                    className="w-28 accent-blue-600"
+                    aria-valuetext={RELEVANCE_LABELS[minRelevance]}
+                  />
+                  <span className="w-14 text-xs text-gray-600 tabular-nums">
+                    {RELEVANCE_LABELS[minRelevance]}
+                  </span>
+                </div>
+                {visibleNodeCount !== undefined && (
+                  <p className="text-[11px] text-gray-500 text-right">
+                    {visibleNodeCount} nodes{minRelevance <= 2 ? ' — layout may be slow' : ''}
+                  </p>
+                )}
+                {onSourceBackedOnlyChange && (
+                  <label
+                    className="flex items-center gap-1.5 text-xs text-gray-600 whitespace-nowrap"
+                    title="Hide relations that are only LLM-inferred"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!!sourceBackedOnly}
+                      onChange={(e) => onSourceBackedOnlyChange(e.target.checked)}
+                    />
+                    source/literature-backed relations only
+                  </label>
+                )}
               </div>
             )}
 

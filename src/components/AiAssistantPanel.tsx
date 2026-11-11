@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Send, Upload } from 'lucide-react';
 import { useTechTree } from '@/hooks/useTechTree';
+import { chatContextTree } from '@/lib/smrFilters';
 import { TopicKey } from '@/lib/topicConfig';
 import DOMPurify from 'dompurify';
 import { Badge } from '@/components/ui/badge';
@@ -83,7 +84,7 @@ const AiAssistantPanel: React.FC<AiAssistantPanelProps> = ({ topic }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: message.trim(),
-          context: techTree || { nodes: [], edges: [] },
+          context: chatContextTree(techTree),
           history: messages,
           topic,
           fileData,

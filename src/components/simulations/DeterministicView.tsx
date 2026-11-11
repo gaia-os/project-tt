@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react';
 import { TopicKey } from '@/lib/topicConfig';
 import { TechTree } from '@/lib/types';
 
-const TREE_FOLDER: Record<TopicKey, string> = {
+const TREE_FOLDER: Partial<Record<TopicKey, string>> = {
   nuclear: 'nuclear_tt',
   fossil_fuels: 'fossil_fuel_tt_v2',
 };

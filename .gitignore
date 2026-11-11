@@ -267,5 +267,7 @@ __marimo__/
 simulations/outputs/*
 data/pdfs/
 data/extracted/
+kg/mongo/data/
+kg/neo4j/data/
 
 #==========================

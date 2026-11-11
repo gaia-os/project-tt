@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { CompanyInfo } from '@/lib/types';
+import { TopicKey } from '@/lib/topicConfig';
+import { topicImageUrl } from '@/lib/smrImages';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -13,6 +15,8 @@ import {
 
 interface CompanyDetailsProps {
   company: CompanyInfo;
+  /** Needed to resolve `logo_image_id` against the topic's image store. */
+  topic?: TopicKey;
 }
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -93,12 +97,22 @@ function MetricCard({
   );
 }
 
-const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company }) => {
+const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, topic }) => {
+  const logoId = typeof company.logo_image_id === 'string' ? company.logo_image_id : null;
   return (
     <div className="p-4 flex flex-col h-full">
       <Card className="flex flex-col h-full">
         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4 gap-4 border-b-2 mb-4">
-          <div>
+          {logoId && topic && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={topicImageUrl(topic, logoId)}
+              alt={`${company.canonical_name} logo`}
+              className="h-12 w-12 flex-shrink-0 rounded border bg-white object-contain p-0.5"
+              loading="lazy"
+            />
+          )}
+          <div className="flex-1">
             <CardTitle className="text-lg font-bold leading-tight">
               {company.canonical_name}
             </CardTitle>
@@ -205,6 +219,40 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company }) => {
                 <InfoRow label="Current Capacity" value={company.current_capacity ?? null} />
               </div>
             </div>
+          )}
+
+          {/* SMR organisation fields (smr_tt_db) */}
+          <InfoRow label="Organisation Type" value={(company.organisation_kind as string) ?? null} />
+          <InfoRow label="Ticker" value={(company.ticker as string) ?? null} />
+          <InfoRow label="Valuation" value={(company.valuation as string) ?? null} />
+          <InfoRow
+            label="Supply-chain Roles"
+            value={
+              Array.isArray(company.supply_roles) && company.supply_roles.length ? (
+                <TagList items={(company.supply_roles as string[]).map((r) => r.replace(/_/g, ' '))} />
+              ) : null
+            }
+          />
+          {Array.isArray(company.stakeholders) && company.stakeholders.length > 0 && (
+            <InfoRow
+              label="Stakeholders"
+              value={
+                <ul className="space-y-0.5">
+                  {(company.stakeholders as { name: string; relation: string; url: string | null }[]).map((s, i) => (
+                    <li key={i}>
+                      {s.url ? (
+                        <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                          {s.name}
+                        </a>
+                      ) : (
+                        s.name
+                      )}{' '}
+                      <span className="text-xs text-gray-500">({s.relation})</span>
+                    </li>
+                  ))}
+                </ul>
+              }
+            />
           )}
 
           <Accordion type="multiple" className="w-full">

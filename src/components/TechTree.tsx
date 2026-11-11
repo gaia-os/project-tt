@@ -28,6 +28,7 @@ import TabPanel from './TabPanel';
 import EditInterface from './EditInterface';
 import { useTechTree } from '@/hooks/useTechTree';
 import { setAdminPassword, verifyAdminPassword } from '@/lib/adminClient';
+import { DEFAULT_MIN_RELEVANCE, filterSmrTechTree, isSmrTree } from '@/lib/smrFilters';
 
 // Suppress hydration warnings for Radix UI
 if (typeof window !== 'undefined') {
@@ -105,6 +106,23 @@ const TechTree: React.FC<TechTreeProps> = ({
  
   // Category filtering state
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
+  // SMR-style trees (large, relevance-rated, provenance-tagged edges)
+  const smrTree = useMemo(() => isSmrTree(techTree), [techTree]);
+  const [minRelevance, setMinRelevance] = useState<number>(DEFAULT_MIN_RELEVANCE);
+  const [sourceBackedOnly, setSourceBackedOnly] = useState<boolean>(false);
+  const revealedFocusKeyRef = useRef<number | undefined>(undefined);
+  const smrFilteredTree = useMemo(
+    () =>
+      techTree && smrTree
+        ? filterSmrTechTree(techTree, {
+            minRelevance,
+            sourceBackedOnly,
+            category: selectedCategory,
+          })
+        : null,
+    [techTree, smrTree, minRelevance, sourceBackedOnly, selectedCategory],
+  );
 
   // Refs to imperatively switch TabPanel tabs / sub-views
   const showNodeDetailsTabRef = useRef<(() => void) | null>(null);
@@ -222,7 +240,7 @@ const TechTree: React.FC<TechTreeProps> = ({
     setLiteratureNodes([]);
     setLiteratureEdges([]);
     setExpandedLiteratureNodeIds(new Set());
-  }, [techTree, groupingMode, showingRelatedNodes, showOnlyConnected, searchTerm, selectedCategory]);
+  }, [techTree, groupingMode, showingRelatedNodes, showOnlyConnected, searchTerm, selectedCategory, smrFilteredTree]);
 
   useEffect(() => {
     if (!techTree) return;
@@ -231,8 +249,8 @@ const TechTree: React.FC<TechTreeProps> = ({
       setIsLoading(true);
       
       // Apply category filter
-      let filteredTechTree = techTree;
-      if (selectedCategory !== 'All') {
+      let filteredTechTree = smrFilteredTree ?? techTree;
+      if (!smrFilteredTree && selectedCategory !== 'All') {
         filteredTechTree = {
           nodes: techTree.nodes.filter(node => node.data.category === selectedCategory),
           edges: techTree.edges.filter(edge => {
@@ -267,6 +285,7 @@ const TechTree: React.FC<TechTreeProps> = ({
     searchTerm,
     techTree,
     selectedCategory,
+    smrFilteredTree,
   ]);
 
   // Update node and edge styles based on highlighted elements
@@ -769,7 +788,21 @@ const TechTree: React.FC<TechTreeProps> = ({
     const node = layoutedNodesRef.current.find(
       (candidate) => candidate.id === requestedTechnologyId,
     );
-    if (!node) return;
+    if (!node) {
+      // Hidden by the SMR detail threshold: lower it once per focus request
+      // so the node gets laid out (without fighting later slider changes).
+      const smr = techTree?.nodes.find((n) => n.id === requestedTechnologyId)?.data.smr;
+      if (
+        smr?.kind === 'technology' &&
+        smr.relevance < minRelevance &&
+        revealedFocusKeyRef.current !== technologyFocusRequestKey
+      ) {
+        revealedFocusKeyRef.current = technologyFocusRequestKey;
+        setSelectedCategory('All');
+        setMinRelevance(smr.relevance);
+      }
+      return;
+    }
 
     setSelectedNode((current) => (current?.id === node.id ? current : node));
     const connected = findConnectedElements(
@@ -789,6 +822,8 @@ const TechTree: React.FC<TechTreeProps> = ({
     technologyFocusRequestKey,
     isLoading,
     findConnectedElements,
+    techTree,
+    minRelevance,
   ]);
 
   if (error) {
@@ -840,6 +875,15 @@ const TechTree: React.FC<TechTreeProps> = ({
           selectedCategory={selectedCategory}
           categories={uniqueCategories}
           onCategoryChange={setSelectedCategory}
+          {...(smrTree
+            ? {
+                minRelevance,
+                onMinRelevanceChange: setMinRelevance,
+                visibleNodeCount: smrFilteredTree?.nodes.length,
+                sourceBackedOnly,
+                onSourceBackedOnlyChange: setSourceBackedOnly,
+              }
+            : {})}
         />
         {isLoadingData || isLoading ? (
           <div className="flex-grow flex items-center justify-center h-full">

@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTechTree } from '@/hooks/useTechTree';
+import { chatContextTree } from '@/lib/smrFilters';
 
 type ChatMode = 'instant' | 'thinking';
 
@@ -200,7 +201,7 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage.content,
-          context: techTree || { nodes: [], edges: [] },
+          context: chatContextTree(techTree),
           history: messages,
           topic,
           fileData,

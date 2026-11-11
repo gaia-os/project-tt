@@ -53,12 +53,16 @@ export async function GET(request: NextRequest) {
           infact_analysis: node.infact_analysis,
           infact_analysis_html_content: node.infact_analysis_html_content,
           infact_status: node.infact_status,
+          ...(node.smr ? { smr: node.smr } : {}),
         },
       })),
       edges: edges.map((edge) => ({
         id: edge.id,
         source: edge.source,
         target: edge.target,
+        ...(typeof edge.source_backed === 'boolean'
+          ? { data: { source_backed: edge.source_backed } }
+          : {}),
       })),
     };
 
