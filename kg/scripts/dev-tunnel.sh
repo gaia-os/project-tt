@@ -9,10 +9,12 @@
 #   KG_SERVER=user@server ./scripts/dev-tunnel.sh
 #
 # Forwards (local port -> server loopback):
+#   33332 -> ollama      
 #   33335 -> mongodb     (MONGODB_URI in .env.local)
 #   33336 -> kg-service  (KG_SERVICE_URL in .env.local)
-#   33333 -> neo4j http  (browser at localhost:33333, optional)
-#   33334 -> neo4j bolt  (optional)
+#   33333 -> neo4j http  (browser at localhost:33333)
+#   33334 -> neo4j bolt  
+#   33337 -> app instance     
 #
 # -N: no remote command. Ctrl-C to stop. Add -f to background it.
 
