@@ -15,7 +15,7 @@
 #   MONGO_CONTAINER     target container (default: mongodb_smr_tt)
 #   MONGO_TOOLS_IMAGE   image providing mongodump (default: mongo:8)
 #   MIGRATE_DBS         space-separated DBs to copy
-#                       (default: the two DBs the app reads — see src/lib/topicConfig.ts)
+#                       (default: the DB the app reads — see src/lib/topicConfig.ts)
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -32,7 +32,7 @@ fi
 MONGO_USER="${MONGO_USER:-mongo}"
 MONGO_CONTAINER="${MONGO_CONTAINER:-mongodb_smr_tt}"
 MONGO_TOOLS_IMAGE="${MONGO_TOOLS_IMAGE:-mongo:8}"
-MIGRATE_DBS="${MIGRATE_DBS:-nuclear_tt_db fossil_fuels_tt_db}"
+MIGRATE_DBS="${MIGRATE_DBS:-smr}"
 
 if [[ "$(docker inspect -f '{{.State.Running}}' "$MONGO_CONTAINER" 2>/dev/null)" != "true" ]]; then
   echo "ERROR: $MONGO_CONTAINER is not running — start the stack first:"

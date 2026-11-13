@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 import { KgEntity } from '@/lib/types';
 
 // Serves the materialized KG enrichment produced by enrich.py
@@ -11,12 +12,12 @@ export async function GET(request: NextRequest) {
     const nodeId = searchParams.get('nodeId');
     const topic = searchParams.get('topic') as TopicKey;
 
-    if (!topic || !TOPICS[topic]) {
+    if (!topic || !(await getTopic(topic))) {
       return NextResponse.json({ error: 'Invalid or missing topic parameter' }, { status: 400 });
     }
 
     const client = await clientPromise;
-    const db = client.db(TOPICS[topic].dbName);
+    const db = client.db((await getTopic(topic))!.dbName);
 
     // Availability lookup: which nodes have enrichment (drives icon visibility).
     if (!nodeId) {

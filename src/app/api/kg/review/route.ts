@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 import { experimentKeys, PAPER_PART_SCOPE } from '@/lib/kgKeys';
 import { KgEntity, KgExperiment } from '@/lib/types';
 
@@ -26,12 +27,12 @@ interface ReviewPart {
 export async function GET(request: NextRequest) {
   try {
     const topic = request.nextUrl.searchParams.get('topic') as TopicKey;
-    if (!topic || !TOPICS[topic]) {
+    if (!topic || !(await getTopic(topic))) {
       return NextResponse.json({ error: 'Invalid or missing topic' }, { status: 400 });
     }
 
     const client = await clientPromise;
-    const db = client.db(TOPICS[topic].dbName);
+    const db = client.db((await getTopic(topic))!.dbName);
 
     const [docs, curations, voteRows] = await Promise.all([
       db

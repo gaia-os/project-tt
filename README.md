@@ -163,10 +163,12 @@ src/
 - Sign up at https://www.mongodb.com/cloud/atlas
 - Create a new free cluster
 - Note your cluster connection details
-- Run following script to set-up the nuclear db: `npx tsx --env-file=.env.local scripts/add-nuclear-data.ts`
-- You can also add fossil fuel db: `npx tsx --env-file=.env.local scripts/add-fossil-fuel-data.ts`
-- Seed nuclear company mappings with
-  `npx tsx --env-file=.env.local scripts/add-tt-companies.ts`
+- Each dataset lives in `data/extracted/<name>/` and is seeded into the
+  MongoDB database `<name>`:
+  `npx tsx --env-file=.env.local scripts/seed-dataset.ts <name>`
+  (or `npm run seed -- <name>`). The app's tree selector lists every seeded
+  database. An optional `dataset.json` in the folder sets the display label
+  and chat system prompt.
 
 ### Installation
 
@@ -329,28 +331,30 @@ The application will be available at your Vercel domain with the `/investment-te
 
 ## Adding a New Dataset
 
-Follow these steps to add a new dataset (e.g., a Solar Tech Tree) and fully integrate it into the app.
+Datasets are folder-driven: drop an extracted knowledge base into
+`data/extracted/<name>/` and seed it — no code changes needed.
 
-1. **Prepare the Data Source**
-   - Create a JSON data file (e.g., `data/solar_tech_tree.json`) containing nodes and edges.
-   - Ensure nodes include required properties like `id`, `label`, `type`, and `trl_current`.
+1. **Prepare the Data Folder**
+   - Create `data/extracted/<name>/` with the same layout as `data/extracted/smr/`:
+     - `technologies/graph.json` — nodes + typed edges (required)
+     - `reactors/*.md`, `technologies/*.md`, `orgs/*.md` — entities with YAML frontmatter
+     - optional `dataset.json` — `{ "label": "...", "systemPrompt": "..." }` for the
+       selector label and chat prompt (defaults to the folder name + a generic prompt)
 
-2. **Create and Run a Database Seed Script**
-   - Add a script in `scripts/` (e.g., `scripts/add-solar-data.ts`) following the existing fossil/nuclear patterns.
-   - Update `JSON_FILE_PATH` to your new JSON file and set a new `DB_NAME` (e.g., `solar_tt_db`).
-   - Run the script:
-     ```bash
-     npx tsx --env-file=.env.local scripts/add-solar-data.ts
-     ```
+2. **Seed the Database**
+   ```bash
+   npx tsx --env-file=.env.local scripts/seed-dataset.ts <name>
+   ```
+   The folder name becomes the MongoDB database name. The app discovers the new
+   dataset automatically — it appears in the tree selector without a redeploy.
 
 3. **Update Node Types and Styling (`src/lib/types.ts`)**
    - Add new node types to `NODE_LABELS` (e.g., `SolarConcept`).
    - Assign Tailwind CSS color classes in `LABEL_COLORS`.
    - Add corresponding entries to `LABEL_COLORS_VARIABLES` so they render correctly.
 
-4. **Register the Topic Configuration (if present, e.g., `src/lib/topicConfig.ts`)**
-   - Add your new topic to the `TopicKey` union.
-   - Add a new entry in `TOPICS` with `id`, `label`, `dbName`, and a tailored `systemPrompt`.
-
-5. **API Routing Integration**
-   - If your API route reads a `topic` query param and maps to `topicConfig.dbName`, no additional fetch changes are needed.
+4. **Topic Configuration**
+   - None needed — `data/extracted/<name>` ↔ MongoDB `<name>` ↔ selector entry
+     `<name>` are all the same identifier. Labels/prompts come from `dataset.json`.
+   - If you introduce new node `type` values, also update `NODE_LABELS` /
+     `LABEL_COLORS` in `src/lib/types.ts` so they render correctly.

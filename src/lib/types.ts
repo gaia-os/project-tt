@@ -501,7 +501,7 @@ export interface AvailableCompanyViewResponse {
   companies: CompanySummary[];
   mappings: CompanyTechnologyMapping[];
   coverage: CompanyViewCoverage;
-  /** Topic-specific HQ coordinates; falls back to data/company_locations.json when absent. */
+  /** Topic-specific HQ coordinates. */
   locations?: CompanyLocation[];
 }
 

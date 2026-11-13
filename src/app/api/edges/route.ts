@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { requireAdmin } from '@/lib/adminAuth';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 
 // POST - Create a new edge
 export async function POST(request: NextRequest) {
@@ -21,14 +22,14 @@ export async function POST(request: NextRequest) {
 
     // Get and validate topic
     const topic = body.topic as TopicKey;
-    if (!topic || !TOPICS[topic]) {
+    if (!topic || !(await getTopic(topic))) {
       return NextResponse.json(
         { error: 'Invalid or missing topic parameter' },
         { status: 400 }
       );
     }
 
-    const topicConfig = TOPICS[topic];
+    const topicConfig = (await getTopic(topic))!;
 
     const client = await clientPromise;
     const db = client.db(topicConfig.dbName); // Dynamic database selection

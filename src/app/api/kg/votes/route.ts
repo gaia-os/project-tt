@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 import { getVoter, isValidTarget, rateLimited } from '@/lib/voterAuth';
 
 const MAX_TARGETS = 500;
@@ -14,7 +15,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { topic, targets } = await request.json();
-    if (!topic || !TOPICS[topic as TopicKey] || !Array.isArray(targets) || !targets.length) {
+    if (!topic || !(await getTopic(topic as TopicKey)) || !Array.isArray(targets) || !targets.length) {
       return NextResponse.json({ error: 'Invalid params' }, { status: 400 });
     }
     if (targets.length > MAX_TARGETS) {
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     const rows = valid.length
       ? await (await clientPromise)
-          .db(TOPICS[topic as TopicKey].dbName)
+          .db((await getTopic(topic as TopicKey))!.dbName)
           .collection('kg_votes')
           .find({ targetId: { $in: valid } }, { projection: { _id: 0, targetId: 1, voterId: 1, vote: 1 } })
           .toArray()

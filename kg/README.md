@@ -62,8 +62,8 @@ curl localhost:33337/investment-tech-tree   # app (basePath!)
 
 ## MongoDB data migration (Atlas -> container)
 
-The app reads `nuclear_tt_db` and `fossil_fuels_tt_db`
-(`src/lib/topicConfig.ts`). To port them from Atlas:
+The app reads the `smr` database (dataset folders under `data/extracted/`
+map 1:1 to database names — see `scripts/seed-dataset.ts`). To port it from Atlas:
 
 1. Put the Atlas URI in `.env` as `MONGODB_SOURCE_URI` (already set there
    if you copied the shipped `.env`).

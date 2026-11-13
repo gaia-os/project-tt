@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 import { attachVoterCookie, getVoter, isValidTarget, rateLimited } from '@/lib/voterAuth';
 
 const indexed = new Set<string>();
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { targetId, vote, topic } = await request.json();
-    if (!isValidTarget(targetId) || !topic || !TOPICS[topic as TopicKey]) {
+    if (!isValidTarget(targetId) || !topic || !(await getTopic(topic as TopicKey))) {
       return NextResponse.json({ error: 'Missing/invalid fields' }, { status: 400 });
     }
     if (vote !== null && vote !== 'up' && vote !== 'down') {
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
     if ('error' in voter) return voter.error;
     const voterId = voter.voterId!;
 
-    const dbName = TOPICS[topic as TopicKey].dbName;
+    const dbName = (await getTopic(topic as TopicKey))!.dbName;
     const col = (await clientPromise).db(dbName).collection('kg_votes');
     if (!indexed.has(dbName)) {
       await col.createIndex({ targetId: 1, voterId: 1 }, { unique: true });

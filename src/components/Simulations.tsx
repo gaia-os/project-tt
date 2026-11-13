@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { titleizeLabel, TopicKey } from '@/lib/topicConfig';
 import { TechTree } from '@/lib/types';
 import { SimulationMode, MODE_LABELS, McsData, DistributionData } from './simulations/mcsTypes';
 import { DeterministicView } from './simulations/DeterministicView';
@@ -12,10 +12,7 @@ interface SimulationData {
 }
 
 // Topics without an entry have no precomputed simulation outputs.
-const TREE_FOLDER: Partial<Record<TopicKey, string>> = {
-  nuclear: 'nuclear_tt',
-  fossil_fuels: 'fossil_fuel_tt_v2',
-};
+const TREE_FOLDER: Partial<Record<TopicKey, string>> = {};
 
 const YEAR_OPTIONS = ['5', '10', '15', '20', '25', '30'];
 
@@ -111,7 +108,7 @@ const Simulations: React.FC<Props> = ({ topic, techTree, onNodeSelect }) => {
       <div className="p-6 bg-white">
         <h2 className="text-2xl font-bold text-gray-800 mb-3">Investment Simulation Results</h2>
         <p className="text-sm text-gray-500">
-          Simulations are not yet available for {TOPICS[topic].label}.
+          Simulations are not yet available for {titleizeLabel(topic)}.
         </p>
       </div>
     );

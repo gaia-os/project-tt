@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 
 // GET ?topic=smr&nodeId=smr:bwrx-300 -> rich node payload from `node_details`
 // (404 when the topic has no details for that node).
@@ -8,7 +9,7 @@ export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic') as TopicKey;
   const nodeId = request.nextUrl.searchParams.get('nodeId');
 
-  if (!topic || !TOPICS[topic]) {
+  if (!topic || !(await getTopic(topic))) {
     return NextResponse.json({ error: 'Invalid or missing topic parameter' }, { status: 400 });
   }
   if (!nodeId) {
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
   try {
     const client = await clientPromise;
     const details = await client
-      .db(TOPICS[topic].dbName)
+      .db((await getTopic(topic))!.dbName)
       .collection('node_details')
       .findOne({ id: nodeId }, { projection: { _id: 0 } });
 

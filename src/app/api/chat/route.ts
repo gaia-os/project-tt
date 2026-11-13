@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 import { TechTree } from '@/lib/types';
 
 interface ChatRequestBody {
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
     if (!message && !fileData) {
       return NextResponse.json({ error: 'Message or file is required' }, { status: 400 });
     }
-    const topicConfig = TOPICS[topic as TopicKey];
+    const topicConfig = (await getTopic(topic as TopicKey))!;
     if (!topicConfig) {
       return NextResponse.json({ error: 'Invalid topic' }, { status: 400 });
     }

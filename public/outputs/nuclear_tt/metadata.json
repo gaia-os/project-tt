@@ -1,9 +1,0 @@
-{
-  "tree_name": "nuclear_tt_v2",
-  "source_file": "/home/rrao/projects/gaia-os/gaia-tt/data/nuclear_tt_v2.json",
-  "file_md5": "7be3d476cf29245a722b312d6df07d6d",
-  "git_commit": "0b23392",
-  "run_timestamp_utc": "2026-04-16T09:24:15.844313+00:00",
-  "num_simulations": 10000,
-  "simulation_option": "option_3"
-}

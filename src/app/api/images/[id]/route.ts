@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Binary } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 
 const ALLOWED_CONTENT_TYPES = new Set(['image/png', 'image/jpeg']);
 
@@ -13,14 +14,14 @@ export async function GET(
   const { id } = await params;
   const topic = request.nextUrl.searchParams.get('topic') as TopicKey;
 
-  if (!topic || !TOPICS[topic]) {
+  if (!topic || !(await getTopic(topic))) {
     return NextResponse.json({ error: 'Invalid or missing topic parameter' }, { status: 400 });
   }
 
   try {
     const client = await clientPromise;
     const image = await client
-      .db(TOPICS[topic].dbName)
+      .db((await getTopic(topic))!.dbName)
       .collection('images')
       .findOne({ id }, { projection: { data: 1, content_type: 1, sha1: 1 } });
 

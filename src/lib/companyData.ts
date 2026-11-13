@@ -6,7 +6,8 @@ import {
   CompanyTechnologyMapping,
   CompanyViewResponse,
 } from '@/lib/types';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 
 export const COMPANIES_COLLECTION = 'tt_companies';
 export const COMPANY_TECH_EDGES_COLLECTION = 'company_tech_tree_edges';
@@ -179,7 +180,7 @@ export async function getCompanyViewData(
 ): Promise<CompanyViewResponse> {
   const { default: clientPromise } = await import('@/lib/mongodb');
   const client = await clientPromise;
-  const db = client.db(TOPICS[topic].dbName);
+  const db = client.db((await getTopic(topic))!.dbName);
 
   const [companyDocuments, mappingDocuments, locationDocuments] = await Promise.all([
     db
@@ -199,7 +200,7 @@ export async function getCompanyViewData(
   return buildCompanyViewResponse(
     companyDocuments,
     mappingDocuments,
-    TOPICS[topic].label,
+    (await getTopic(topic))!.label,
     locationDocuments,
   );
 }
@@ -210,7 +211,7 @@ export async function getCompanyById(
 ): Promise<CompanyInfo | null> {
   const { default: clientPromise } = await import('@/lib/mongodb');
   const client = await clientPromise;
-  const db = client.db(TOPICS[topic].dbName);
+  const db = client.db((await getTopic(topic))!.dbName);
   const company = await db
     .collection(COMPANIES_COLLECTION)
     .findOne({ id: companyId });

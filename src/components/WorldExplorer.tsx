@@ -21,7 +21,6 @@ import { geoCentroid } from 'd3-geo';
 import worldAtlas from 'world-atlas/countries-110m.json';
 import { numericToAlpha2 } from 'i18n-iso-countries';
 import type { GeoJsonObject } from 'geojson';
-import companyLocationsData from '../../data/company_locations.json';
 import {
   CompanyLocation,
   CompanySummary,
@@ -73,7 +72,7 @@ const DEFAULT_POSITION: MapPosition = {
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 6;
 const MAP_COLORS = ['#dbeafe', '#93c5fd', '#60a5fa', '#2563eb', '#1e3a8a'];
-const COMPANY_LOCATIONS = companyLocationsData.locations as CompanyLocation[];
+const COMPANY_LOCATIONS: CompanyLocation[] = [];
 
 function getCountryColor(count: number, maximum: number): string {
   if (count === 0 || maximum === 0) return '#e5e7eb';

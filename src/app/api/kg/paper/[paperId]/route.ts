@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 import { KgExperiment } from '@/lib/types';
 import { experimentKeys, PAPER_PART_SCOPE } from '@/lib/kgKeys';
 
@@ -13,7 +14,7 @@ export async function GET(
     const { paperId } = await params;
     const topic = request.nextUrl.searchParams.get('topic') as TopicKey;
 
-    if (!topic || !TOPICS[topic]) {
+    if (!topic || !(await getTopic(topic))) {
       return NextResponse.json({ error: 'Invalid or missing topic parameter' }, { status: 400 });
     }
     if (!paperId) {
@@ -21,7 +22,7 @@ export async function GET(
     }
 
     const client = await clientPromise;
-    const db = client.db(TOPICS[topic].dbName);
+    const db = client.db((await getTopic(topic))!.dbName);
 
     const dossier = await db
       .collection('kg_papers')

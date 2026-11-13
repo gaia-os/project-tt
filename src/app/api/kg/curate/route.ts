@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { requireAdmin } from '@/lib/adminAuth';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 import { isExperimentKey, PAPER_PART_SCOPE } from '@/lib/kgKeys';
 
 // POST {nodeId, entityId, verdict: 'accept'|'reject', topic} — human curation
@@ -22,12 +23,12 @@ export async function POST(request: NextRequest) {
     if (nodeId === PAPER_PART_SCOPE && !isExperimentKey(entityId)) {
       return NextResponse.json({ error: 'Invalid paper part key' }, { status: 400 });
     }
-    if (!topic || !TOPICS[topic as TopicKey]) {
+    if (!topic || !(await getTopic(topic as TopicKey))) {
       return NextResponse.json({ error: 'Invalid topic' }, { status: 400 });
     }
 
     const client = await clientPromise;
-    const db = client.db(TOPICS[topic as TopicKey].dbName);
+    const db = client.db((await getTopic(topic as TopicKey))!.dbName);
 
     await db.collection('kg_curations').updateOne(
       { techTreeNodeId: nodeId, entityId },

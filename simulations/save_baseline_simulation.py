@@ -31,10 +31,10 @@ the full timeline.
 
 Usage:
     # Single tree
-    python simulations/save_baseline_simulation.py data/nuclear_tt_v2.json
+    python simulations/save_baseline_simulation.py data/<tech_tree>.json
 
     # Multiple trees
-    python simulations/save_baseline_simulation.py data/nuclear_tt_v2.json data/fossil_fuel_tt_v2.json
+    python simulations/save_baseline_simulation.py data/tree_a.json data/tree_b.json
 
     # All trees via glob
     python simulations/save_baseline_simulation.py data/*.json

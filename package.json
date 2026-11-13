@@ -9,8 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "audit:data": "tsx scripts/audit-data.ts",
-    "generate:company-locations": "tsx scripts/generate-company-locations.ts"
+    "seed": "tsx --env-file=.env.local scripts/seed-dataset.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

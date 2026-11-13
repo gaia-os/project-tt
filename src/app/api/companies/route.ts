@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,11 +13,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Missing nodeId parameter' }, { status: 400 });
     }
 
-    if (!topic || !TOPICS[topic]) {
+    if (!topic || !(await getTopic(topic))) {
       return NextResponse.json({ error: 'Invalid or missing topic parameter' }, { status: 400 });
     }
 
-    const topicConfig = TOPICS[topic];
+    const topicConfig = (await getTopic(topic))!;
     const client = await clientPromise;
     const db = client.db(topicConfig.dbName);
 

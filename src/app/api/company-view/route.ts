@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCompanyViewData } from '@/lib/companyData';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 
 export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic') as TopicKey;
 
-  if (!topic || !TOPICS[topic]) {
+  if (!topic || !(await getTopic(topic))) {
     return NextResponse.json(
       { error: 'Invalid or missing topic parameter' },
       { status: 400 },

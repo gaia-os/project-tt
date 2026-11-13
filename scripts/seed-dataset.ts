@@ -1,12 +1,20 @@
 /**
- * scripts/add-smr-data.ts
+ * scripts/seed-dataset.ts
  *
- * Builds the SMR tech tree database (smr_tt_db) from the extracted SMR
- * knowledge base in data/extracted (reactors / technologies / orgs + IAEA
- * figures and org logos). The database is fully replaced on every run and
- * shares nothing with nuclear_tt_db / fossil_fuels_tt_db.
+ * Seeds one tech-tree dataset into MongoDB. A dataset is a folder under
+ * data/extracted/<name> containing:
+ *   technologies/graph.json   knowledge graph (nodes + typed edges)   [required]
+ *   technologies/*.md         Technology entities (frontmatter)
+ *   reactors/*.md             SMRDesign entities (frontmatter)
+ *   orgs/*.md                 Organisation entities (frontmatter)
+ *   dataset.json              optional {label, systemPrompt} -> `meta` collection
+ *   .geocode-cache.json       shared Nominatim cache (auto-maintained)
+ *
+ * The folder name becomes the MongoDB database name, so `data/extracted/smr`
+ * seeds the `smr` database. The database is fully replaced on every run.
  *
  * Collections written:
+ *   meta                     dataset label / chat system prompt
  *   nodes                    lean graph nodes (reactors + technologies)
  *   edges                    ENABLES relations (tech->tech, tech->reactor)
  *   node_details             rich per-node payload, fetched lazily by the UI
@@ -16,16 +24,15 @@
  *   tt_company_locations     geocoded org headquarters (world view)
  *
  * Usage:
- *   npx tsx --env-file=.env.local scripts/add-smr-data.ts
+ *   npx tsx --env-file=.env.local scripts/seed-dataset.ts <folder>
  *
  * Optional env:
- *   SMR_DATA_DIR=data/extracted   source directory
- *   MONGODB_DB_NAME=smr_tt_db     target database
- *   SKIP_GEOCODE=true             only use the geocode cache, no Nominatim calls
- *   DRY_RUN=true                  parse + report, don't touch MongoDB
+ *   MONGODB_DB_NAME           override the database name (default: folder name)
+ *   SKIP_GEOCODE=true         only use the geocode cache, no Nominatim calls
+ *   DRY_RUN=true              parse + report, don't touch MongoDB
  *
  * Geocoding uses the public Nominatim API (max 1 request/s, results cached in
- * <SMR_DATA_DIR>/.geocode-cache.json so re-runs make no network requests).
+ * <folder>/.geocode-cache.json so re-runs make no network requests).
  */
 
 import * as fs from 'node:fs';
@@ -38,12 +45,26 @@ import enLocale from 'i18n-iso-countries/langs/en.json';
 countries.registerLocale(enLocale);
 
 const ROOT = path.resolve(__dirname, '..');
-const DATA_DIR = path.resolve(ROOT, process.env.SMR_DATA_DIR ?? 'data/extracted');
-const DB_NAME = process.env.MONGODB_DB_NAME ?? 'smr_tt_db';
+const DATASET = process.argv[2];
+if (!DATASET) {
+  console.error('usage: npx tsx --env-file=.env.local scripts/seed-dataset.ts <folder>');
+  console.error('       (folder under data/extracted/, e.g. "smr")');
+  process.exit(1);
+}
+if (!/^[A-Za-z0-9_-]+$/.test(DATASET)) {
+  console.error(`Invalid dataset name "${DATASET}" — use only letters, digits, - and _ (it becomes the MongoDB database name).`);
+  process.exit(1);
+}
+const DATA_DIR = path.join(ROOT, 'data/extracted', DATASET);
+if (!fs.existsSync(path.join(DATA_DIR, 'technologies', 'graph.json'))) {
+  console.error(`No dataset at ${DATA_DIR} — expected technologies/graph.json inside the folder.`);
+  process.exit(1);
+}
+const DB_NAME = process.env.MONGODB_DB_NAME ?? DATASET;
 const SKIP_GEOCODE = process.env.SKIP_GEOCODE === 'true';
 const DRY_RUN = process.env.DRY_RUN === 'true';
 const GEOCODE_CACHE_PATH = path.join(DATA_DIR, '.geocode-cache.json');
-const NOMINATIM_USER_AGENT = 'investment-tech-tree-smr-seed/0.1 (research project, one-off geocoding)';
+const NOMINATIM_USER_AGENT = 'investment-tech-tree-seed/0.1 (research project, one-off geocoding)';
 const MAX_CITATIONS = 3;
 
 type Yaml = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -60,6 +81,7 @@ function readMarkdown(file: string): { fm: Yaml; body: string } {
 }
 
 function listMarkdown(dir: string): string[] {
+  if (!fs.existsSync(dir)) return [];
   return fs
     .readdirSync(dir)
     .filter((f) => f.endsWith('.md') && f !== 'index.md')
@@ -240,6 +262,13 @@ interface GraphJson {
 const graph: GraphJson = JSON.parse(
   fs.readFileSync(path.join(DATA_DIR, 'technologies/graph.json'), 'utf8'),
 );
+
+let datasetMeta: Document = {};
+try {
+  datasetMeta = JSON.parse(fs.readFileSync(path.join(DATA_DIR, 'dataset.json'), 'utf8'));
+} catch {
+  /* no dataset.json — selector falls back to the folder name */
+}
 const reactorFiles = listMarkdown(path.join(DATA_DIR, 'reactors')).map((f) => ({ file: f, ...readMarkdown(f) }));
 const techFiles = listMarkdown(path.join(DATA_DIR, 'technologies')).map((f) => ({ file: f, ...readMarkdown(f) }));
 const orgFiles = listMarkdown(path.join(DATA_DIR, 'orgs')).map((f) => ({ file: f, ...readMarkdown(f) }));
@@ -754,6 +783,8 @@ async function main() {
   await client.connect();
   try {
     const db = client.db(DB_NAME);
+    await db.collection('meta').deleteMany({});
+    await db.collection('meta').insertOne({ _id: 'meta', id: DATASET, ...datasetMeta, seeded_at: new Date().toISOString() });
     const writes: [string, Document[], Document][] = [
       ['nodes', nodeDocs, { id: 1 }],
       ['edges', edgeDocs, { id: 1 }],

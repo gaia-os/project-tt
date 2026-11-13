@@ -1,21 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { TechTree } from '@/lib/types';
-import { TOPICS, TopicKey } from '@/lib/topicConfig';
+import { TopicKey } from '@/lib/topicConfig';
+import { getTopic } from '@/lib/topics.server';
 
 export async function GET(request: NextRequest) {
   try {
     // Get topic from query parameters
     const topic = request.nextUrl.searchParams.get('topic') as TopicKey;
     
-    if (!topic || !TOPICS[topic]) {
+    if (!topic || !(await getTopic(topic))) {
       return NextResponse.json(
         { error: 'Invalid or missing topic parameter' },
         { status: 400 }
       );
     }
 
-    const topicConfig = TOPICS[topic];
+    const topicConfig = (await getTopic(topic))!;
 
     // Check if we're in a build environment and MongoDB URI is not available
     if (!process.env.MONGODB_URI && process.env.NODE_ENV === 'production') {
