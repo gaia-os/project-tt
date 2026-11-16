@@ -216,8 +216,20 @@ const layoutGraph = async (
     layoutOptions: {
       'elk.algorithm': 'layered',
       'elk.layered.spacing.nodeNodeBetweenLayers': '100',
+      // Force reactors into the last (rightmost) layer so no technology can
+      // ever be laid out to their right, even when ENABLES cycles between
+      // technologies force ELK to break edge direction arbitrarily.
+      'elk.layered.layering.layerConstraint': 'LAST_SEPARATE',
     },
-    children: visibleNodes,
+    children: visibleNodes.map((node) => ({
+      ...node,
+      // Per-node override: only reactors are pinned to the last layer.
+      // Techs remain free to occupy any earlier layer based on the DAG.
+      layoutOptions:
+        node.data?.nodeLabel === 'ReactorConcept'
+          ? { 'elk.layered.layering.layerConstraint': 'LAST' }
+          : undefined,
+    })),
     edges: visibleEdges.map((edge) => ({
       id: `${edge.source}-${edge.target}`,
       sources: [edge.source],
