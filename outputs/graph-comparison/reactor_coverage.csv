@@ -1,0 +1,104 @@
+reactor_id,name,enables_a,enables_b,techs_a,techs_b,source_a,source_b,ratio_a_over_b
+smr:r1,R1,10,4,10,4,10,4,2.50
+smr:shelf-m,SHELF-M,25,12,25,12,25,12,2.08
+smr:happy200,HAPPY200,28,15,28,15,28,15,1.87
+smr:rr-smr,Rolls-Royce SMR,33,18,33,18,33,18,1.83
+smr:klt-40s,KLT-40S,31,17,31,17,31,17,1.82
+smr:harpia,HARPIA™ Nuclear Microreactor,25,14,25,14,25,14,1.79
+smr:unitherm,UNITHERM,25,14,25,14,25,14,1.79
+smr:ritm-200n,RI™-200N,32,19,32,19,32,19,1.68
+smr:ca-waste-burner,CA Waste Burner,25,15,25,15,25,15,1.67
+smr:htr-10,HTR-10,25,15,25,15,25,15,1.67
+smr:sair,SAIR,25,15,25,15,25,15,1.67
+smr:seamsr-100,seaMSR-100,25,15,25,15,25,15,1.67
+smr:evinci,Westinghouse eVinci™ Microreactor,29,18,29,18,29,18,1.61
+smr:lfr-as-30,LFR-AS-30,8,5,8,5,8,5,1.60
+smr:nuscale-power-module,NuScale Power Module™,24,15,24,15,24,15,1.60
+smr:acp100s,ACP100S,25,16,25,16,25,16,1.56
+smr:jmr,JMR,25,16,25,16,25,16,1.56
+smr:star,STAR,25,16,25,16,25,16,1.56
+smr:smr-300,SMR-300,31,20,31,20,31,20,1.55
+smr:blue-capsule,BLUE CAPSULE,29,19,29,19,29,19,1.53
+smr:cal-30,CAL-30,26,17,26,17,26,17,1.53
+smr:flex,FLEX Reactor,29,19,29,19,29,19,1.53
+smr:arc-100,ARC-100,27,18,27,18,27,18,1.50
+smr:dfbr-1,DFBR-1,2,4,2,4,2,4,0.50
+smr:ritm-200m,RI™-200M,24,16,24,16,24,16,1.50
+smr:i-smr,i-SMR,31,21,31,21,31,21,1.48
+smr:hexana,HEXANA,28,19,28,19,28,19,1.47
+smr:kp-fhr,KP-FHR,22,15,22,15,22,15,1.47
+smr:thorcon-500,Thorcon,32,22,32,22,32,22,1.45
+smr:bwrx-300,BWRX-300,30,21,30,21,30,21,1.43
+smr:sealer-one,SEALER-one,10,7,10,7,10,7,1.43
+smr:fmr,FMR (Fast Modular Reactor),27,19,27,19,27,19,1.42
+smr:ap300-smr,AP300™ SMR,28,20,28,20,28,20,1.40
+smr:stellarium,Stellarium,25,18,25,18,25,18,1.39
+smr:abv-6e,ABV-6E,20,15,20,15,20,15,1.33
+smr:acp100,ACP100,28,21,28,21,28,21,1.33
+smr:imsr,IMSR400,28,21,28,21,28,21,1.33
+smr:lftr,Lithium Fluoride Thorium Reactor,24,18,24,18,24,18,1.33
+smr:msr-1,MSR-1,4,6,4,6,4,6,0.67
+smr:peluit-40,PeLUIt-40,25,19,25,19,25,19,1.32
+smr:carem,CAREM,21,16,21,16,21,16,1.31
+smr:pwr-20,PWR-20,21,16,21,16,21,16,1.31
+smr:htgr-pola,HTGR-POLA,26,20,26,20,26,20,1.30
+smr:project-pele,Project Pele,9,7,9,7,9,7,1.29
+smr:htr-pm,HTR-PM,32,25,32,25,32,25,1.28
+smr:thorizon-one,THORIZON,32,25,32,25,32,25,1.28
+smr:em,EM2 (Energy Multiplier Module),28,22,28,22,28,22,1.27
+smr:wl-100-smr,WL-100,24,19,24,19,24,19,1.26
+smr:amr-power-cell-microreactor,Advanced Micro Reactor – AMR,25,20,25,20,25,20,1.25
+smr:df300,DF300,5,4,5,4,5,4,1.25
+smr:holos-quad,HOLOS-QUAD,25,20,25,20,25,20,1.25
+smr:htgr,HTGR,15,12,15,12,15,12,1.25
+smr:ldr-50,LDR-50,5,4,5,4,5,4,1.25
+smr:marvel,MARVEL,20,16,20,16,20,16,1.25
+smr:nhr200-ii,NHR200-II,5,4,5,4,5,4,1.25
+smr:odin,ODIN,10,8,10,8,10,8,1.25
+smr:otrera-300,OTRERA 300,25,20,25,20,25,20,1.25
+smr:yl-100,YL-100,25,20,25,20,25,20,1.25
+smr:jimmy-htr,JIMMY,21,17,21,17,21,17,1.24
+smr:movelux,Movelux,16,13,16,13,16,13,1.23
+smr:elena,ELENA,23,19,23,19,23,19,1.21
+smr:bandi,BANDI,18,15,18,15,18,15,1.20
+smr:blossom-energy-smr,Blossom Energy SMR,6,5,6,5,6,5,1.20
+smr:brest-od-300,BREST-OD-300,24,20,24,20,24,20,1.20
+smr:marina,MARINA,18,15,18,15,18,15,1.20
+smr:sealer-55,SEALER-55,24,20,24,20,24,20,1.20
+smr:start,START,6,5,6,5,6,5,1.20
+smr:salus-100,SALUS-100,25,21,25,21,25,21,1.19
+smr:kaleidos,Kaleidos,5,6,5,6,5,6,0.83
+smr:a-htr-100,A-HTR-100,7,6,7,6,7,6,1.17
+smr:htmr-100,HTMR100,27,23,27,23,27,23,1.17
+smr:xe-100,Xe-100,21,18,21,18,21,18,1.17
+smr:hectar,HECTAR,29,25,29,25,29,25,1.16
+smr:loki-mmr,LOKI MMR,22,19,22,19,22,19,1.16
+smr:lfr-as-200,LFR-AS-200,30,26,30,26,30,26,1.15
+smr:aurora-powerhouse,Aurora Powerhouse Product Line,18,21,18,21,18,21,0.86
+smr:cmsr,CMSR,6,7,6,7,6,7,0.86
+smr:xamr,XAMR,8,7,8,7,8,7,1.14
+smr:ritm-200s,RITM-200S,9,8,9,8,9,8,1.12
+smr:ssr-w,Stable Salt Reactor-Wasteburner,27,24,27,24,27,24,1.12
+smr:htr50s,HTR-50S,23,26,23,26,23,26,0.88
+smr:natrium,The Natrium™ Project,21,19,21,19,21,19,1.11
+smr:energy-well,Energy Well,24,22,24,22,24,22,1.09
+smr:httr,HTTR,20,22,20,22,20,22,0.91
+smr:nuward-smr,NUWARD,27,25,27,25,27,25,1.08
+smr:zeus,ZEUS,14,13,14,13,14,13,1.08
+smr:kronos-mmr,KRONOS MMR,26,27,26,27,26,27,0.96
+smr:smart100,SMART,31,32,31,32,31,32,0.97
+smr:4s,4S,3,3,3,3,3,3,1.00
+smr:acpr50s,ACPR50S,7,7,7,7,7,7,1.00
+smr:banr,BANR,12,12,12,12,12,12,1.00
+smr:entra1,ENTRA1,8,8,8,8,8,8,1.00
+smr:gthtr300,GTHTR300,18,18,18,18,18,18,1.00
+smr:hermes,Hermes,9,9,9,9,9,9,1.00
+smr:holos-mono,HOLOS-Monolithic,25,25,25,25,25,25,1.00
+smr:jfhr,JFHR,20,20,20,20,20,20,1.00
+smr:leunr,LEUNR,4,4,4,4,4,4,1.00
+smr:mn-1,MN-1,6,6,6,6,6,6,1.00
+smr:msr-100,MSR-100,4,4,4,4,4,4,1.00
+smr:nuclearis-n1,Nuclearis N1,4,4,4,4,4,4,1.00
+smr:otrera-2x300,Otrera 2x300,6,6,6,6,6,6,1.00
+smr:teplator,TEPLATOR,5,5,5,5,5,5,1.00
+smr:vber-300,VBER-300,15,15,15,15,15,15,1.00

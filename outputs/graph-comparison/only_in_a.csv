@@ -1,0 +1,1397 @@
+name,id,category,origin
+17x17 fuel assembly,tech:17x17-fuel-assembly,fuel,source_document
+2cr 1mo steel,tech:2cr-1mo-steel,material,source_document
+316 stainless steel,tech:316h-stainless-steel,material,source_document
+7lif thf4 tru f3 fuel salt,tech:7lif-thf4-tru-f3-fuel-salt,fuel,source_document
+accident condition qualification testing drop fire puncture,tech:accident-condition-qualification-testing-drop-fire-puncture,component,llm_inferred
+actinide fuel,tech:actinide-fuel,fuel,llm_inferred
+activated carbon adsorption,tech:activated-charcoal-sorbent,component,llm_inferred
+active containment spray system,tech:active-containment-spray-system,system,source_document
+active magnetic bearings,tech:active-magnetic-bearings,component,source_document
+additive manufacturing am,tech:additive-manufacturing,manufacturing,source_document
+advanced composite material,tech:advanced-composite-material,material,llm_inferred
+advanced manufacturing,tech:advanced-manufacturing,manufacturing,llm_inferred
+advanced stainless steel,tech:advanced-stainless-steel,material,llm_inferred
+advanced structural material,tech:advanced-structural-material,material,llm_inferred
+advanced welding,tech:advanced-welding,manufacturing,source_document
+advanced welding and pressure boundary fabrication,tech:advanced-welding-and-pressure-boundary-fabrication,component,llm_inferred
+agile product development,tech:agile-product-development,manufacturing,source_document
+ai based operations and maintenance diagnostics,tech:ai-based-operations-and-maintenance-diagnostics,software_method,source_document
+air cooled heat sink,tech:air-cooled-heat-sink,system,source_document
+air cooled steam turbine,tech:air-cooled-steam-turbine,component,source_document
+air cooled tertiary loop,tech:air-cooled-tertiary-loop,system,source_document
+air cooling system,tech:air-cooling-system,component,llm_inferred
+air cooling towers,tech:air-cooling-towers,component,source_document
+airlock access system,tech:airlock-access-system,component,source_document
+al be alloy neutron reflector,tech:al-be-alloy-neutron-reflector,material,source_document
+alkali metal chloride salts licl nacl kcl,tech:alkali-metal-chloride-salts-licl-nacl-kcl,material,llm_inferred
+alkali metal coolant,tech:alkali-metal-coolant,material,llm_inferred
+alloy development and tube fabrication,tech:alloy-development-and-tube-fabrication,material,llm_inferred
+alloy melting and casting,tech:alloy-melting-and-casting,material,llm_inferred
+alumina forming steel,tech:alumina-forming-steel,material,source_document
+aluminium alloy melting and casting,tech:aluminium-alloy-melting-and-casting,material,llm_inferred
+aluminum alloy,tech:aluminum-alloy,component,llm_inferred
+aluminum alloy rib stock,tech:aluminum-alloy-rib-stock,component,llm_inferred
+aluminum or zirconium alloy cladding tube,tech:aluminum-or-zirconium-alloy-cladding-tube,component,llm_inferred
+amine based or ionic liquid absorbent solutions,tech:amine-based-or-ionic-liquid-absorbent-solutions,process,llm_inferred
+ammonia nh3 gas,tech:ammonia-nh3-gas,process,llm_inferred
+ammonia production,tech:ammonia-production,process,source_document
+ammonia synthesis catalyst iron or ruthenium,tech:ammonia-synthesis-catalyst-iron-or-ruthenium,process,llm_inferred
+annular linear induction pump,tech:annular-linear-induction-pump,component,source_document
+annular water reservoir,tech:annular-water-reservoir,system,source_document
+anti collision protection,tech:anti-collision-protection,system,source_document
+anti flooding features,tech:anti-flooding-features,system,source_document
+anti seismic system,tech:anti-seismic-system,system,source_document
+ap1000 reactor components,tech:ap1000-reactor-components,component,source_document
+argon containment gas,tech:argon-containment-gas,material,source_document
+argon filled leak tight reactor pit,tech:argon-filled-leak-tight-reactor-pit,system,source_document
+argon gas sweep,tech:argon-gas-sweep,process,source_document
+artificial intelligence based control system,tech:artificial-intelligence-based-control-system,instrumentation_control,source_document
+asme section iii graphite design code,tech:asme-section-iii-graphite-design-code,component,llm_inferred
+asme section iii materials,tech:asme-section-iii-materials,material,source_document
+asme section iii nuclear certification,tech:asme-section-iii-nuclear-certification,manufacturing,source_document
+asme u stamp certification,tech:asme-u-stamp-certification,manufacturing,source_document
+atmospheric steam dump valves large bore fast acting,tech:atmospheric-steam-dump-valves-large-bore-fast-acting,system,llm_inferred
+atmospheric steam dumping,tech:atmospheric-steam-dumping,system,source_document
+austenitic stainless steel,tech:austenitic-stainless-steel,material,llm_inferred
+automated factory fabrication,tech:automated-factory-fabrication,manufacturing,source_document
+automatic pressure relief system,tech:automatic-pressure-relief-system,system,source_document
+automation and digital solutions,tech:automation-and-digital-solutions,instrumentation_control,source_document
+auxiliary component manufacturing,tech:auxiliary-component-manufacturing,manufacturing,source_document
+axial fan or blower,tech:electric-blower,component,source_document
+b4c ceramic powder,tech:b4c-ceramic-powder,material,llm_inferred
+back end fuel cycle processing,tech:back-end-fuel-cycle-processing,process,source_document
+backup shutdown system,tech:backup-shutdown-system,system,source_document
+balance of plant,tech:balance-of-plant,system,source_document
+ball screw mechanism,tech:ball-screw-mechanism,component,source_document
+ballast system,tech:ballast-system,component,source_document
+batch refueling,tech:three-batch-refuelling,process,source_document
+battery management electronics voltage current monitoring protection,tech:battery-management-electronics-voltage-current-monitoring-protection,component,llm_inferred
+battery or supercapacitor energy storage,tech:battery-or-supercapacitor-energy-storage,instrumentation_control,llm_inferred
+bellows based control rod drive,tech:bellows-based-control-rod-drive,component,source_document
+below grade reactor cavity,tech:reactor-building,component,source_document
+beryllium fluoride salt,tech:beryllium-fluoride-salt,material,source_document
+beryllium metal,tech:beryllium-metal,material,llm_inferred
+beryllium oxide beo,tech:beryllium-oxide-beo,material,source_document
+beryllium oxide reflector,tech:beryllium-oxide-reflector,material,source_document
+beta emitting neutron activatable metal rh ag v co,tech:beta-emitting-neutron-activatable-metal-rh-ag-v-co,instrumentation_control,llm_inferred
+bi te p type and n type semiconductor alloy,tech:bi2te3-p-type-and-n-type-semiconductor-alloy,material,llm_inferred
+biological shielding,tech:biological-shielding-tanks,component,source_document
+biomass feedstock wood agricultural residues,tech:biomass-feedstock-wood-agricultural-residues,process,llm_inferred
+black start up capability,tech:black-start-up-capability,system,source_document
+block fabrication and assembly,tech:block-fabrication-and-assembly,component,llm_inferred
+boiling water reactor fuel assembly,tech:boiling-water-reactor-fuel-assembly,component,source_document
+boron 10 or lithium 6 neutron converter,tech:boron-10-or-lithium-6-neutron-converter,instrumentation_control,llm_inferred
+boron 10 reactivity control rods,tech:boron-10-reactivity-control-rods,component,source_document
+boron carbide b4c neutron absorber,tech:boron-carbide-b4c-absorber,material,source_document
+boron carbide b4c or gadolinium oxide gd2o3,tech:boron-carbide-b4c-or-gadolinium-oxide-gd2o3,material,llm_inferred
+boron free reactivity control system,tech:boron-free-reactivity-control-system,system,source_document
+brazing and plate fin fabrication,tech:plate-fin-brazing-and-assembly,component,llm_inferred
+bubbler assembly,tech:bubbler-assembly,component,source_document
+building containment,tech:building-containment,system,source_document
+building element infrastructure,tech:building-element-infrastructure,component,llm_inferred
+bulk sampling for fuel inspection,tech:bulk-sampling-for-fuel-inspection,instrumentation_control,source_document
+buoyant fuel support,tech:buoyant-fuel-support,system,source_document
+burn up measurement facility,tech:burn-up-measurement-system,instrumentation_control,source_document
+cable extrusion and braiding manufacturing,tech:cable-extrusion-and-braiding-manufacturing,component,llm_inferred
+cad cam and slicing software,tech:cad-cam-and-slicing-software,manufacturing,llm_inferred
+canship,tech:canship,component,source_document
+capillary wick structure,tech:capillary-wick-structure,component,llm_inferred
+carbon based nuclear material,tech:carbon-based-nuclear-material,material,llm_inferred
+carbon based refractory material,tech:carbon-based-refractory-material,material,llm_inferred
+carbon brick layer,tech:carbon-brick-layer,material,source_document
+carbon capture and storage ccs,tech:carbon-capture-and-storage-ccs,process,llm_inferred
+carbon fiber or silicon carbide fiber reinforcement,tech:carbon-fiber-or-silicon-carbide-fiber-reinforcement,material,llm_inferred
+carbon fiber reinforcement,tech:carbon-fiber-reinforcement,material,llm_inferred
+carbon graphite raw material,tech:carbon-graphite-raw-material,material,llm_inferred
+carbon material manufacturing,tech:carbon-material-engineering,manufacturing,llm_inferred
+carbonization and graphitization,tech:compression-molding-carbonization-and-graphitization,manufacturing,llm_inferred
+carbothermal reduction acheson process sic synthesis,tech:carbothermal-reduction-acheson-process-sic-synthesis,material,llm_inferred
+casing and bearing pedestal structural design for thermal deformation,tech:casing-and-bearing-pedestal-structural-design-for-thermal-deformation,component,llm_inferred
+cask design for triso fuel,tech:cask-design-for-triso-fuel,component,source_document
+cast iron or structural steel blocks,tech:cast-iron-or-structural-steel-blocks,component,llm_inferred
+catalytic conversion reactor methanol synthesis or fischer tropsch,tech:catalytic-conversion-reactor-methanol-synthesis-or-fischertropsch,process,llm_inferred
+cementitious concrete mix,tech:cementitious-concrete-mix,material,llm_inferred
+centralized supervision station,tech:centralized-supervision-station,instrumentation_control,source_document
+centrifugal impeller,tech:centrifugal-impeller,component,llm_inferred
+ceramic fuel particles,tech:ceramic-fuel-particles,fuel,llm_inferred
+ceramic heat exchanger,tech:ceramic-heat-exchanger,component,llm_inferred
+ceramic material,tech:ceramic-material,material,llm_inferred
+ceramic matrix composite,tech:ceramic-matrix-composite,material,llm_inferred
+ceramic nuclear fuel,tech:ceramic-nuclear-fuel,fuel,llm_inferred
+ceramic or metallic substrate and interconnect material,tech:ceramic-or-metallic-substrate-and-interconnect-material,component,llm_inferred
+ceramic powder processing and sintering,tech:sintering,fuel,llm_inferred
+ceramic pressure boundary,tech:ceramic-pressure-boundary,component,llm_inferred
+cfd and aero structural optimization methods,tech:cfd-and-aero-structural-optimization-methods,software_method,llm_inferred
+cfd and conjugate heat transfer analysis for corium spreading,tech:cfd-and-conjugate-heat-transfer-analysis-for-corium-spreading,software_method,llm_inferred
+cfd and rotordynamic analysis,tech:cfd-and-rotordynamic-analysis,software_method,llm_inferred
+chemical control system for molten salt,tech:chemical-control-system-for-molten-salt,process,source_document
+chemical dissolution of spent fuel,tech:chemical-dissolution-of-spent-fuel,process,llm_inferred
+chemical sensors,tech:electrochemical-sensors,instrumentation_control,source_document
+chemical separation process,tech:chemical-separation-process,process,llm_inferred
+chemical vapor deposition cvd coating in fluidized bed,tech:chemical-vapor-deposition-cvd-coating-in-fluidized-bed,process,llm_inferred
+chemical vapor infiltration cvi,tech:chemical-vapor-infiltration-cvi,manufacturing,llm_inferred
+chimney,tech:chimney,component,source_document
+chromium ferritic martensitic steel,tech:chromium-ferritic-martensitic-steel,material,source_document
+chromium metal,tech:chromium-metal,material,llm_inferred
+chromium molybdenum vanadium niobium alloying elements,tech:chromium-molybdenum-vanadium-niobium-alloying-elements,material,llm_inferred
+circulation pump,tech:main-circulation-pumps,component,source_document
+citadel building,tech:citadel-building,system,source_document
+civil construction,tech:civil-construction,manufacturing,source_document
+cladding encapsulation e g stainless steel or zirconium alloy sheath,tech:cladding-encapsulation-e-g-stainless-steel-or-zirconium-alloy-sheath,material,llm_inferred
+close coupled design,tech:close-coupled-design,system,source_document
+closed core fuel cycle,tech:closed-core-fuel-cycle,process,source_document
+closed primary circuit,tech:closed-primary-circuit,system,source_document
+closed thorium fuel cycle,tech:closed-thorium-fuel-cycle,process,source_document
+co2 capture,tech:co2-capture,process,source_document
+coating target material oxide or nitride ceramic,tech:coating-target-material-oxide-or-nitride-ceramic,material,llm_inferred
+code qualified pressure vessel material,tech:code-qualified-pressure-vessel-material,material,llm_inferred
+coiled steam generator,tech:helical-coil-steam-generator,component,source_document
+cold press and sintering fabrication,tech:cold-press-and-sintering-fabrication,process,llm_inferred
+cold traps,tech:cold-traps,system,source_document
+common qtm platform,tech:common-qtm-platform,instrumentation_control,source_document
+compact steel containment,tech:compact-steel-containment,component,source_document
+compatible heat exchanger materials copper stainless steel,tech:compatible-heat-exchanger-materials-copper-stainless-steel,material,llm_inferred
+compatible structural materials for liquid metal service,tech:compatible-structural-materials-for-liquid-metal-service,material,llm_inferred
+component inspection and non destructive testing capabilities,tech:component-inspection-and-non-destructive-testing-capabilities,manufacturing,llm_inferred
+component qualification and seismic testing,tech:seismic-qualification-testing,component,llm_inferred
+component qualification testing,tech:component-qualification-testing,process,source_document
+composite core construction material,tech:composite-core-construction-material,material,source_document
+composite nuclear fuel,tech:composite-nuclear-fuel,fuel,llm_inferred
+compression molding and hot pressing,tech:compression-molding-and-hot-pressing,manufacturing,llm_inferred
+compressor turbine engine,tech:compressor-turbine-engine,component,source_document
+computational alloy design thermodynamic and oxidation modeling,tech:computational-alloy-design-thermodynamic-and-oxidation-modeling,material,llm_inferred
+computational design justification,tech:computational-design-justification,software_method,source_document
+computational fluid dynamics cfd,tech:computational-fluid-dynamics-cfd,software_method,source_document
+computational simulation software,tech:computational-simulation-software,software_method,llm_inferred
+computer aided engineering cae software,tech:engineering-simulation-and-analysis-tools,software_method,llm_inferred
+concrete,tech:concrete,manufacturing,llm_inferred
+concrete placement curing and formwork construction process,tech:concrete-placement-curing-and-formwork-construction-process,material,llm_inferred
+concrete shock resistant structure,tech:concrete-shock-resistant-structure,component,source_document
+condensate pump,tech:condensate-pump,component,source_document
+condensing steam turbine,tech:condensing-steam-turbine,component,source_document
+confinement system,tech:confinement-system,system,source_document
+consolidated boundary,tech:consolidated-boundary,system,source_document
+constant torque spring or gravity insertion mechanism,tech:constant-torque-spring-or-gravity-insertion-mechanism,component,llm_inferred
+construction material,tech:construction-material,material,llm_inferred
+construction project management,tech:construction-project-management,manufacturing,llm_inferred
+construction services,tech:construction-services,manufacturing,source_document
+containerized modular packaging,tech:intermodal-shipping-container,manufacturing,source_document
+containment component,tech:containment-component,component,llm_inferred
+containment heat removal equipment,tech:containment-heat-removal-equipment,system,source_document
+containment safety system,tech:containment-safety-system,component,llm_inferred
+containment seals and gaskets,tech:containment-seals-and-gaskets,system,llm_inferred
+containment system,tech:containment-system,system,source_document
+containment system component,tech:containment-system-component,component,llm_inferred
+control and protection system cps rods,tech:control-and-protection-system-cps-rods,component,source_document
+control drum actuator,tech:valve-actuators,system,llm_inferred
+control drum bearing assembly,tech:control-drum-bearing-assembly,component,llm_inferred
+control drum qualification testing friction torque thermal bow,tech:control-drum-qualification-testing-friction-torque-thermal-bow,component,llm_inferred
+control element drive mechanisms cedm,tech:control-element-drive-mechanisms,component,source_document
+control rod calibration and worth measurement,tech:control-rod-calibration-and-worth-measurement,component,llm_inferred
+control rod structural fabrication and assembly,tech:control-rod-structural-fabrication-and-assembly,component,llm_inferred
+controlled atmosphere reaction furnace,tech:controlled-atmosphere-reaction-furnace,process,llm_inferred
+controlled heating and cooling capability electric heaters cryogenic or liquid cooling,tech:controlled-heating-and-cooling-capability-electric-heaters-cryogenic-or-liquid-cooling,component,llm_inferred
+controlled pump shaft sealing system,tech:controlled-pump-shaft-sealing-system,component,source_document
+conventional nuclear i c,tech:conventional-nuclear-i-c,instrumentation_control,source_document
+coolant chemistry control,tech:coolant-chemistry-control,process,llm_inferred
+coolant heat sink fluid,tech:coolant-heat-sink-fluid,component,llm_inferred
+cooling tubes,tech:cooling-tubes,component,llm_inferred
+copper and aluminum conductive shielding layers,tech:copper-and-aluminum-conductive-shielding-layers,component,llm_inferred
+copper or aluminium winding conductors,tech:copper-or-aluminium-winding-conductors,component,llm_inferred
+copper or silver electrode and interconnect material,tech:copper-or-silver-electrode-and-interconnect-material,material,llm_inferred
+core assembly,tech:core-assembly,manufacturing,llm_inferred
+core cavity inert gas cooling system,tech:core-cavity-inert-gas-cooling-system,system,source_document
+core critical heat flux testing,tech:core-critical-heat-flux-testing,software_method,source_document
+core inlet outlet temperature sensors,tech:core-inlet-outlet-temperature-sensors,instrumentation_control,source_document
+core internal structures,tech:core-internal-structures,component,source_document
+core neutronic analysis,tech:core-neutronic-analysis,software_method,source_document
+core support and internal structure assembly,tech:core-support-and-internal-structure-assembly,component,llm_inferred
+corrosion compatibility testing with structural alloys,tech:corrosion-compatibility-testing-with-structural-alloys,material,llm_inferred
+corrosion management,tech:corrosion-management-via-reducing-agents,process,source_document
+corrosion resistance and neutron absorption performance testing,tech:corrosion-resistance-and-neutron-absorption-performance-testing,material,llm_inferred
+corrosion resistant alloy cladding tube,tech:corrosion-resistant-alloy-cladding-tube,component,llm_inferred
+corrosion resistant alloy piping,tech:corrosion-resistant-alloy-piping,component,llm_inferred
+corrosion resistant alloys,tech:corrosion-resistant-alloys,material,source_document
+corrosion resistant fuel cladding alloy,tech:corrosion-resistant-fuel-cladding-alloy,material,source_document
+corrosion resistant materials for molten chloride salt,tech:corrosion-resistant-materials-for-molten-chloride-salt,material,source_document
+corrosion resistant tube and fin alloys,tech:corrosion-resistant-tube-and-fin-alloys,component,llm_inferred
+corrosion studies,tech:corrosion-studies,software_method,source_document
+counter flow heat exchange,tech:counter-flow-heat-exchange,system,source_document
+cover gas,tech:cover-gas-system,system,source_document
+critical assembly testing,tech:critical-assembly-testing,process,source_document
+critical demonstration reactor,tech:critical-mock-up-reactor,manufacturing,source_document
+criticality experiments,tech:criticality-experiments,software_method,source_document
+criticality safety analysis for source placement,tech:criticality-safety-analysis-for-source-placement,component,llm_inferred
+data diodes,tech:data-diodes,instrumentation_control,source_document
+dc power supply and electrode assembly,tech:dc-power-supply-and-electrode-assembly,system,llm_inferred
+dc power supply and rod drive coil control electronics,tech:dc-power-supply-and-rod-drive-coil-control-electronics,component,llm_inferred
+deaerator,tech:deaerator,component,source_document
+dedicated primary coolant pump,tech:dedicated-primary-coolant-pump,component,source_document
+deionised or purified water,tech:deionised-or-purified-water,material,llm_inferred
+demineralized water coolant,tech:demineralized-water-coolant,material,source_document
+design for manufacturability dfm modeling,tech:design-for-manufacturability-dfm-modeling,software_method,source_document
+design optimization methodology,tech:design-optimization-methodology,software_method,llm_inferred
+design validation and verification,tech:design-validation-and-verification,software_method,llm_inferred
+deterministic safety analysis,tech:deterministic-safety-analysis,software_method,source_document
+deuterisation and dedeuterisation of ion exchange resins,tech:deuterisation-and-dedeuterisation-of-ion-exchange-resins,material,llm_inferred
+diesel generator,tech:diesel-generator,component,source_document
+differential scanning calorimetry and thermophysical measurement apparatus,tech:differential-scanning-calorimetry-and-thermophysical-measurement-apparatus,software_method,llm_inferred
+digital control and protection system,tech:digital-control-and-protection-system,instrumentation_control,source_document
+digital instrumentation and control i c,tech:digital-instrumentation-and-control-i-c,instrumentation_control,source_document
+digital rod control system,tech:digital-rod-control-system,instrumentation_control,source_document
+digital signal processing and control algorithm software,tech:digital-signal-processing-and-control-algorithm-software,instrumentation_control,llm_inferred
+direct ammonolysis of uf6,tech:direct-ammonolysis-of-uf6,process,source_document
+direct cycle helium gas turbine,tech:direct-cycle-helium-gas-turbine,component,source_document
+direct foaming replica sacrificial template ceramic processing,tech:direct-foaming-replica-sacrificial-template-ceramic-processing,component,llm_inferred
+direct reactor vessel auxiliary cooling system,tech:direct-reactor-vessel-auxiliary-cooling-system,system,source_document
+directed energy source laser electron beam or uv,tech:directed-energy-source-laser-electron-beam-or-uv,manufacturing,llm_inferred
+display and hmi graphics technology,tech:display-and-hmi-graphics-technology,instrumentation_control,llm_inferred
+distributed control system dcs,tech:distributed-control-system-dcs,instrumentation_control,source_document
+diverse actuation system,tech:diverse-actuation-system,instrumentation_control,source_document
+diverse cpu hardware platforms e g versa module eurocard sbcs,tech:diverse-cpu-hardware-platforms-e-g-versa-module-eurocard-sbcs,instrumentation_control,llm_inferred
+diverse operating system and software platform,tech:diverse-operating-system-and-software-platform,instrumentation_control,llm_inferred
+diverse operating systems e g qnx vxworks,tech:diverse-operating-systems-e-g-qnx-vxworks,instrumentation_control,llm_inferred
+diverse protection system,tech:diverse-protection-system,instrumentation_control,source_document
+diversity and defense in depth assessment methodology,tech:diversity-and-defense-in-depth-assessment-methodology,instrumentation_control,llm_inferred
+domestic equipment manufacturing,tech:domestic-equipment-manufacturing,manufacturing,source_document
+dop aerosol penetration testing,tech:dop-aerosol-penetration-testing,component,llm_inferred
+double containment system,tech:double-containment-system,system,source_document
+downcomer return channel,tech:downcomer-return-channel,component,llm_inferred
+drain tank,tech:drain-tanks,component,source_document
+drive shaft and seal assembly,tech:drive-shaft-and-seal-assembly,component,llm_inferred
+drum fabrication and leak tight welding,tech:drum-fabrication-and-leak-tight-welding,component,llm_inferred
+dual processor safety hardware,tech:dual-processor-safety-hardware,instrumentation_control,llm_inferred
+ductile cast iron or structural steel material,tech:ductile-cast-iron-or-structural-steel-material,material,llm_inferred
+dysprosium oxide dy o,tech:dysprosium-oxide-dy2o3,material,llm_inferred
+dysprosium titanate absorber,tech:dysprosium-titanate-absorber,material,source_document
+ebr ii heritage tests,tech:ebr-ii-heritage-tests,software_method,source_document
+eddy current and radiographic non destructive examination,tech:eddy-current-and-radiographic-non-destructive-examination,component,llm_inferred
+eddy current position and velocity sensors,tech:eddy-current-position-and-velocity-sensors,component,llm_inferred
+electric resistance heating elements,tech:electric-heater-array,component,source_document
+electric storage system ess,tech:electric-storage-system-ess,system,source_document
+electrical cable,tech:electrical-cable,component,llm_inferred
+electrical generator alternator,tech:electrical-generator-alternator,component,llm_inferred
+electrical power supply and control,tech:electrical-power-system,instrumentation_control,llm_inferred
+electrical steel silicon steel laminations,tech:electrical-steel-silicon-steel-laminations,component,llm_inferred
+electrochemical and surface characterization techniques,tech:electrochemical-and-surface-characterization-techniques,software_method,llm_inferred
+electrochemical energy storage device,tech:electrochemical-energy-storage-device,component,llm_inferred
+electrode active materials e g nickel oxide cadmium lithium cobalt oxide,tech:electrode-active-materials-e-g-nickel-oxide-cadmium-lithium-cobalt-oxide,component,llm_inferred
+electrode fabrication and cell assembly process,tech:electrode-fabrication-and-cell-assembly-process,component,llm_inferred
+electrolyte solution alkaline koh or acid h2so4,tech:electrolyte-solution-alkaline-koh-or-acid-h2so4,component,llm_inferred
+electromagnetic drive magnets and annular drive coils,tech:electromagnetic-drive-magnets-and-annular-drive-coils,component,llm_inferred
+electromagnetic field finite element analysis,tech:electromagnetic-field-simulation,component,llm_inferred
+electromagnetic holding and withdrawal coils,tech:electromagnetic-holding-and-withdrawal-coils,component,llm_inferred
+electromagnetic latch mechanism,tech:electromagnetic-latch-mechanism,component,llm_inferred
+electromagnetic lift magnet and coil assembly magnetic jack,tech:electromagnetic-lift-magnet-and-coil-assembly-magnetic-jack,component,llm_inferred
+electromagnetic sodium pump,tech:electromagnetic-sodium-pump,component,source_document
+electromagnetic stator coil winding and fabrication,tech:electromagnetic-stator-windings,component,llm_inferred
+electromechanical control rod drive,tech:electromechanical-control-rod-drive,component,source_document
+electromechanical relay logic components,tech:electromechanical-relay-logic-components,instrumentation_control,llm_inferred
+electrorefining,tech:electrorefining-and-electrochemical-reduction,process,llm_inferred
+elevated temperature tensile and oxidation testing,tech:elevated-temperature-tensile-and-oxidation-testing,material,llm_inferred
+embedded cooling piping,tech:embedded-cooling-piping,material,llm_inferred
+emergency boration injection system,tech:emergency-boration-injection-system,system,source_document
+emergency cooling system,tech:emergency-cooling-system,system,source_document
+emergency depressurization valves,tech:emergency-depressurization-valves,component,source_document
+emergency feed water system,tech:emergency-feed-water-system,system,source_document
+emergency heat exchanger,tech:emergency-heat-exchanger,component,source_document
+emergency power system eps,tech:emergency-power-system,system,source_document
+emergency protection rods,tech:emergency-protection-rods,component,source_document
+emergency reactor vessel cooling system,tech:emergency-reactor-vessel-cooling-system,system,source_document
+emergency recirculation valves,tech:emergency-recirculation-valves,component,source_document
+emergency steam generator drainage system,tech:emergency-steam-generator-drainage-system,system,source_document
+emergency water tank heat exchangers,tech:emergency-water-tank-heat-exchangers,component,source_document
+emi emp shielding effectiveness testing,tech:emi-emp-shielding-effectiveness-testing,component,llm_inferred
+energy absorbing aluminium foam and steel aluminium composite materials,tech:energy-absorbing-aluminium-foam-and-steel-aluminium-composite-materials,system,llm_inferred
+energy carrier production and conversion,tech:energy-carrier-production-and-conversion,process,llm_inferred
+energy conversion system,tech:power-conversion-system,system,source_document
+engineering feasibility analysis,tech:engineering-feasibility-analysis,software_method,llm_inferred
+engineering test facility,tech:engineering-test-facility,system,llm_inferred
+engineering test unit etu,tech:engineering-test-unit-etu,component,source_document
+enhanced tube fabrication,tech:enhanced-tube-fabrication,component,llm_inferred
+enriched uranium fuel,tech:enriched-uranium-fuel,fuel,llm_inferred
+envelope material copper stainless steel or titanium tube,tech:envelope-material-copper-stainless-steel-or-titanium-tube,component,llm_inferred
+epc services for nuclear power,tech:epc-services-for-nuclear-power,manufacturing,source_document
+er gd2o3 burnable absorber,tech:er-gd2o3-burnable-absorber,fuel,source_document
+ethanol purification and quality control,tech:ethanol-purification-and-quality-control,material,llm_inferred
+eutectic alloy,tech:eutectic-alloy,material,llm_inferred
+evaluated nuclear data libraries endf b,tech:evaluated-nuclear-data-libraries-endf-b,process,llm_inferred
+ex core neutron flux detectors,tech:ex-core-neutron-flux-detectors,instrumentation_control,source_document
+ex vessel handling machine exhm,tech:ex-vessel-handling-machine-exhm,component,source_document
+ex vessel storage tank evst,tech:ex-vessel-storage-tank-evst,component,source_document
+exhaust gas treatment system,tech:exhaust-gas-treatment-system,system,source_document
+expansion bellows,tech:expansion-bellows,component,source_document
+experimental testing,tech:experimental-testing,software_method,llm_inferred
+experimental thermal test facility,tech:experimental-thermal-test-facility,component,llm_inferred
+exterior leak tight cocoon containment,tech:exterior-leak-tight-cocoon-containment,component,source_document
+external steam pressurizer,tech:external-steam-pressurizer,component,source_document
+fast acting squib or pneumatic actuator,tech:fast-acting-squib-or-pneumatic-actuator,component,llm_inferred
+fast reactor core,tech:fast-reactor-core,system,source_document
+fast reactor fuel cladding,tech:fast-reactor-fuel-cladding,material,llm_inferred
+fast spectrum nuclear cross section data,tech:fast-spectrum-nuclear-cross-section-data,software_method,llm_inferred
+fault tolerant design and fault detection methodology,tech:fault-tolerant-design-and-fault-detection-methodology,instrumentation_control,llm_inferred
+fault tree and event tree logic modeling methodology,tech:fault-tree-and-event-tree-logic-modeling-methodology,software_method,llm_inferred
+fault tree and reliability analysis,tech:fault-tree-and-reliability-analysis,system,llm_inferred
+fc92 cladding,tech:fc92-cladding,material,source_document
+feed and bleed fuel management,tech:feed-and-bleed-fuel-management,process,source_document
+feedwater preheater,tech:feedwater-preheater,component,llm_inferred
+ferrocement reactor shaft,tech:ferrocement-reactor-shaft,component,source_document
+ferrous alloy,tech:ferrous-alloy,material,llm_inferred
+filter housing and sealing frame,tech:filter-housing-and-sealing-frame,component,llm_inferred
+filtered release vents,tech:filtered-release-vents,component,source_document
+final safety analysis report fsar,tech:final-safety-analysis-report-fsar,software_method,source_document
+fine motion control rod drives,tech:fine-motion-control-rod-drives,component,source_document
+finite element analysis fea methods,tech:finite-element-analysis-fea-methods,software_method,llm_inferred
+finned tube fabrication and assembly,tech:finned-tube-fabrication-and-assembly,component,llm_inferred
+finned tube or heat pipe heat exchanger bundles,tech:finned-tube-or-heat-pipe-heat-exchanger-bundles,component,llm_inferred
+fissile fuel,tech:fissile-fuel,fuel,llm_inferred
+fissile seed material u 233 pu 239 or u 235,tech:fissile-seed-material-u-233-pu-239-or-u-235,process,llm_inferred
+fission gas management component,tech:fission-gas-management-component,component,llm_inferred
+fission product separation system,tech:fission-product-separation-system,system,source_document
+fission product transport measurement and monitoring,tech:fission-product-transport-measurement-and-monitoring,system,llm_inferred
+fission product trap,tech:fission-product-trap,component,source_document
+fission product vent system fpvs,tech:fission-product-vent-system-fpvs,system,source_document
+flag type control rods,tech:flag-type-control-rods,component,source_document
+flibe coolant,tech:flibe-coolant,material,source_document
+flinak intermediate coolant,tech:flinak-intermediate-coolant,material,source_document
+floating hull,tech:floating-hull,component,source_document
+floating nuclear power plant,tech:floating-nuclear-power-plant,system,source_document
+flow characteristic and cavitation testing,tech:flow-characteristic-and-cavitation-testing,component,llm_inferred
+flow control devices,tech:flow-control-devices,component,llm_inferred
+fluid and material thermophysical property databases,tech:fluid-and-material-thermophysical-property-databases,software_method,llm_inferred
+fluoride salt,tech:fluoride-salt,material,llm_inferred
+flywheel,tech:flywheel,component,source_document
+forced circulation primary loop,tech:forced-circulation-primary-loop,system,source_document
+forged ring component welding,tech:forged-ring-component-welding,manufacturing,source_document
+forging process simulation,tech:forging-process-simulation,manufacturing,llm_inferred
+formal safety verification and model checking,tech:formal-safety-verification-and-model-checking,instrumentation_control,llm_inferred
+formal verification methodology,tech:formal-verification-methodology,instrumentation_control,llm_inferred
+fpga based reactor protection system,tech:fpga-based-reactor-protection-system,instrumentation_control,source_document
+fpga hardware,tech:fpga-hardware,instrumentation_control,llm_inferred
+fracture toughness and drop test qualification,tech:fracture-toughness-and-drop-test-qualification,process,llm_inferred
+frequency conversion drive system,tech:frequency-conversion-drive-system,component,llm_inferred
+friction damping design and testing,tech:friction-damping-design-and-testing,component,llm_inferred
+fuel assembly fabrication and quality inspection,tech:fuel-assembly-fabrication-and-quality-inspection,process,llm_inferred
+fuel assembly handling system,tech:fuel-assembly-loading-system,component,source_document
+fuel assembly interface socket and locking mechanism,tech:fuel-assembly-interface-socket-and-locking-mechanism,component,llm_inferred
+fuel building,tech:fuel-building,manufacturing,source_document
+fuel cartridge,tech:fuel-cartridge,component,source_document
+fuel cladding,tech:fuel-cladding,component,llm_inferred
+fuel containment structure,tech:fuel-containment-structure,component,llm_inferred
+fuel cycle management,tech:fuel-cycle-management,process,source_document
+fuel depletion and burnup simulation,tech:nuclear-fuel-simulation,software_method,llm_inferred
+fuel development,tech:fuel-development,process,llm_inferred
+fuel discharge facility,tech:fuel-discharge-facility,component,source_document
+fuel element,tech:fuel-rod,component,llm_inferred
+fuel element clamping and positioning device,tech:fuel-element-clamping-and-positioning-device,component,llm_inferred
+fuel element or pebble interface gripper,tech:fuel-element-or-pebble-interface-gripper,component,llm_inferred
+fuel element with spacing ribs,tech:fuel-element-with-spacing-ribs,component,source_document
+fuel exchanger,tech:fuel-exchanger,component,source_document
+fuel handling and storage system,tech:fuel-handling-machine,component,source_document
+fuel irradiation testing,tech:fuel-irradiation-testing,process,source_document
+fuel manufacturing,tech:fuel-manufacturing,process,llm_inferred
+fuel matrix to cladding metallurgical bonding,tech:fuel-matrix-to-cladding-metallurgical-bonding,process,source_document
+fuel recycling,tech:fuel-recycling,process,source_document
+fuel salt compatibility testing,tech:fuel-salt-compatibility-testing,process,source_document
+fuel salt draining,tech:fuel-salt-draining,system,source_document
+fuel salt irradiation testing,tech:fuel-salt-irradiation-testing,process,source_document
+fuel salt recycling,tech:fuel-salt-recycling,process,source_document
+fuel salt reprocessing,tech:fuel-salt-reprocessing,process,source_document
+fuel salt storage tank,tech:fuel-salt-storage-tank,component,source_document
+fuel salt thermo physical property testing,tech:fuel-salt-thermo-physical-property-testing,process,source_document
+full core refueling,tech:full-core-refueling,process,source_document
+full scale hydraulic testing loop,tech:full-scale-hydraulic-testing-loop,process,source_document
+full scale mechanical prototype,tech:full-scale-mechanical-prototype,manufacturing,source_document
+full scale testing,tech:full-scale-testing,software_method,source_document
+full scale testing of iv crdm,tech:full-scale-testing-of-iv-crdm,software_method,source_document
+functional containment,tech:functional-containment,system,source_document
+gadolinia burnable absorber,tech:gadolinia-burnable-absorber,fuel,source_document
+gadolinium based neutron absorber,tech:gadolinium-based-neutron-absorber,fuel,llm_inferred
+gadolinium burnable poison,tech:gadolinium-burnable-poison,fuel,source_document
+gallium indium and tin constituent metals,tech:gallium-indium-and-tin-constituent-metals,material,llm_inferred
+gamma spectrometry and isotopic assay instrumentation,tech:gamma-spectrometry-and-isotopic-assay-instrumentation,instrumentation_control,llm_inferred
+gas centrifuge cascade technology,tech:gas-centrifuge-cascade-technology,process,llm_inferred
+gas composition and pressure monitoring instrumentation,tech:gas-pressure-and-composition-monitoring-instrumentation,system,llm_inferred
+gas coolant management system,tech:gas-coolant-management-system,system,llm_inferred
+gas cooled reactor coolant technology,tech:gas-cooled-reactor-coolant-technology,process,llm_inferred
+gas cooled reactor core,tech:gas-cooled-reactor-core,system,source_document
+gas flow control and delivery system,tech:gas-flow-management-and-blower-system,system,llm_inferred
+gas holding tank,tech:gas-holding-tank,component,source_document
+gas sparging and electrochemical reduction,tech:gas-sparging-and-electrochemical-reduction,process,llm_inferred
+gas turbine,tech:gas-turbine,component,source_document
+gas type pressurizer,tech:gas-type-pressurizer,component,source_document
+gaseous radioactive waste filtration,tech:gaseous-radioactive-waste-filtration,process,source_document
+gd nb zr alloy,tech:gd-nb-zr-alloy,material,source_document
+generator,tech:generator,component,source_document
+generic design assessment,tech:generic-design-assessment,software_method,source_document
+geometric inspection sensor array,tech:geometric-inspection-sensor-array,component,llm_inferred
+geotechnical and structural reliability analysis,tech:geotechnical-and-structural-reliability-analysis,software_method,llm_inferred
+glass fibre or ceramic filter media,tech:glass-fibre-or-ceramic-filter-media,component,llm_inferred
+glycol based coolant,tech:glycol-based-coolant,material,llm_inferred
+gnf2 fuel,tech:gnf2-fuel,fuel,source_document
+graphite block fabrication,tech:graphite-block-fabrication,manufacturing,source_document
+graphite block stacking assembly,tech:graphite-block-stacking-assembly,manufacturing,source_document
+graphite core internals,tech:graphite-core-internals,component,source_document
+graphite irradiation testing,tech:graphite-irradiation-testing,software_method,source_document
+graphite key and dowel fabrication,tech:graphite-key-and-dowel-fabrication,material,llm_inferred
+graphite moderator,tech:graphite-moderator,material,source_document
+graphite moderator fabrication engineering,tech:graphite-moderator-fabrication-engineering,manufacturing,source_document
+graphite nuclear component,tech:graphite-nuclear-component,material,llm_inferred
+graphite pebble fabrication,tech:graphite-pebble-fabrication,manufacturing,source_document
+graphite pebble fuel,tech:graphite-pebble-fuel,fuel,source_document
+graphite property testing density porosity mechanical neutron,tech:graphite-property-testing-density-porosity-mechanical-neutron,manufacturing,llm_inferred
+graphite reflector,tech:graphite-reflector,material,source_document
+graphite structure design,tech:graphite-structure-design,manufacturing,source_document
+gravity assisted shutdown system,tech:gravity-assisted-shutdown-system,system,source_document
+gravity driven control rod drive mechanism,tech:gravity-driven-control-rod-drive-mechanism,component,source_document
+gravity driven safety shutdown rod,tech:gravity-driven-safety-shutdown-rod,component,source_document
+gravity driven shutdown elements,tech:gravity-driven-shutdown-elements,component,source_document
+grid plate fabrication and coating,tech:grid-plate-fabrication-and-coating,manufacturing,llm_inferred
+grid spacer and end fitting structure,tech:grid-spacer-and-end-fitting-structure,component,llm_inferred
+grid synchronization and protection equipment,tech:grid-synchronization-and-protection-equipment,system,llm_inferred
+gridreserve thermal storage system,tech:gridreserve-thermal-storage-system,system,source_document
+haleu deconversion,tech:haleu-deconversion,process,source_document
+haleu metallic u zr fuel,tech:haleu-metallic-u-zr-fuel,fuel,source_document
+haleu oxide fuel,tech:haleu-oxide-fuel,fuel,source_document
+haleu transportation systems,tech:haleu-transportation-systems,process,source_document
+hardwired protection system,tech:hardwired-protection-system,instrumentation_control,source_document
+heat engine,tech:heat-engine,component,llm_inferred
+heat exchangers,tech:heat-exchangers,component,source_document
+heat integration,tech:heat-integration-for-bio-coal-production,process,source_document
+heat pipe working fluids,tech:heat-pipe-working-fluids,material,source_document
+heat rejection system,tech:heat-rejection-system,system,llm_inferred
+heat transfer component,tech:heat-transfer-component,component,llm_inferred
+heat transfer fluid,tech:heat-transfer-fluid,material,llm_inferred
+heat transfer mechanism,tech:heat-transfer-mechanism,system,llm_inferred
+heat transfer medium,tech:heat-transfer-medium,material,llm_inferred
+heat transfer system,tech:heat-transfer-system,system,llm_inferred
+heat transfer unit,tech:heat-transfer-unit,component,source_document
+heavy concrete magnetite or barite aggregate,tech:heavy-concrete-magnetite-or-barite-aggregate,material,llm_inferred
+heavy lift crane and rigging equipment,tech:heavy-lift-crane-and-rigging-equipment,manufacturing,llm_inferred
+heavy water chemistry control and purification,tech:heavy-water-chemistry-control-and-purification,material,llm_inferred
+heavy water d o production via isotope separation,tech:heavy-water-d2o-production-via-isotope-separation,material,llm_inferred
+helium 3 gas proportional counter tubes,tech:helium-3-gas-proportional-counter-tubes,instrumentation_control,llm_inferred
+helium blower,tech:helium-blower,component,source_document
+helium compatible shaft seal system,tech:helium-compatible-shaft-seal-system,component,llm_inferred
+helium service system,tech:helium-service-system,system,source_document
+helium technology,tech:helium-technology,process,source_document
+helium test facility,tech:helium-test-facility,system,source_document
+hepa filtration system,tech:hepa-filtration-system,component,source_document
+hexagonal fuel assembly,tech:hexagonal-fuel-assembly,component,source_document
+hi storm umax,tech:hi-storm-fw-umax,component,source_document
+high burnup fuel irradiation testing,tech:high-burnup-fuel-irradiation-testing,software_method,source_document
+high chromium structural steel,tech:high-chromium-structural-steel,material,llm_inferred
+high current electrical power supply,tech:high-current-electrical-power-supply,component,llm_inferred
+high fidelity computer modeling,tech:high-fidelity-computer-modeling,software_method,source_document
+high head pumps,tech:high-head-pumps,component,source_document
+high integrity programmable safety platform,tech:high-integrity-programmable-safety-platform,instrumentation_control,source_document
+high level waste stream reprocessed,tech:high-level-waste-stream-reprocessed,process,llm_inferred
+high performance computing hpc simulation,tech:high-performance-computing-hpc-simulation,software_method,source_document
+high performance permanent magnets,tech:permanent-magnet-material,component,llm_inferred
+high performance separation membranes polymer ceramic or nanostructured,tech:high-performance-separation-membranes-polymer-ceramic-or-nanostructured,process,llm_inferred
+high permeability magnetic shielding alloy,tech:high-permeability-magnetic-shielding-alloy,component,llm_inferred
+high power narrow band laser systems,tech:high-power-narrow-band-laser-systems,process,llm_inferred
+high precision turbine blade and rotor manufacturing,tech:precision-rotor-and-impeller-machining,component,llm_inferred
+high pressure feed pumps,tech:high-pressure-feed-pumps,process,llm_inferred
+high pressure piping and flange connections,tech:high-pressure-piping-and-flange-connections,component,llm_inferred
+high purity argon or nitrogen gas supply,tech:high-purity-argon-or-nitrogen-gas-supply,material,llm_inferred
+high purity bismuth,tech:high-purity-bismuth,material,llm_inferred
+high purity helium gas supply,tech:high-purity-helium-gas-supply,material,llm_inferred
+high purity lead low silver tin and other impurities,tech:high-purity-lead-low-silver-tin-and-other-impurities,material,llm_inferred
+high purity nickel and chromium raw materials,tech:high-purity-nickel-and-chromium-raw-materials,material,llm_inferred
+high purity nitrogen gas,tech:high-purity-nitrogen-gas,system,llm_inferred
+high speed bearings gas foil magnetic or oil lubricated,tech:high-speed-bearings-gas-foil-magnetic-or-oil-lubricated,component,llm_inferred
+high speed rotor mechanical design and vibration analysis,tech:high-speed-rotor-mechanical-design-and-vibration-analysis,component,llm_inferred
+high strength prestressing steel tendons,tech:high-strength-prestressing-steel-tendons,material,llm_inferred
+high strength rotor material steel or composite,tech:high-strength-rotor-material-steel-or-composite,component,llm_inferred
+high strength steel,tech:high-strength-steel,manufacturing,llm_inferred
+high temperature alloy impeller and casing material,tech:high-temperature-alloy-impeller-and-casing-material,component,llm_inferred
+high temperature ceramic sealing,tech:high-temperature-ceramic-sealing,system,llm_inferred
+high temperature compatible electrode and cell materials,tech:high-temperature-compatible-electrode-and-cell-materials,instrumentation_control,llm_inferred
+high temperature electrical insulation,tech:high-temperature-electrical-insulation,component,llm_inferred
+high temperature gas cooled reactor supply chain,tech:high-temperature-gas-cooled-reactor-supply-chain,manufacturing,source_document
+high temperature heat storage system,tech:high-temperature-heat-storage-system,system,source_document
+high temperature mechanical and thermal property testing,tech:high-temperature-mechanical-and-thermal-property-testing,material,llm_inferred
+high temperature nickel based superalloys,tech:high-temperature-nickel-based-superalloys,component,llm_inferred
+high temperature pressure resistant alloy valve body,tech:high-temperature-pressure-resistant-alloy-valve-body,component,llm_inferred
+high temperature sodium environment components,tech:high-temperature-sodium-environment-components,component,source_document
+high temperature steam production system,tech:high-temperature-steam-production-system,system,source_document
+high temperature structural alloy,tech:high-temperature-structural-alloy,material,llm_inferred
+high temperature structural and radiation qualification testing,tech:high-temperature-structural-and-radiation-qualification-testing,material,llm_inferred
+high temperature test reactor httr operational experience,tech:high-temperature-test-reactor-httr-operational-experience,system,source_document
+high temperature tribology testing in liquid sodium,tech:high-temperature-tribology-testing-in-liquid-sodium,component,llm_inferred
+hot cell,tech:hot-cell,component,source_document
+hot forging and cold work tube fabrication,tech:hot-forging-and-cold-work-tube-fabrication,material,llm_inferred
+human factors and ergonomic design methodology,tech:human-factors-and-ergonomic-design-methodology,instrumentation_control,llm_inferred
+hydraulic and structural design optimisation,tech:hydraulic-and-structural-design-optimisation,component,llm_inferred
+hydraulic profiling of coolant flow,tech:hydraulic-profiling-of-coolant-flow,process,source_document
+hydride synthesis gas phase or solid state reaction,tech:hydride-synthesis-gas-phase-or-solid-state-reaction,material,llm_inferred
+hydriding hydrogen absorption into u zr alloy,tech:hydriding-hydrogen-absorption-into-u-zr-alloy,fuel,llm_inferred
+hydrogen diffusion measurement through metal membranes,tech:hydrogen-diffusion-measurement-through-metal-membranes,instrumentation_control,llm_inferred
+hydrogen h,tech:hydrogen-h2,material,llm_inferred
+hydrogen management system,tech:hydrogen-processor,component,source_document
+hydrogen separation purification and compression,tech:hydrogen-separation-purification-and-compression,process,llm_inferred
+iaea transport safety certification,tech:iaea-transport-safety-certification,manufacturing,llm_inferred
+ics cybersecurity framework,tech:ics-cybersecurity-framework,instrumentation_control,llm_inferred
+imaging based inspection method,tech:imaging-based-inspection-method,software_method,llm_inferred
+impact dynamics finite element analysis,tech:impact-dynamics-finite-element-analysis,system,llm_inferred
+in containment refueling water storage tank,tech:in-containment-refueling-water-storage-tank,component,source_document
+in core guide tube,tech:in-core-instrumentation-guide-tubes,component,source_document
+in core instrumentation support structure,tech:in-core-instrumentation-support-structure,component,source_document
+in gd expansion module igem,tech:in-gd-expansion-module-igem,component,source_document
+in reactor spent fuel storage,tech:in-reactor-spent-fuel-storage,component,source_document
+in situ spent fuel cooling,tech:in-situ-spent-fuel-cooling,system,source_document
+in vessel control rod drive mechanism,tech:in-vessel-control-rod-drive-mechanism,component,source_document
+in vessel corium retention,tech:in-vessel-corium-retention,system,source_document
+in vessel fuel handling equipment,tech:in-vessel-fuel-handling-equipment,component,source_document
+in vessel steam generator,tech:in-vessel-steam-generator,component,source_document
+in vessel transfer machine,tech:in-vessel-transfer-machine,component,source_document
+indium gadolinium liquid alloy,tech:indium-gadolinium-liquid-alloy,component,llm_inferred
+industrial chemical synthesis,tech:industrial-chemical-synthesis,process,llm_inferred
+industrial communication network,tech:secure-industrial-communication-network,instrumentation_control,llm_inferred
+industrial construction,tech:industrial-construction,manufacturing,llm_inferred
+industrial cybersecurity system,tech:industrial-cybersecurity-system,instrumentation_control,llm_inferred
+industry 4 0 digital technology,tech:industry-4-0-digital-technology,software_method,llm_inferred
+inert atmosphere filling and sealing process,tech:inert-atmosphere-filling-and-sealing-process,component,llm_inferred
+inert gas,tech:inert-gas,material,llm_inferred
+inert gas containment atmosphere,tech:inert-gas-containment-atmosphere,system,source_document
+inert gas cover,tech:inert-gas-cover,material,source_document
+inherent negative reactivity feedback,tech:inherent-negative-reactivity-feedback,system,source_document
+instrumentation and data acquisition system thermocouples pressure transducers flow meters,tech:instrumentation-and-data-acquisition-system-thermocouples-pressure-transducers-flow-meters,component,llm_inferred
+instrumented scaled test loop,tech:instrumented-scaled-test-loop,software_method,llm_inferred
+instrumented test article or loop,tech:instrumented-test-article-or-loop,software_method,llm_inferred
+integral isolation valves,tech:integral-isolation-valves,component,source_document
+integral reactor configuration,tech:integral-reactor-configuration,system,source_document
+integrated heat transfer testing,tech:integrated-heat-transfer-testing,process,source_document
+integrated shielding,tech:integrated-shielding,component,source_document
+intercooler,tech:intercooler-heat-exchanger,component,source_document
+interim spent fuel storage,tech:interim-spent-fuel-storage,system,source_document
+intermediary heat storage system,tech:intermediary-heat-storage-system,system,source_document
+intermediate circuit heat transfer,tech:intermediate-circuit-heat-transfer,system,source_document
+intermediate coolant salt loop,tech:intermediate-coolant-salt-loop,system,source_document
+intermediate heat transfer fluid,tech:intermediate-heat-transfer-fluid,material,llm_inferred
+intermodal transport,tech:modular-transport-by-road-rail-or-sea,manufacturing,source_document
+internal reactor control system,tech:internal-reactor-control-system,instrumentation_control,source_document
+international business structure,tech:international-business-structure,manufacturing,llm_inferred
+ion exchange resins,tech:ion-exchange-resins,system,llm_inferred
+ionization detection of sodium aerosols,tech:ionization-detection-of-sodium-aerosols,instrumentation_control,llm_inferred
+iron or steel structural material,tech:iron-or-steel-structural-material,material,llm_inferred
+iron water biological shielding,tech:iron-water-biological-shielding,material,source_document
+irradiation testing,tech:irradiation-testing,process,source_document
+iso container transport,tech:iso-container-transport,manufacturing,source_document
+isolation system,tech:isolation-system,system,llm_inferred
+isolation valves,tech:isolation-valves,component,llm_inferred
+isotope shift spectroscopy and quantum control,tech:isotope-shift-spectroscopy-and-quantum-control,process,llm_inferred
+isotopic composition assay and verification,tech:isotopic-composition-assay-and-verification,process,llm_inferred
+joining process,tech:joining-process,manufacturing,llm_inferred
+joint venture construction and export,tech:joint-venture-construction-and-export,manufacturing,source_document
+korea fuel assembly kofa,tech:korea-fuel-assembly-kofa,fuel,source_document
+land based safety analysis and licensing,tech:land-based-safety-analysis-and-licensing,system,llm_inferred
+large section casting or forging,tech:large-section-casting-or-forging,material,llm_inferred
+large volume shielding pool,tech:large-volume-shielding-pool,system,source_document
+laser isotope separation enrichment,tech:laser-isotope-separation-enrichment,process,source_document
+leach testing capability,tech:leach-testing-capability,process,llm_inferred
+lead air coolers,tech:lead-air-coolers,component,source_document
+lead cooled fast reactor core,tech:lead-cooled-fast-reactor-core,system,source_document
+lead lead coolers,tech:lead-lead-coolers,component,source_document
+lead pb,tech:lead-pb,material,llm_inferred
+lead tin liquid metal,tech:lead-tin-liquid-metal,material,source_document
+leak detection system,tech:leak-detection-system,instrumentation_control,llm_inferred
+leak tight bellow type valves,tech:leak-tight-bellow-type-valves,component,source_document
+leak tight containment,tech:leak-tight-containment,component,source_document
+leu fuel,tech:leu-fuel,fuel,source_document
+leu fuel fabrication,tech:leu-fuel-fabrication,process,source_document
+licensed nuclear transport container,tech:licensed-nuclear-transport-container,component,source_document
+lif bef2 uf4 fuel salt,tech:lif-bef2-uf4-fuel-salt,fuel,source_document
+lifetime core loading,tech:lifetime-core-loading,process,source_document
+light water coolant,tech:light-water-coolant,material,source_document
+light water reactor fuel assembly,tech:light-water-reactor-fuel-assembly,fuel,llm_inferred
+light water reactor lwr,tech:pressurised-water-reactor,system,source_document
+linear motors,tech:linear-motors,component,source_document
+liquid coolant,tech:liquid-coolant,material,llm_inferred
+liquid metal alloy,tech:liquid-metal-alloy,material,llm_inferred
+liquid metal purification oxygen and nitrogen removal,tech:liquid-metal-purification-oxygen-and-nitrogen-removal,material,llm_inferred
+liquid metallic nuclear fuel,tech:liquid-metallic-nuclear-fuel,fuel,llm_inferred
+liquid metallic u cr fuel,tech:liquid-metallic-u-cr-fuel,fuel,source_document
+liquid nuclear fuel,tech:liquid-nuclear-fuel,fuel,llm_inferred
+liquid radioactive waste management system,tech:liquid-radioactive-waste-management-system,system,source_document
+liquid silicon infiltration lsi,tech:liquid-silicon-infiltration-lsi,component,llm_inferred
+liquid waste filtration and demineralization,tech:liquid-waste-filtration-and-demineralization,process,source_document
+lithium fluoride 7lif,tech:lithium-fluoride-7lif,fuel,llm_inferred
+lithium isotope enrichment,tech:lithium-enrichment-facility,process,source_document
+load following capability,tech:load-following-capability,system,source_document
+local supervision station,tech:local-supervision-station,instrumentation_control,source_document
+local ultimate heatsink system,tech:local-ultimate-heatsink-system,system,source_document
+localizing valves,tech:localizing-valves,component,source_document
+long lead item procurement,tech:long-lead-item-procurement,manufacturing,source_document
+long life core design,tech:long-life-core-design,system,source_document
+loose parts and vibration monitoring system,tech:loose-parts-and-vibration-monitoring-system,instrumentation_control,source_document
+loss of forced cooling test,tech:loss-of-forced-cooling-test,software_method,source_document
+low alloy or stainless steel plate and forging,tech:low-alloy-or-stainless-steel-plate-and-forging,component,llm_inferred
+low alloy steel,tech:low-alloy-steel,material,source_document
+low cobalt steel,tech:low-cobalt-steel,material,source_document
+low enriched uranium fuel cycle,tech:low-enriched-uranium-fuel-cycle,process,source_document
+low head pressure injection pump,tech:low-head-pressure-injection-pump,component,source_document
+low temperature heat output system,tech:low-temperature-heat-output-system,system,source_document
+lwr plutonium fuel utilization,tech:lwr-plutonium-fuel-utilization,fuel,source_document
+magnesium or calcium reduction chemistry,tech:magnesium-or-calcium-reduction-chemistry,process,llm_inferred
+magnetic bearing main blower,tech:magnetic-bearing-main-blower,component,source_document
+magnetic bearing power amplifier and control electronics,tech:magnetic-bearing-power-amplifier-and-control-electronics,component,llm_inferred
+magnetic jack control rod drive mechanism,tech:magnetic-jack-control-rod-drive-mechanism,component,source_document
+magnetohydrodynamic mhd pump design and analysis methods,tech:magnetohydrodynamic-mhd-pump-design-and-analysis-methods,component,llm_inferred
+main steam turbine control valves,tech:main-steam-turbine-control-valves,component,source_document
+man machine interface mmi,tech:digital-man-machine-interface-system,instrumentation_control,source_document
+manufacturing engineering methodology,tech:manufacturing-engineering-methodology,software_method,llm_inferred
+manufacturing process capability modeling,tech:manufacturing-process-capability-modeling,software_method,llm_inferred
+maraging steel,tech:maraging-steel,material,llm_inferred
+marine construction,tech:shipyard-fabrication,manufacturing,source_document
+marine containment and confinement system,tech:marine-containment-and-confinement-system,system,source_document
+marine nuclear operations,tech:marine-nuclear-operations,process,llm_inferred
+marine nuclear power engineering,tech:marine-nuclear-power-engineering,manufacturing,source_document
+marine reactor licensing and operation,tech:marine-reactor-licensing-and-operation,software_method,source_document
+marine reactor technology,tech:marine-reactor-technology,system,source_document
+maritime technology adaptation for land,tech:maritime-technology-adaptation-for-land,system,source_document
+martensitic stainless steel for latch housing and pressure boundary,tech:martensitic-stainless-steel-for-latch-housing-and-pressure-boundary,component,llm_inferred
+material compatibility testing methodology,tech:material-compatibility-testing-methodology,software_method,llm_inferred
+material degradation and embrittlement modeling,tech:material-degradation-and-embrittlement-modeling,component,llm_inferred
+material property characterization methodology,tech:material-property-characterization-methodology,software_method,llm_inferred
+material research and qualification,tech:material-research-and-qualification,software_method,source_document
+material surveillance equipment,tech:material-surveillance-equipment,component,source_document
+materials testing,tech:materials-testing,process,llm_inferred
+mcnp code,tech:mcnp-code,software_method,source_document
+mechanical drive and extraction mechanism,tech:mechanical-drive-and-extraction-mechanism,component,llm_inferred
+mechanical energy storage device,tech:mechanical-energy-storage-device,component,llm_inferred
+mechanical grinding and milling,tech:mechanical-grinding-and-milling,process,llm_inferred
+mechanical latch and release mechanism,tech:movable-latch-assembly,component,llm_inferred
+mechanical property and fracture toughness qualification,tech:mechanical-property-and-fracture-toughness-qualification,material,llm_inferred
+mechanical shaft seal,tech:mechanical-shaft-seal,component,llm_inferred
+mechanical shim operational strategy,tech:mechanical-shim-operational-strategy,process,source_document
+mechanical testing and non destructive examination of cladding,tech:mechanical-testing-and-non-destructive-examination-of-cladding,material,llm_inferred
+mechanical trigger and actuation mechanism,tech:mechanical-trigger-and-actuation-mechanism,system,llm_inferred
+medium pressure injection system,tech:medium-pressure-injection-system,system,source_document
+melt interaction and spreading testing thermite or corium experiments,tech:melt-interaction-and-spreading-testing-thermite-or-corium-experiments,component,llm_inferred
+melt resistant refractory materials ceramic pans or refractory steel,tech:melt-resistant-refractory-materials-ceramic-pans-or-refractory-steel,component,llm_inferred
+metal ceramic fuel,tech:metal-ceramic-fuel,fuel,llm_inferred
+metal cladding and diffusion bonding process,tech:metal-cladding-and-diffusion-bonding-process,material,llm_inferred
+metal coated charcoal silver copper,tech:metal-coated-charcoal-silver-copper,component,llm_inferred
+metal forming,tech:metal-forming,manufacturing,llm_inferred
+metal fuel fabrication,tech:metal-fuel-fabrication,process,source_document
+metal hydride nuclear fuel,tech:metal-hydride-nuclear-fuel,fuel,llm_inferred
+metal matrix aluminum stainless steel or duplex steel,tech:metal-matrix-aluminum-stainless-steel-or-duplex-steel,material,llm_inferred
+metal sealing and welding process,tech:metal-sealing-and-welding-process,component,llm_inferred
+metallic cladding material,tech:metallic-cladding-material,material,llm_inferred
+metallic containment,tech:steel-containment,component,source_document
+metallic dispersion fuel matrix,tech:metallic-dispersion-fuel-matrix,material,llm_inferred
+metallic neutron absorber,tech:metallic-neutron-absorber,material,llm_inferred
+metallic nuclear fuel,tech:metallic-nuclear-fuel,fuel,llm_inferred
+metallic structural alloy,tech:metallic-structural-alloy,material,llm_inferred
+microgrid integration,tech:microgrid-integration,system,source_document
+microreactor,tech:microreactor,system,source_document
+microscopy and analytical instrumentation sem tem optical eddy current gamma scanning,tech:microscopy-and-analytical-instrumentation-sem-tem-optical-eddy-current-gamma-scanning,process,llm_inferred
+minor actinide burning,tech:minor-actinide-burning,process,source_document
+miscellaneous automatic systems,tech:miscellaneous-automatic-systems,instrumentation_control,source_document
+mixed uranium plutonium nitride fuel,tech:mixed-uranium-plutonium-nitride-fuel,fuel,source_document
+mixing and encapsulation process,tech:mixing-and-encapsulation-process,process,llm_inferred
+mnup fuel fabrication,tech:mnup-fuel-fabrication,process,source_document
+mobile reactor system,tech:mobile-reactor-system,system,source_document
+modelling capabilities,tech:modelling-capabilities,software_method,source_document
+modular construction,tech:modular-construction,manufacturing,source_document
+modular deployment,tech:modular-deployment,system,source_document
+modular design and interface engineering,tech:modular-design-and-interface-engineering,manufacturing,llm_inferred
+modular reactor core,tech:modular-reactor-core,system,source_document
+modular skid fabrication,tech:modular-skid-fabrication,manufacturing,source_document
+module development facility,tech:module-development-facility,manufacturing,source_document
+moisture monitoring system,tech:moisture-monitoring-system,instrumentation_control,source_document
+moisture sensor calibration and qualification for high temperature helium service,tech:moisture-sensor-calibration-and-qualification-for-high-temperature-helium-service,instrumentation_control,llm_inferred
+moisture separator re heater,tech:moisture-separator-re-heater,component,source_document
+molecular sieve or adsorbent gas purification,tech:molecular-sieve-or-adsorbent-gas-purification,material,llm_inferred
+molten chloride fuel,tech:molten-chloride-fuel,fuel,source_document
+molten chloride salt coolant,tech:molten-chloride-salt-coolant,material,source_document
+molten core material retention capability,tech:molten-core-material-retention-capability,system,source_document
+molten fluoride fuel,tech:molten-fluoride-fuel,fuel,source_document
+molten salt,tech:molten-salt,material,llm_inferred
+molten salt corrosion testing,tech:material-corrosion-testing,software_method,source_document
+molten salt electrolyte e g licl kcl li o licl,tech:molten-salt-electrolyte-e-g-liclkcl-li2olicl,process,llm_inferred
+molten salt energy storage system,tech:molten-salt-energy-storage-system,system,source_document
+molten salt fuel,tech:molten-salt-fuel,fuel,llm_inferred
+molten salt fuel chemistry control material,tech:molten-salt-fuel-chemistry-control-material,material,llm_inferred
+molten salt fuel container,tech:molten-salt-fuel-container,component,llm_inferred
+molten salt fuel management,tech:molten-salt-fuel-management,process,source_document
+molten salt fuel r d,tech:molten-salt-fuel-r-d,process,source_document
+molten salt heat transfer fluid,tech:nitrate-salt-heat-transfer-fluid,material,source_document
+molten salt loop,tech:molten-salt-loop,system,source_document
+molten salt loop testing,tech:molten-salt-loop-testing,manufacturing,source_document
+molten salt production,tech:molten-salt-production,process,source_document
+molten salt property measurement,tech:molten-salt-property-research,software_method,source_document
+molten salt pump,tech:molten-salt-pump,component,source_document
+molten salt purification,tech:molten-salt-purification,process,source_document
+molten salt reactor,tech:molten-salt-reactor,system,llm_inferred
+molten salt reactor component,tech:molten-salt-reactor-component,component,llm_inferred
+molten salt reactor core,tech:molten-salt-reactor-core,system,source_document
+molten salt reactor primary system,tech:molten-salt-reactor-primary-system,system,llm_inferred
+molten salt thermodynamic and pyrochemical property data,tech:molten-salt-thermodynamic-and-pyrochemical-property-data,system,llm_inferred
+molten salt to steam boiler,tech:molten-salt-to-steam-boiler,component,source_document
+molybdenum metal,tech:molybdenum-metal,material,llm_inferred
+monoblock layout,tech:monoblock-layout,system,source_document
+monte carlo depletion analysis,tech:monte-carlo-depletion-analysis,software_method,source_document
+monte carlo statistical particle transport algorithms,tech:monte-carlo-statistical-particle-transport-algorithms,software_method,llm_inferred
+mox fuel assembly testing facility,tech:mox-fuel-assembly-testing-facility,process,source_document
+mox fuel production facility,tech:mox-fuel-production-facility,process,source_document
+mox fuel supply and reprocessing,tech:mox-fuel-supply-and-reprocessing,process,source_document
+multi module configuration,tech:multi-module-configuration,system,source_document
+multi physics simulation tool,tech:multi-physics-code,software_method,source_document
+multi stage valve trim tortuous path or cage design,tech:multi-stage-valve-trim-tortuous-path-or-cage-design,component,llm_inferred
+multilayer metal concrete reactor vessel,tech:multilayer-metal-concrete-reactor-vessel,component,source_document
+multivariable control design methodology,tech:multivariable-control-design-methodology,instrumentation_control,llm_inferred
+nabf4 molten salt,tech:nabf4-molten-salt,material,source_document
+naf bef2 uf4 fuel salt,tech:naf-bef2-uf4-fuel-salt,fuel,source_document
+nak intermediate heat transfer,tech:nak-intermediate-heat-transfer,material,source_document
+natural circulation,tech:natural-circulation,system,source_document
+natural circulation cooling design central chimney and liquid metal flow,tech:natural-circulation-cooling-design-central-chimney-and-liquid-metal-flow,component,llm_inferred
+natural flake graphite synthetic graphite and phenolic resin pitch binder manufacturing,tech:natural-flake-graphite-synthetic-graphite-and-pitch-resin-binder,manufacturing,llm_inferred
+naval propulsion feasibility study,tech:naval-propulsion-feasibility-study,software_method,source_document
+near surface waste storage,tech:near-surface-waste-storage,process,source_document
+negative temperature coefficient,tech:negative-temperature-coefficient,system,source_document
+neutron absorber alloy,tech:neutron-absorber-alloy,material,llm_inferred
+neutron absorber assembly,tech:neutron-absorber-assembly,component,llm_inferred
+neutron absorber component,tech:neutron-absorber-component,component,llm_inferred
+neutron absorber control rod,tech:neutron-absorber-control-rod,component,llm_inferred
+neutron absorber material boron carbide or gadolinium,tech:neutron-absorber-material-boron-carbide-or-gadolinium,component,llm_inferred
+neutron and gamma irradiation qualification testing,tech:neutron-and-gamma-irradiation-qualification-testing,component,llm_inferred
+neutron beam collimation system,tech:neutron-beam-collimation-system,software_method,llm_inferred
+neutron detection and range instrumentation,tech:neutron-detection-and-range-instrumentation,component,llm_inferred
+neutron detection signal processing and counting electronics,tech:neutron-detection-signal-processing-and-counting-electronics,instrumentation_control,llm_inferred
+neutron flux instrumentation,tech:neutron-flux-instrumentation,instrumentation_control,source_document
+neutron irradiation,tech:neutron-irradiation,process,llm_inferred
+neutron moderator reflector material,tech:neutron-moderator-reflector-material,material,llm_inferred
+neutron radiography,tech:neutron-radiography,software_method,source_document
+neutron reflector material,tech:neutron-reflector-material,material,llm_inferred
+neutron source,tech:neutron-source,component,llm_inferred
+nickel base alloy,tech:nickel-base-alloy,material,llm_inferred
+nickel based superalloy,tech:nickel-based-superalloy,material,llm_inferred
+nickel chromium iron base alloy,tech:nickel-chromium-iron-base-alloy,material,llm_inferred
+nickel iron chromium alloy,tech:nickel-iron-chromium-alloy,material,llm_inferred
+nickel metal,tech:nickel-metal,material,llm_inferred
+niobium,tech:niobium,material,llm_inferred
+nitride nuclear fuel,tech:nitride-nuclear-fuel,fuel,llm_inferred
+nitrogen,tech:nitrogen,material,llm_inferred
+nitrogen brayton cycle,tech:nitrogen-brayton-cycle,system,source_document
+nitrogen cushion,tech:nitrogen-cushion,material,source_document
+non destructive testing ndt,tech:non-destructive-testing-ndt,manufacturing,llm_inferred
+non destructive testing of nuclear tubing,tech:non-destructive-testing-of-nuclear-tubing,material,llm_inferred
+non nuclear component demonstration,tech:non-nuclear-component-demonstration,manufacturing,source_document
+non nuclear prototype,tech:non-nuclear-prototype,system,source_document
+non nuclear test facility,tech:non-nuclear-test-facility,component,llm_inferred
+non nuclear testing,tech:non-nuclear-testing,process,source_document
+non nuclear testing and design validation,tech:non-nuclear-testing-and-design-validation,software_method,llm_inferred
+nonlinear and adaptive control algorithm design,tech:nonlinear-and-adaptive-control-algorithm-design,component,llm_inferred
+nonlinear control system design backstepping fuzzy logic,tech:nonlinear-control-system-design-backstepping-fuzzy-logic,component,llm_inferred
+normal operation control systems,tech:normal-operation-control-systems,instrumentation_control,source_document
+nuclear cross section and decay data libraries,tech:nuclear-cross-section-and-decay-data-libraries,software_method,llm_inferred
+nuclear data validation,tech:nuclear-data-validation,process,llm_inferred
+nuclear engineering simulation tools,tech:nuclear-engineering-simulation-tools,software_method,llm_inferred
+nuclear facility component,tech:nuclear-facility-component,component,llm_inferred
+nuclear facility design engineering,tech:nuclear-facility-design-engineering,software_method,llm_inferred
+nuclear facility structural design specifications,tech:nuclear-facility-structural-design-specifications,software_method,llm_inferred
+nuclear fuel and coolant thermophysical property data,tech:nuclear-fuel-and-coolant-thermophysical-property-data,software_method,llm_inferred
+nuclear fuel cycle,tech:nuclear-fuel-cycle,process,llm_inferred
+nuclear fuel cycle modeling,tech:nuclear-fuel-cycle-modeling,software_method,llm_inferred
+nuclear fuel cycle processing,tech:nuclear-fuel-cycle-processing,process,llm_inferred
+nuclear fuel cycle scenario analyses,tech:nuclear-fuel-cycle-scenario-analyses,software_method,source_document
+nuclear fuel element design and development,tech:nuclear-fuel-design,process,source_document
+nuclear fuel fabrication,tech:fuel-fabrication,process,source_document
+nuclear fuel qualification,tech:nuclear-fuel-qualification,process,llm_inferred
+nuclear fuel reprocessing,tech:spent-fuel-reprocessing,process,source_document
+nuclear fuel supply chain,tech:nuclear-fuel-supply-chain,process,source_document
+nuclear fuel uranium or thorium compound,tech:nuclear-fuel-uranium-or-thorium-compound,component,llm_inferred
+nuclear grade base and filler materials,tech:nuclear-grade-base-and-filler-materials,manufacturing,llm_inferred
+nuclear grade graphite raw material,tech:nuclear-grade-graphite-raw-material,material,llm_inferred
+nuclear grade structural material,tech:nuclear-grade-structural-material,material,llm_inferred
+nuclear grade welding and fabrication,tech:nuclear-grade-welding-and-fabrication,component,llm_inferred
+nuclear licensing,tech:nuclear-licensing-activity,software_method,llm_inferred
+nuclear material fabrication engineering,tech:nuclear-material-fabrication-engineering,manufacturing,llm_inferred
+nuclear material transportation and logistics,tech:nuclear-material-transportation-and-logistics,process,llm_inferred
+nuclear materials engineering,tech:nuclear-materials-engineering,software_method,llm_inferred
+nuclear materials qualification,tech:nuclear-materials-qualification,process,llm_inferred
+nuclear materials research and development,tech:nuclear-materials-research-and-development,material,llm_inferred
+nuclear physics experimental validation,tech:nuclear-physics-experimental-validation,software_method,llm_inferred
+nuclear plant safety system,tech:nuclear-safety-system,component,llm_inferred
+nuclear power component manufacturing,tech:nuclear-power-component-manufacturing,manufacturing,source_document
+nuclear power engineering,tech:nuclear-engineering-and-construction,manufacturing,source_document
+nuclear quality assurance and verification,tech:nuclear-quality-assurance-and-verification,process,llm_inferred
+nuclear quality certification,tech:nuclear-quality-certification,manufacturing,llm_inferred
+nuclear quality component fabrication,tech:nuclear-quality-component-fabrication,manufacturing,source_document
+nuclear quality component fabrication and assembly,tech:nuclear-quality-component-fabrication-and-assembly,software_method,llm_inferred
+nuclear quality fabrication and assembly of loop components,tech:nuclear-quality-fabrication-and-assembly-of-loop-components,software_method,llm_inferred
+nuclear reactor component,tech:nuclear-reactor-components,component,llm_inferred
+nuclear reactor core,tech:nuclear-reactor-core,system,llm_inferred
+nuclear reactor design,tech:nuclear-reactor-design,system,llm_inferred
+nuclear reactor heritage data,tech:nuclear-reactor-heritage-data,software_method,llm_inferred
+nuclear reactor physics,tech:nuclear-reactor-physics,manufacturing,llm_inferred
+nuclear safety analysis,tech:nuclear-safety-analysis,software_method,llm_inferred
+nuclear safety analysis software,tech:nuclear-safety-analysis-software,software_method,llm_inferred
+nuclear safety regulatory framework,tech:nuclear-safety-regulatory-framework,software_method,llm_inferred
+nuclear sampling system,tech:nuclear-sampling-system,system,source_document
+nuclear structural engineering design codes and standards,tech:nuclear-structural-engineering-design-codes-and-standards,software_method,llm_inferred
+nuclear structural materials,tech:nuclear-structural-materials,manufacturing,llm_inferred
+nuclear testing and qualification,tech:nuclear-testing-and-qualification,process,llm_inferred
+nuclear thermal hydraulic experimental testing,tech:nuclear-thermal-hydraulic-experimental-testing,software_method,llm_inferred
+nuclear transport package,tech:nuclear-transport-package,component,llm_inferred
+nuclear valve body casting and welding,tech:nuclear-valve-body-casting-and-welding,component,llm_inferred
+off site salt reprocessing and purification,tech:off-site-salt-reprocessing-and-purification,process,source_document
+on site refuelling,tech:on-site-refuelling,process,source_document
+once through haleu fuel cycle,tech:once-through-haleu-fuel-cycle,process,source_document
+online chemical processing system,tech:online-chemical-processing-system,process,source_document
+open air brayton cycle,tech:open-air-brayton-cycle,system,source_document
+open energy conversion cycle,tech:open-energy-conversion-cycle,system,source_document
+operator workstation and hmi software,tech:operator-workstation-and-hmi-software,instrumentation_control,llm_inferred
+optical one way transceiver hardware,tech:optical-one-way-transceiver-hardware,instrumentation_control,llm_inferred
+optical signal processing electronics,tech:optical-signal-processing-electronics,instrumentation_control,llm_inferred
+organic liquid coolant,tech:organic-liquid-coolant,material,llm_inferred
+overpressure protection systems,tech:overpressure-protection-systems,system,source_document
+oxide nuclear fuel,tech:oxide-nuclear-fuel,fuel,llm_inferred
+oxygen concentration monitoring,tech:oxygen-concentration-monitoring,instrumentation_control,source_document
+oxygen content control and inert atmosphere handling,tech:oxygen-content-control-and-inert-atmosphere-handling,material,llm_inferred
+particle accelerator,tech:external-particle-accelerator,component,source_document
+passive air cooling system,tech:passive-air-cooling-system,system,source_document
+passive autocatalytic hydrogen recombiner parh,tech:passive-autocatalytic-hydrogen-recombiner,component,source_document
+passive auxiliary feedwater system,tech:passive-auxiliary-feedwater-system,system,source_document
+passive decay heat removal,tech:passive-decay-heat-removal,system,source_document
+passive emergency core cooling system peccs,tech:passive-emergency-core-cooling-system,system,source_document
+passive heat rejection component,tech:passive-heat-rejection-component,component,llm_inferred
+passive heat transfer component,tech:passive-heat-transfer-component,component,llm_inferred
+passive heat transfer device,tech:passive-heat-transfer-device,component,llm_inferred
+passive heat transfer system,tech:passive-heat-transfer-system,component,llm_inferred
+passive load following,tech:passive-load-following,system,source_document
+passive reactivity control system,tech:passive-reactivity-control-system,system,source_document
+passive reactor caisson water flooding system,tech:passive-reactor-caisson-water-flooding-system,system,source_document
+passive reactor vessel cooling testing,tech:passive-reactor-vessel-cooling-testing,software_method,source_document
+passive residual heat removal prhr system,tech:passive-residual-heat-removal-prhr-system,system,source_document
+passive safety component,tech:passive-safety-component,component,llm_inferred
+passive safety condenser system,tech:passive-safety-condenser-system,system,source_document
+passive safety systems,tech:passive-safety-systems,system,source_document
+passive safety testing,tech:passive-safety-testing,software_method,llm_inferred
+passive spent fuel cooling system,tech:passive-spent-fuel-cooling,process,source_document
+passive surge tank,tech:passive-surge-tank,component,source_document
+passive thermal management system,tech:passive-thermal-management-system,system,llm_inferred
+pebble fuel fabrication,tech:pebble-fuel-fabrication,process,source_document
+pellet pressing and sintering,tech:pellet-pressing-and-sintering,process,llm_inferred
+periodic coolant poison injection system,tech:periodic-coolant-poison-injection-system,system,source_document
+periscope inspection system,tech:periscope-inspection-system,instrumentation_control,source_document
+permanent magnet synchronous motor,tech:permanent-magnet-synchronous-motor,component,llm_inferred
+perovskite oxide electrode materials,tech:perovskite-oxide-electrode-materials,system,llm_inferred
+phase transformation and microstructural characterization xrd dsc atom probe tomography,tech:phase-transformation-and-microstructural-characterization-xrd-dsc-atom-probe-tomography,material,llm_inferred
+pipe fabrication and welding,tech:pipe-fabrication-and-welding,component,llm_inferred
+piping and plumbing components,tech:piping-and-plumbing-components,component,llm_inferred
+plant protection system,tech:plant-protection-system,instrumentation_control,source_document
+plate fin and tube fin fabrication,tech:plate-fin-and-tube-fin-fabrication,component,llm_inferred
+pld coatings,tech:pld-coatings,material,source_document
+polymer solidification technology,tech:polymer-solidification-technology,process,source_document
+polymer solidifying agents e g polyethylene nochar type absorbent polymers,tech:polymer-solidifying-agents-e-g-polyethylene-nochar-type-absorbent-polymers,process,llm_inferred
+pool cooling and purification system,tech:pool-cooling-and-purification-system,system,source_document
+porous solid sorbents activated carbons zeolites,tech:porous-solid-sorbents-activated-carbons-zeolites,process,llm_inferred
+position encoder and feedback sensor,tech:position-encoder-and-feedback-sensor,component,llm_inferred
+position sensing transducers magnetic capacitive or inductive,tech:position-sensing-transducers-magnetic-capacitive-or-inductive,instrumentation_control,llm_inferred
+position transmitter reed switch array,tech:position-transmitter-reed-switch-array,component,llm_inferred
+potassium fluoride kf,tech:potassium-fluoride-kf,material,llm_inferred
+potassium metal,tech:potassium-metal,material,llm_inferred
+powder filament or resin feedstock materials,tech:powder-filament-or-resin-feedstock-materials,manufacturing,llm_inferred
+powder metallurgical fuel fabrication,tech:powder-metallurgical-fuel-fabrication,manufacturing,source_document
+powder metallurgy,tech:powder-metallurgy,manufacturing,llm_inferred
+powder metallurgy or alloy fabrication process,tech:powder-metallurgy-or-alloy-fabrication-process,material,llm_inferred
+power amplifier and control electronics,tech:power-amplifier-and-control-electronics,component,llm_inferred
+power barge,tech:power-barge,manufacturing,source_document
+power barge platform,tech:power-barge-platform,system,source_document
+power conversion component,tech:power-conversion-component,component,llm_inferred
+power conversion electronics,tech:power-electronics-inverter,component,llm_inferred
+power electronics for electromagnetic coil drive,tech:power-electronics-for-electromagnetic-coil-drive,instrumentation_control,llm_inferred
+power plant design,tech:power-plant-design,system,llm_inferred
+power quality monitoring and automatic transfer switching,tech:power-quality-monitoring-and-automatic-transfer-switching,instrumentation_control,llm_inferred
+pre licensing vendor design review,tech:pre-licensing-vendor-design-review,software_method,source_document
+precision actuator,tech:precision-actuator,component,llm_inferred
+precision machining and assembly of valve internals,tech:precision-machining-and-assembly-of-valve-internals,component,llm_inferred
+precision rotor balancing and integrally geared shaft fabrication,tech:precision-rotor-balancing-and-integrally-geared-shaft-fabrication,component,llm_inferred
+predictive maintenance systems,tech:predictive-maintenance-systems,instrumentation_control,source_document
+prefabricated building structures,tech:prefabricated-removable-building,manufacturing,source_document
+preliminary safety analysis report psar,tech:preliminary-safety-analysis-report-psar,software_method,source_document
+preliminary safety review documentation,tech:preliminary-safety-review-documentation,software_method,source_document
+pressure boundary access system,tech:pressure-boundary-access-system,component,llm_inferred
+pressure compensation gas system,tech:pressure-compensation-gas-system,system,source_document
+pressure containing valve body and internals,tech:pressure-containing-valve-body-and-internals,component,llm_inferred
+pressure control device,tech:pressure-control-device,component,llm_inferred
+pressure equipment certification,tech:pressure-equipment-certification,manufacturing,llm_inferred
+pressure vessel,tech:pressure-vessel,component,llm_inferred
+pressure vessel fabrication and welding,tech:pressure-vessel-fabrication-and-welding,component,llm_inferred
+pressure vessel steel,tech:pressure-vessel-steel,material,llm_inferred
+pressurised light water microreactor,tech:pressurised-light-water-microreactor,system,source_document
+pressurised water reactor core,tech:pressurised-water-reactor-core,system,source_document
+pressurised water reactor supply chain,tech:pressurised-water-reactor-supply-chain,manufacturing,source_document
+pressurization mechanism pump or pressurized tank,tech:pressurization-mechanism-pump-or-pressurized-tank,system,llm_inferred
+pressurization system,tech:pressurization-system,system,llm_inferred
+pressurized water reactor fuel assembly,tech:pressurised-water-reactor-fuel-rods,component,source_document
+pressurizer safety valves,tech:pressurizer-safety-valves,component,source_document
+pressurizer system,tech:pressurizer-system,system,source_document
+prestressed reinforced concrete,tech:prestressed-reinforced-concrete,material,source_document
+prestressing tensioning and anchoring process,tech:prestressing-tensioning-and-anchoring-process,material,llm_inferred
+primary circuit maintenance system,tech:primary-circuit-maintenance-system,process,llm_inferred
+primary circuit piping,tech:primary-circuit-piping,component,llm_inferred
+primary circuit purification system,tech:primary-circuit-purification-system,system,source_document
+primary containment system,tech:primary-containment-system,system,source_document
+primary coolant loop,tech:primary-coolant-loop,system,llm_inferred
+primary coolant pump,tech:primary-coolant-pump,component,source_document
+primary coolant support system,tech:primary-coolant-support-system,system,llm_inferred
+primary loop isolation system,tech:primary-loop-isolation-system,system,source_document
+primary pressure boundary,tech:primary-pressure-boundary,component,llm_inferred
+primary protection system,tech:primary-protection-system,system,source_document
+prismatic fuel block,tech:prismatic-fuel-block,component,source_document
+prismatic fuel elements,tech:prismatic-fuel-elements,fuel,source_document
+process instrumentation sensors transmitters actuators,tech:process-instrumentation-sensors-transmitters-actuators,instrumentation_control,llm_inferred
+process monitoring system,tech:process-monitoring-system,system,llm_inferred
+process parameter calibration and dimensional inspection,tech:process-parameter-calibration-and-dimensional-inspection,manufacturing,llm_inferred
+process parameters control system,tech:process-parameters-control-system,instrumentation_control,source_document
+process sensor,tech:process-sensor,instrumentation_control,llm_inferred
+product functional and geometric specification,tech:product-functional-and-geometric-specification,software_method,llm_inferred
+programmable logic controllers plc,tech:programmable-logic-controllers-plc,instrumentation_control,source_document
+project management methodology,tech:project-management-methodology,manufacturing,llm_inferred
+project procurement management,tech:project-procurement-management,manufacturing,llm_inferred
+protection system,tech:protection-system,instrumentation_control,llm_inferred
+protective coating,tech:protective-coating,material,llm_inferred
+protective enclosure,tech:safety-casing,component,source_document
+protective oxidation resistant coating sic sin,tech:protective-oxidation-resistant-coating-sic-sin,material,llm_inferred
+prototype testing,tech:prototype-testing,software_method,source_document
+pulsed laser deposition process,tech:pulsed-laser-deposition-process,material,llm_inferred
+pump,tech:pump,component,llm_inferred
+purification and cooling system,tech:purification-and-cooling-system,system,source_document
+pwr fuel assembly,tech:pwr-fuel-assembly,fuel,llm_inferred
+pwr fuel fabrication process,tech:pwr-fuel-fabrication-process,process,source_document
+pyrolysis or hydrothermal carbonization reactor,tech:pyrolysis-or-hydrothermal-carbonization-reactor,process,llm_inferred
+pyrolytic carbon deposition matrix formation,tech:pyrolytic-carbon-deposition-matrix-formation,material,llm_inferred
+pyrolytic carbon pyc coating material,tech:pyrolytic-carbon-pyc-coating-material,process,llm_inferred
+qualification and testing methodology,tech:qualification-and-testing-methodology,software_method,llm_inferred
+qualification and testing system,tech:qualification-and-testing-system,system,llm_inferred
+quality assurance certification,tech:quality-assurance-certification,manufacturing,llm_inferred
+quality inspection and testing,tech:quality-inspection-and-testing,manufacturing,llm_inferred
+quantitative risk analysis,tech:quantitative-risk-analysis,software_method,llm_inferred
+radiation and process control detection blocks,tech:radiation-and-process-control-detection-blocks,instrumentation_control,source_document
+radiation damage assessment and structural aging qualification,tech:radiation-damage-assessment-and-structural-aging-qualification,material,llm_inferred
+radiation environment qualification testing,tech:radiation-environment-qualification-testing,instrumentation_control,llm_inferred
+radiation hardened sensors,tech:radiation-hardened-sensors,instrumentation_control,source_document
+radiation leak detectors,tech:radiation-leak-detectors,instrumentation_control,source_document
+radiation monitoring systems,tech:radiation-monitoring-systems,instrumentation_control,source_document
+radiation resistance and thermal cycling qualification testing,tech:radiation-resistance-and-thermal-cycling-qualification-testing,material,llm_inferred
+radiation resistant capsule and specimen material,tech:radiation-resistant-capsule-and-specimen-material,component,llm_inferred
+radiation shielding,tech:radiation-shield-and-impact-barrier,component,source_document
+radiation source gamma irradiator or reactor,tech:radiation-source-gamma-irradiator-or-reactor,process,llm_inferred
+radiation transport analysis,tech:radiation-transport-analysis,component,llm_inferred
+radioactive isotope am be or cf 252,tech:radioactive-isotope-am-be-or-cf-252,component,llm_inferred
+radioactive material packaging,tech:radioactive-material-packaging,component,llm_inferred
+radioactive waste management,tech:radioactive-waste-management,process,llm_inferred
+radiological confinement structure,tech:radiological-confinement-structure,component,llm_inferred
+radiolysis and gas release testing,tech:radiolysis-and-gas-release-testing,process,source_document
+rankine bottoming cycle,tech:rankine-bottoming-cycle,system,source_document
+rankine power conversion system,tech:rankine-power-conversion-system,system,source_document
+rapid prototyping and digital simulation tools,tech:rapid-prototyping-and-digital-simulation-tools,manufacturing,llm_inferred
+rare earth doped glass sensing element,tech:rare-earth-doped-glass-sensing-element,instrumentation_control,llm_inferred
+rare earth oxide compound,tech:rare-earth-oxide-compound,material,llm_inferred
+reactivity control component,tech:reactivity-control-component,component,llm_inferred
+reactivity control material,tech:reactivity-control-material,material,llm_inferred
+reactivity control medium,tech:reactivity-control-medium,material,llm_inferred
+reactivity management material,tech:reactivity-management-material,fuel,llm_inferred
+reactor auxiliary equipment,tech:reactor-auxiliary-equipment,component,llm_inferred
+reactor can,tech:reactor-can,component,source_document
+reactor cavity air cooling system,tech:reactor-cavity-cooling-system,system,source_document
+reactor chemistry control,tech:reactor-chemistry-control,system,llm_inferred
+reactor control and protection system,tech:reactor-control-and-protection-system,instrumentation_control,source_document
+reactor coolant,tech:reactor-coolant,material,llm_inferred
+reactor coolant pressure relief system,tech:reactor-coolant-pressure-relief-system,system,source_document
+reactor coolant system auxiliary material,tech:reactor-coolant-system-auxiliary-material,material,llm_inferred
+reactor coolant system components,tech:reactor-coolant-system-components,component,llm_inferred
+reactor cooling system,tech:reactor-cooling-system,system,llm_inferred
+reactor core,tech:reactor-core,system,llm_inferred
+reactor core component,tech:reactor-core-component,component,llm_inferred
+reactor core design,tech:reactor-core-design,manufacturing,llm_inferred
+reactor core material,tech:reactor-core-material,material,llm_inferred
+reactor core thermal hydraulic design,tech:reactor-core-thermal-hydraulic-design,process,llm_inferred
+reactor design and adaptation study,tech:reactor-design-and-adaptation-study,software_method,llm_inferred
+reactor design and analysis software,tech:reactor-design-and-analysis-software,software_method,llm_inferred
+reactor design engineering,tech:reactor-design-engineering-services,process,source_document
+reactor design verification and validation v v,tech:reactor-design-verification-and-validation,software_method,llm_inferred
+reactor emergency shutdown actuators,tech:reactor-emergency-shutdown-actuators,component,source_document
+reactor enclosure system res,tech:reactor-enclosure-system-res,system,source_document
+reactor heat removal system,tech:reactor-heat-removal-system,system,source_document
+reactor mechanical components,tech:reactor-mechanical-equipment,component,llm_inferred
+reactor module transport,tech:reactor-module-transport,manufacturing,source_document
+reactor operations and maintenance,tech:reactor-operations-and-maintenance,process,llm_inferred
+reactor overpressure protection system,tech:reactor-overpressure-protection-system,system,source_document
+reactor physics and thermal fluid design codes,tech:reactor-physics-and-thermal-fluid-design-codes,software_method,source_document
+reactor physics experimental verification,tech:reactor-physics-experimental-verification,process,llm_inferred
+reactor physics testing methodology,tech:reactor-physics-testing-methodology,software_method,llm_inferred
+reactor pit cooling system,tech:reactor-pit-cooling-system,system,source_document
+reactor pool,tech:reactor-pool,component,source_document
+reactor pressure management components,tech:reactor-pressure-management-components,component,llm_inferred
+reactor protection system rps,tech:reactor-protection-system-rps,instrumentation_control,source_document
+reactor recirculation valves,tech:reactor-recirculation-valves,component,source_document
+reactor refueling device,tech:reactor-refueling-device,component,source_document
+reactor room with steel lined tank,tech:reactor-room-with-steel-lined-tank,system,source_document
+reactor safety component,tech:reactor-safety-component,component,llm_inferred
+reactor safety valves,tech:reactor-safety-valves,component,source_document
+reactor startup component,tech:reactor-startup-component,component,llm_inferred
+reactor structural alloy,tech:reactor-structural-alloy,material,llm_inferred
+reactor structural components,tech:reactor-structural-components,component,llm_inferred
+reactor structural material,tech:reactor-structural-material,material,llm_inferred
+reactor support structure,tech:reactor-support-structure,component,llm_inferred
+reactor system dynamics simulation codes,tech:reactor-system-dynamics-simulation-codes,software_method,llm_inferred
+reactor testing and validation equipment,tech:reactor-testing-and-validation-equipment,component,llm_inferred
+reactor thermal fluid simulation,tech:reactor-thermal-fluid-simulation,software_method,llm_inferred
+reactor trip prevention system,tech:reactor-trip-prevention-system,instrumentation_control,source_document
+reactor vent valves,tech:reactor-vent-valves,component,source_document
+reactor vessel auxiliary cooling system,tech:reactor-vessel-auxiliary-cooling-system,system,source_document
+reactor vessel fabrication,tech:reactor-vessel-fabrication,manufacturing,source_document
+reactor vessel internals,tech:reactor-vessel-internals,component,llm_inferred
+reactor vessel passive cooling system,tech:reactor-vessel-passive-cooling-system,system,source_document
+recompression brayton cycle,tech:recompression-brayton-cycle,system,source_document
+recuperator heat exchanger,tech:recuperator-heat-exchanger,component,source_document
+redundant consumer grade electronics,tech:redundant-consumer-grade-electronics,instrumentation_control,source_document
+redundant hard wired monitoring and control systems,tech:redundant-hard-wired-monitoring-and-control-systems,instrumentation_control,source_document
+redundant shutdown system,tech:redundant-shutdown-system,system,source_document
+reference electrode technology for molten salt,tech:reference-electrode-technology-for-molten-salt,instrumentation_control,llm_inferred
+refractory brick forming and firing process,tech:refractory-brick-forming-and-firing-process,manufacturing,llm_inferred
+refractory ceramic fiber or insulating castable material,tech:refractory-ceramic-fiber-or-insulating-castable-material,material,llm_inferred
+refractory ceramic material,tech:refractory-ceramic,material,llm_inferred
+regenerator,tech:regenerator,component,llm_inferred
+regulatory compliance documentation,tech:regulatory-compliance-documentation,software_method,llm_inferred
+regulatory compliance framework,tech:regulatory-compliance-framework,manufacturing,llm_inferred
+regulatory review process,tech:regulatory-review-process,software_method,llm_inferred
+regulatory submission,tech:regulatory-submission,software_method,llm_inferred
+reinforced concrete containment structure,tech:reinforced-concrete-containment-structure,component,source_document
+reinforced concrete lining,tech:reinforced-concrete-lining,component,llm_inferred
+reinforced concrete or steel structural fabrication,tech:reinforced-concrete-or-steel-structural-fabrication,component,llm_inferred
+reliability and dynamic analysis,tech:reliability-and-dynamic-analysis,system,llm_inferred
+remote monitoring and operation,tech:remote-monitoring-and-operation,instrumentation_control,source_document
+removable reactor screen,tech:removable-reactor-screen,component,source_document
+replaceable core cartridge module,tech:replaceable-core-cartridge-module,component,source_document
+representative core test section design,tech:representative-core-test-section-design,software_method,llm_inferred
+residual heat removal heat exchanger,tech:residual-heat-removal-heat-exchanger,component,source_document
+robust control design methodology,tech:robust-control-design-methodology,instrumentation_control,llm_inferred
+rod control and position indication system,tech:rod-control-and-position-indication-system,instrumentation_control,llm_inferred
+rod position monitoring system,tech:rod-position-monitoring-system,instrumentation_control,source_document
+rod structural cladding and guide tube,tech:rod-structural-cladding-and-guide-tube,component,llm_inferred
+rolling element bearings,tech:rolling-element-bearings,component,llm_inferred
+rotating disk method for uranium recovery,tech:rotating-disk-method-for-uranium-recovery,process,source_document
+rotating machinery bearing,tech:rotating-machinery-bearing,component,llm_inferred
+rotating machinery component,tech:rotating-machinery-component,component,llm_inferred
+rotating shaft and bearing assembly,tech:rotating-shaft-and-bearing-assembly,component,llm_inferred
+rotordynamics and vibration analysis,tech:rotordynamics-and-vibration-analysis,component,llm_inferred
+rpv off gas system,tech:rpv-off-gas-system,system,source_document
+sa 508 grade 3 steel,tech:sa-508-grade-3-class-1-steel,material,source_document
+sa533 steel,tech:sa533-steel,material,source_document
+sa533b sa508 steel,tech:sa533b-sa508-steel,material,source_document
+sacrificial corium absorbing material,tech:sacrificial-corium-absorbing-material,system,llm_inferred
+safety analysis and reliability assessment,tech:safety-analysis-and-reliability-assessment,system,llm_inferred
+safety analysis and transient verification,tech:safety-analysis-and-transient-verification,system,llm_inferred
+safety assessment methodology,tech:safety-assessment-methodology,software_method,llm_inferred
+safety automation system,tech:safety-automation-system,instrumentation_control,source_document
+safety case documentation,tech:safety-justification-documentation,software_method,source_document
+safety injection system,tech:safety-injection-system,system,source_document
+safety integrity level analysis methodology,tech:safety-integrity-level-analysis-methodology,instrumentation_control,llm_inferred
+safety logic design and formal verification,tech:safety-logic-design-and-formal-verification,instrumentation_control,llm_inferred
+safety monitoring system,tech:safety-monitoring-system,instrumentation_control,llm_inferred
+safety qualification and certification testing,tech:safety-qualification-and-certification-testing,instrumentation_control,llm_inferred
+safety qualification and pra based certification,tech:safety-qualification-and-pra-based-certification,instrumentation_control,llm_inferred
+safety structure,tech:safety-structure,component,llm_inferred
+safety system,tech:safety-system,system,llm_inferred
+salt chemistry monitoring,tech:salt-chemistry-monitoring,instrumentation_control,source_document
+salt manufacturing and purification,tech:highly-purified-salt-production,process,source_document
+salt production facility,tech:salt-production-facility,manufacturing,source_document
+salt purification and chemistry control,tech:salt-purification-and-chemistry-control,process,source_document
+sample sectioning and preparation,tech:sample-sectioning-and-preparation,process,llm_inferred
+seakeeping and hydrodynamic analysis,tech:seakeeping-and-hydrodynamic-analysis,component,llm_inferred
+seal dynamic analysis and rotor stability modelling,tech:seal-dynamic-analysis-and-rotor-stability-modelling,component,llm_inferred
+seal face materials carbon ceramic or surface textured composites,tech:seal-face-materials-carbon-ceramic-or-surface-textured-composites,component,llm_inferred
+seal performance and wear qualification testing,tech:seal-performance-and-wear-qualification-testing,component,llm_inferred
+sealed below grade containment,tech:sealed-below-grade-containment,system,source_document
+sealed hatch and door mechanisms,tech:sealed-hatch-and-door-mechanisms,component,llm_inferred
+sealed liquid metal reservoir and channel,tech:sealed-liquid-metal-reservoir-and-channel,component,llm_inferred
+sealed reactor cavity,tech:sealed-reactor-cavity,system,source_document
+sealed test vessels mini canisters,tech:sealed-test-vessels-mini-canisters,process,llm_inferred
+secondary containment component,tech:secondary-containment-component,component,llm_inferred
+secondary coolant loop,tech:secondary-coolant-loop,system,source_document
+secondary heat exchanger,tech:secondary-heat-exchanger,component,source_document
+secondary loop isolation system,tech:secondary-loop-isolation-system,system,source_document
+secondary molten salt heat transfer system,tech:secondary-molten-salt-heat-transfer-system,system,source_document
+seismic design analysis,tech:seismic-design-analysis,software_method,source_document
+seismic interaction and fluid structure coupling analysis,tech:seismic-interaction-and-fluid-structure-coupling-analysis,software_method,llm_inferred
+self powered neutron flux detectors,tech:self-powered-neutron-flux-detectors,instrumentation_control,source_document
+self pressurized integral primary circuit,tech:self-pressurized-integral-primary-circuit,system,source_document
+semiconductor thermoelectric material,tech:semiconductor-thermoelectric-material,material,llm_inferred
+sensor calibration and qualification testing,tech:sensor-calibration-and-qualification-testing,instrumentation_control,llm_inferred
+separate effects testing for heat pipes,tech:separate-effects-testing-for-heat-pipes,process,source_document
+separation columns and chromatographic media,tech:separation-columns-and-chromatographic-media,system,llm_inferred
+series production of primary modules,tech:series-production-of-primary-modules,manufacturing,source_document
+severe accident management system sams,tech:severe-accident-management-system,system,llm_inferred
+severe accident simulation and corium property analysis,tech:severe-accident-simulation-and-corium-property-analysis,system,llm_inferred
+shielded coffer dam,tech:shielded-coffer-dam,component,source_document
+shielded emi emp cables,tech:shielded-emi-emp-cables,component,source_document
+shielded fuel fabrication,tech:shielded-fuel-fabrication,manufacturing,source_document
+shielding and thermal analysis design,tech:shielding-and-thermal-analysis-design,process,llm_inferred
+ship style steel plate construction,tech:ship-style-steel-plate-construction,manufacturing,source_document
+shotcrete application,tech:shotcrete-application-technique,process,llm_inferred
+shutdown mechanism,tech:shutdown-mechanism,component,source_document
+sic chemical vapour deposition and sintering,tech:sic-chemical-vapour-deposition-and-sintering,manufacturing,llm_inferred
+sic composite tube testing,tech:sic-composite-tube-testing,process,source_document
+sic fibre production and preform forming,tech:sic-fibre-production-and-preform-forming,material,llm_inferred
+sic fibre production and preform weaving,tech:sic-fibre-production-and-preform-weaving,material,llm_inferred
+signal conditioning and data acquisition system,tech:instrumentation-system,instrumentation_control,llm_inferred
+signal processing and alarm electronics,tech:signal-processing-and-alarm-electronics,instrumentation_control,llm_inferred
+signal processing and pattern recognition algorithms lpc svm spectral analysis,tech:signal-processing-and-pattern-recognition-algorithms-lpc-svm-spectral-analysis,instrumentation_control,llm_inferred
+signal transmission component,tech:signal-transmission-component,component,llm_inferred
+silica optical fiber,tech:silica-optical-fiber,instrumentation_control,llm_inferred
+silicon,tech:silicon,material,llm_inferred
+silicon carbide composite cladding,tech:silicon-carbide-composite-cladding,material,source_document
+silicon carbide composite rods,tech:silicon-carbide-composite-rods,material,source_document
+silicon carbide neutron flux monitors,tech:silicon-carbide-neutron-flux-monitors,instrumentation_control,source_document
+silicon carbide sic,tech:silicon-carbide-sic,material,source_document
+silicon carbide sic fuel tube,tech:silicon-carbide-sic-fuel-tube,component,source_document
+silicon carbide sic sleeves,tech:silicon-carbide-sic-sleeves,component,source_document
+silicon powder,tech:silicon-powder,fuel,llm_inferred
+silumin matrix,tech:silumin-matrix,material,source_document
+single batch fuel management,tech:single-batch-fuel-management,process,source_document
+single crystal and directionally solidified blade casting,tech:single-crystal-and-directionally-solidified-blade-casting,manufacturing,llm_inferred
+single loop nsss configuration,tech:single-loop-nsss-configuration,system,source_document
+single loop semi integral configuration,tech:single-loop-semi-integral-configuration,system,source_document
+single module non nuclear validation mock up,tech:single-module-non-nuclear-validation-mock-up,software_method,source_document
+single walled twisted tube steam generator,tech:single-walled-twisted-tube-steam-generator,component,source_document
+sintering additives carbon metallic or oxide,tech:sintering-additives-carbon-metallic-or-oxide,material,llm_inferred
+site specific seismic hazard characterization data,tech:site-specific-seismic-hazard-characterization-data,software_method,llm_inferred
+slowpoke 2 research reactor,tech:slowpoke-2-research-reactor,system,source_document
+small absorber ball shutdown system,tech:small-absorber-ball-system,component,source_document
+smr smart net zero city control and simulator centre,tech:smr-smart-net-zero-city-control-and-simulator-centre,system,source_document
+sodium air heat exchanger testing,tech:sodium-air-heat-exchanger-testing,manufacturing,source_document
+sodium chemistry management,tech:sodium-chemistry-management,process,source_document
+sodium fire mitigation design,tech:sodium-fire-mitigation-design,system,source_document
+sodium fluoride salt,tech:sodium-fluoride-salt,material,source_document
+sodium heat pipes,tech:sodium-heat-pipes,component,source_document
+sodium hydrolysis,tech:sodium-hydrolysis,process,source_document
+sodium metal,tech:sodium-metal,material,llm_inferred
+sodium testing facility,tech:sodium-testing-facility,manufacturing,source_document
+sodium to nitrogen heat exchanger,tech:sodium-to-nitrogen-heat-exchanger,component,source_document
+solar salt loop,tech:solar-salt-loop,system,source_document
+soldering and bonding process,tech:soldering-and-bonding-process,manufacturing,llm_inferred
+solid moderator,tech:solid-moderator,material,llm_inferred
+solid nuclear fuel,tech:solid-nuclear-fuel,fuel,llm_inferred
+solid oxide electrolysis cell soec,tech:solid-oxide-electrolysis-cell-soec,system,source_document
+solid oxide fuel cell sofc stack fabrication,tech:solid-oxide-fuel-cell-sofc-stack-fabrication,system,llm_inferred
+solid state heat conduction system,tech:solid-state-heat-conduction-system,system,source_document
+solid state power conversion system,tech:solid-state-power-conversion-system,component,llm_inferred
+solid waste solidification and packaging,tech:solid-waste-solidification-and-packaging,process,source_document
+solution treatment and ageing heat treatment cycle,tech:solution-treatment-and-ageing-heat-treatment-cycle,manufacturing,llm_inferred
+source strength and stochastic startup analysis,tech:source-strength-and-stochastic-startup-analysis,software_method,llm_inferred
+space reactor design,tech:space-reactor-design,system,source_document
+spacer grid or wire wrap,tech:spacer-grid-or-wire-wrap,component,llm_inferred
+specialized structural materials,tech:special-materials-development,material,source_document
+spent candu reactor fuel,tech:spent-candu-reactor-fuel,fuel,source_document
+spent fuel cooling system,tech:spent-fuel-cooling-system,system,source_document
+spent fuel handling and storage,tech:spent-fuel-handling-and-storage,process,source_document
+spent fuel handling within vessel,tech:spent-fuel-handling-within-vessel,process,source_document
+spent fuel management equipment,tech:spent-fuel-management-equipment,component,llm_inferred
+spent fuel pool cooling and clean up system,tech:spent-fuel-pool-cooling-and-clean-up-system,system,source_document
+spent fuel rack structure,tech:spent-fuel-rack-structure,component,llm_inferred
+spent fuel storage cask,tech:spent-fuel-storage-cask,component,source_document
+spent fuel storage drum,tech:spent-fuel-storage-drum,component,source_document
+spent fuel storage facility,tech:spent-fuel-storage-facility,system,source_document
+spent fuel storage vaults,tech:spent-fuel-storage-vaults,component,source_document
+spent nuclear fuel,tech:spent-nuclear-fuel-assemblies,fuel,source_document
+ssl dynco code,tech:ssl-dynco-code,software_method,source_document
+stainless steel,tech:stainless-steel,material,source_document
+stainless steel cladding,tech:stainless-steel-cladding,material,source_document
+stainless steel fuel cladding,tech:stainless-steel-fuel-cladding,material,source_document
+stainless steel structural rod body,tech:stainless-steel-structural-rod-body,component,llm_inferred
+stainless steel tube cold drawing and annealing,tech:stainless-steel-tube-cold-drawing-and-annealing,manufacturing,llm_inferred
+standard design approval,tech:standard-design-approval,software_method,source_document
+standard light water reactor fuel supply chain,tech:standard-light-water-reactor-fuel-supply-chain,process,source_document
+star reactor design specifications geometry fuel coolant parameters,tech:star-reactor-design-specifications-geometry-fuel-coolant-parameters,software_method,llm_inferred
+static fuelled molten salt fuel,tech:static-fuelled-molten-salt-fuel,fuel,source_document
+steam boiler,tech:steam-boiler,component,source_document
+steam condenser,tech:steam-condenser,component,source_document
+steam conditioning component,tech:steam-conditioning-component,component,llm_inferred
+steam separators,tech:steam-separators,component,source_document
+steam sparger and condensation management system,tech:steam-sparger-and-condensation-management-system,component,llm_inferred
+steam system control valve,tech:steam-system-control-valve,component,llm_inferred
+steam to steam reboiler,tech:steam-to-steam-reboiler,component,source_document
+steam turbine generator,tech:steam-turbine-generator,component,source_document
+steel,tech:steel,material,llm_inferred
+steel plate composite material,tech:steel-plate-composite-material,manufacturing,llm_inferred
+steel pressure containment,tech:steel-pressure-containment,system,source_document
+steel reinforcement rebar,tech:steel-reinforcement-rebar,material,llm_inferred
+stem sealed valve,tech:stem-sealed-valve,component,llm_inferred
+stirling engine,tech:stirling-engine,component,source_document
+storage battery,tech:storage-battery,component,source_document
+structural alloy,tech:structural-alloy,material,llm_inferred
+structural alloy encasement,tech:structural-alloy-encasement,material,llm_inferred
+structural alloy pipe or channel e g stainless steel nickel alloy,tech:structural-alloy-pipe-or-channel-e-g-stainless-steel-nickel-alloy,component,llm_inferred
+structural and mechanical analysis methods,tech:structural-and-mechanical-analysis-methods,software_method,llm_inferred
+structural design and finite element analysis,tech:structural-design-and-finite-element-analysis,manufacturing,llm_inferred
+structural engineering design,tech:structural-engineering-design,manufacturing,llm_inferred
+structural protection system,tech:structural-protection-system,system,llm_inferred
+structural steel inner vessel,tech:structural-steel-inner-vessel,component,llm_inferred
+structural steel or aluminium outer shell,tech:structural-steel-or-aluminium-outer-shell,component,llm_inferred
+subcritical reactor core,tech:subcritical-reactor-core,system,source_document
+subscale reactor simulator,tech:subscale-reactor-simulator,component,source_document
+subscale simulator testing,tech:subscale-simulator-testing,process,source_document
+substitute alloying elements ni mo cr ti,tech:substitute-alloying-elements-ni-mo-cr-ti,material,llm_inferred
+superconducting accelerator magnets,tech:superconducting-accelerator-magnets,component,llm_inferred
+superconducting rf cavities,tech:superconducting-rf-cavities,component,llm_inferred
+superconducting wire and magnet fabrication,tech:superconducting-wire-and-magnet-fabrication,component,llm_inferred
+supercritical carbon dioxide sco2 brayton cycle,tech:supercritical-carbon-dioxide-sco2-brayton-cycle,system,source_document
+supercritical carbon dioxide sco2 coolant,tech:supercritical-carbon-dioxide-sco2-coolant,material,source_document
+supercritical carbon dioxide turbine generator,tech:supercritical-carbon-dioxide-turbine-generator,component,source_document
+supercritical steam generation system,tech:supercritical-steam-generation-system,system,source_document
+supercritical steam generator,tech:supercritical-steam-generator,component,source_document
+supercritical working fluid,tech:supercritical-working-fluid,material,llm_inferred
+supply chain management,tech:supply-chain-management,manufacturing,source_document
+synroc polyphase titanate ceramic matrix,tech:synroc-polyphase-titanate-ceramic-matrix,process,llm_inferred
+synroc waste conditioning,tech:synroc-waste-conditioning,process,source_document
+synthetic fuel production,tech:synthetic-fuel-production,process,source_document
+system level energy and materials analysis,tech:system-level-energy-and-materials-analysis,software_method,llm_inferred
+temperature measurement and thermal management heat sink insulation,tech:temperature-measurement-and-thermal-management-heat-sink-insulation,component,llm_inferred
+temperature sensor,tech:temperature-sensor,instrumentation_control,llm_inferred
+tertiary coolant system,tech:tertiary-coolant-system,system,source_document
+test and qualification facility,tech:test-and-qualification-facility,system,llm_inferred
+test specimens salt fuel resin bitumen,tech:test-specimens-salt-fuel-resin-bitumen,process,llm_inferred
+testing and validation,tech:testing-and-validation,process,llm_inferred
+thermal convection heat transfer,tech:thermal-convection-heat-transfer,system,source_document
+thermal cutting and plate forming,tech:thermal-cutting-and-plate-forming,manufacturing,llm_inferred
+thermal energy transfer component,tech:thermal-energy-transfer-component,component,llm_inferred
+thermal hydraulic and neutronic data analysis methods,tech:thermal-hydraulic-and-neutronic-data-analysis-methods,software_method,llm_inferred
+thermal hydraulic design and optimization methods,tech:thermal-hydraulic-design-and-optimization-methods,component,llm_inferred
+thermal hydraulic design principle,tech:thermal-hydraulic-design-principle,system,llm_inferred
+thermal hydraulic experimental validation,tech:thermal-hydraulic-experimental-validation,software_method,llm_inferred
+thermal hydraulic modeling,tech:thermal-hydraulic-modeling,software_method,source_document
+thermal hydraulic neutronic coupled simulation,tech:thermal-hydraulic-neutronic-coupled-simulation,software_method,source_document
+thermal hydraulic test loop,tech:thermal-hydraulic-test-loop,software_method,source_document
+thermal insulation material,tech:thermal-insulation-material,material,llm_inferred
+thermal management component,tech:thermal-management-component,component,llm_inferred
+thermal neutron reactor,tech:thermal-neutron-reactor,system,llm_inferred
+thermal or membrane separation process,tech:thermal-or-membrane-separation-process,process,llm_inferred
+thermal radiation heat transfer,tech:thermal-radiation-heat-transfer,system,source_document
+thermal transfer testing rig,tech:thermal-transfer-testing-rig,component,source_document
+thermally controlled solid liquid separation,tech:thermally-controlled-solid-liquid-separation,system,llm_inferred
+thermo syphon heat pipe,tech:thermo-syphon-heat-pipe,component,source_document
+thermochemical water splitting cycle,tech:thermochemical-water-splitting-cycle,process,llm_inferred
+thermocouples,tech:thermocouples,instrumentation_control,source_document
+thermodynamic sorption analysis,tech:thermodynamic-sorption-analysis,component,llm_inferred
+thermoelectric generator teg,tech:thermoelectric-generator,component,source_document
+thermoelectric module fabrication and assembly process,tech:thermoelectric-module-fabrication-and-assembly-process,component,llm_inferred
+thermoelectric seebeck effect,tech:thermoelectric-seebeck-effect,instrumentation_control,llm_inferred
+thermohydraulic testing,tech:thermohydraulic-testing,software_method,source_document
+thermohydraulic verification loop,tech:thermohydraulic-verification-loop,software_method,source_document
+thermophysical property characterisation heat transfer friction activation,tech:thermophysical-property-characterisation-heat-transfer-friction-activation,material,llm_inferred
+thermophysical property measurement,tech:thermophysical-property-measurement,software_method,llm_inferred
+thorium,tech:thorium,fuel,llm_inferred
+thorium conversion,tech:thorium-conversion,process,source_document
+thorium fluoride thf,tech:thorium-fluoride-thf4,material,llm_inferred
+thorium nuclear fuel,tech:thorium-nuclear-fuel,fuel,llm_inferred
+thorium th 232 fertile material,tech:thorium-th-232-fertile-material,process,llm_inferred
+three loop primary circuit,tech:three-loop-primary-circuit,system,source_document
+three phase power supply and frequency control,tech:three-phase-power-supply-and-frequency-control,component,llm_inferred
+ti au barrier and bonding layer,tech:ti-au-barrier-and-bonding-layer,material,llm_inferred
+tin sn,tech:tin-sn,material,llm_inferred
+titanium alloy grade 1 2 7 or 12 tube stock,tech:titanium-alloy-grade-1-2-7-or-12-tube-stock,component,llm_inferred
+titanium alloy heat exchanger,tech:titanium-alloy-heat-exchanger,component,source_document
+titanium brazing or welding process,tech:titanium-brazing-or-welding-process,component,llm_inferred
+titanium dioxide tio,tech:titanium-dioxide-tio2,material,llm_inferred
+top thermal shield,tech:top-thermal-shield,component,source_document
+transport load structural analysis,tech:transport-load-structural-analysis,manufacturing,llm_inferred
+transportable cartridge cask,tech:transportable-cartridge-cask,manufacturing,source_document
+transuranic waste material pu am cm,tech:transuranic-waste-material-pu-am-cm,process,llm_inferred
+transuranic waste transmutation,tech:transuranic-waste-transmutation,process,source_document
+triga leu 30 20 fuel,tech:triga-leu-30-20-fuel,fuel,source_document
+triso fuel,tech:triso-fuel,fuel,source_document
+triso fuel irradiation testing,tech:triso-fuel-irradiation-testing,process,source_document
+triso fuel qualification,tech:triso-fuel-qualification,software_method,source_document
+triso fuel recycling,tech:triso-fuel-recycling,process,source_document
+triso prismatic haleu fuel,tech:triso-prismatic-haleu-fuel,fuel,source_document
+triso x pebble fuel,tech:triso-x-pebble-fuel,fuel,source_document
+tube drawing,tech:tube-drawing-and-bending,component,llm_inferred
+tube fabrication and pressure boundary welding,tech:tube-fabrication-and-pressure-boundary-welding,component,llm_inferred
+tube fabrication sealing and salt filling,tech:tube-fabrication-sealing-and-salt-filling,component,llm_inferred
+tube twisting and helical forming,tech:tube-twisting-and-helical-forming,component,llm_inferred
+tubular heat exchanger,tech:tubular-heat-exchanger,component,llm_inferred
+tunnel excavation and lining construction,tech:tunnel-excavation-and-lining-construction,component,llm_inferred
+turbine bypass valves,tech:turbine-bypass-valves,component,source_document
+turbomachinery power conversion unit,tech:turbomachinery-power-conversion-unit,component,llm_inferred
+u 233 fissile fuel,tech:u-233-fissile-fuel,fuel,source_document
+uc spherical kernel irradiation tests,tech:uc-spherical-kernel-irradiation-tests,process,source_document
+ultrasonic or resistance welding of ribs to tube,tech:ultrasonic-or-resistance-welding-of-ribs-to-tube,component,llm_inferred
+ultrasonic phased array and wear qualification testing,tech:ultrasonic-phased-array-and-wear-qualification-testing,component,llm_inferred
+un fuel,tech:un-fuel,fuel,source_document
+un triso fuel,tech:un-triso-fuel,fuel,source_document
+underground tunnel,tech:underground-tunnel,component,source_document
+uninterruptible power supply,tech:uninterruptible-power-supply,instrumentation_control,source_document
+uo2 dispersion fuel,tech:uo2-dispersion-fuel,fuel,source_document
+uo2 fuel,tech:uo2-fuel,fuel,source_document
+uo2 gd2o3 fuel,tech:uo2-gd2o3-fuel,fuel,source_document
+upcomer,tech:upcomer,component,source_document
+uranium carbide uc2 x powder synthesis,tech:uranium-carbide-uc2-x-powder-synthesis,fuel,llm_inferred
+uranium carbide uco fuel,tech:uranium-oxycarbide-uco-fuel,fuel,source_document
+uranium carbide uco triso fuel,tech:uco-triso-fuel,fuel,source_document
+uranium chemical processing,tech:uranium-chemical-processing,process,llm_inferred
+uranium compound feed uf6 or uo2,tech:uranium-compound-feed-uf6-or-uo2,process,llm_inferred
+uranium conversion uf6 to uo2,tech:uranium-conversion-uf6-to-uo2,fuel,llm_inferred
+uranium dioxide uo2 fuel particles,tech:uo2-particles,fuel,source_document
+uranium dioxide uo2 triso fuel,tech:uo2-triso-fuel,fuel,source_document
+uranium hexafluoride uf6 or uranium metal feed,tech:uranium-hexafluoride-uf6-or-uranium-metal-feed,process,llm_inferred
+uranium hexafluoride uf6 production,tech:uranium-hexafluoride-uf6-production,process,llm_inferred
+uranium nitride fuel fabrication,tech:uranium-nitride-fuel-fabrication,process,source_document
+uranium ore processing and conversion,tech:uranium-ore-processing-and-conversion,fuel,llm_inferred
+uranium oxycarbide ceramic triso fuel,tech:uranium-oxycarbide-ceramic-triso-fuel,fuel,source_document
+uranium tetrafluoride uf,tech:uranium-tetrafluoride-uf4,material,llm_inferred
+uranium zirconium alloy fabrication melting casting extrusion,tech:uranium-zirconium-alloy-fabrication-melting-casting-extrusion,fuel,llm_inferred
+uranium zirconium nuclear fuel,tech:uranium-zirconium-nuclear-fuel,fuel,llm_inferred
+vacuum arc remelting or vacuum induction melting,tech:vacuum-arc-remelting-or-vacuum-induction-melting,manufacturing,llm_inferred
+vacuum evacuation and hermetic sealing process,tech:vacuum-evacuation-and-hermetic-sealing-process,component,llm_inferred
+vacuum or inert atmosphere alloying and casting,tech:vacuum-or-inert-atmosphere-alloying-and-casting,manufacturing,llm_inferred
+vacuum sealing and casing fabrication,tech:vacuum-sealing-and-casing-fabrication,component,llm_inferred
+vacuum vapor handling and collection systems,tech:vacuum-vapor-handling-and-collection-systems,process,llm_inferred
+validated thermal hydraulic correlations and empirical models,tech:validated-thermal-hydraulic-correlations-and-empirical-models,software_method,llm_inferred
+valve body casting machining and double valve body assembly,tech:valve-body-casting-machining-and-double-valve-body-assembly,component,llm_inferred
+variable back pressure blade and disk design,tech:variable-back-pressure-blade-and-disk-design,component,llm_inferred
+vented low pressure containment,tech:vented-low-pressure-containment,system,source_document
+ventilation system,tech:ventilation-system,system,source_document
+venting device porous plug capillary tubes check valve,tech:venting-device-porous-plug-capillary-tubes-check-valve,component,llm_inferred
+vertical dry storage,tech:vertical-dry-storage,system,source_document
+vessel cooling system,tech:vessel-cooling-system,system,source_document
+vessel replacement procedure,tech:vessel-replacement-procedure,manufacturing,source_document
+vibration and acoustic sensors accelerometers piezoelectric transducers,tech:vibration-and-acoustic-sensors-accelerometers-piezoelectric-transducers,instrumentation_control,llm_inferred
+virtual modeling and simulation,tech:virtual-modeling-and-simulation,software_method,llm_inferred
+waste management system,tech:waste-disposal,process,llm_inferred
+waste stream characterization and pretreatment,tech:waste-stream-characterization-and-pretreatment,process,llm_inferred
+waste treatment and solidification,tech:waste-treatment-and-solidification,process,source_document
+water and gas injection cooling system,tech:water-and-gas-injection-cooling-system,system,llm_inferred
+water based coolant,tech:water-based-coolant,material,llm_inferred
+water chemistry control and purification,tech:water-steam-chemistry-control-and-purification,component,llm_inferred
+water chemistry monitoring conductivity ph ionic speciation,tech:water-chemistry-monitoring-conductivity-ph-ionic-speciation,instrumentation_control,llm_inferred
+water filled pool containment,tech:water-filled-pool-containment,system,source_document
+water h2o feed,tech:water-h2o-feed,process,llm_inferred
+water storage tank,tech:water-storage-tank,system,llm_inferred
+water treatment and purification,tech:water-treatment-system,system,llm_inferred
+wear resistant coatings plasma spray detonation gun crc nicr,tech:wear-resistant-coatings-plasma-spray-detonation-gun-crc-nicr,component,llm_inferred
+weld procedure qualification and non destructive inspection,tech:weld-procedure-qualification-and-non-destructive-inspection,manufacturing,llm_inferred
+welding,tech:welding,manufacturing,llm_inferred
+welding power sources and process control systems,tech:welding-power-sources-and-process-control-systems,manufacturing,llm_inferred
+wimsd4 code,tech:wimsd4-code,software_method,source_document
+zirconium,tech:zirconium,material,llm_inferred
+zirconium alloy,tech:zirconium-alloy-cladding,material,source_document
+zirconium alloy e110,tech:zirconium-alloy-e110,material,source_document
+zirconium alloy melting and fabrication,tech:zirconium-alloy-melting-and-fabrication,material,llm_inferred
+zirconium alloy tube cold drawing and annealing,tech:zirconium-alloy-tube-cold-drawing-and-annealing,material,llm_inferred
+zirconium matrix,tech:zirconium-matrix,material,source_document
+zirconium metal and alloying elements sn fe cr ni,tech:zirconium-metal-and-alloying-elements-sn-fe-cr-ni,material,llm_inferred
+zirconium niobium alloy,tech:zirconium-niobium-alloy,material,source_document
+zirconium or yttrium metal,tech:zirconium-or-yttrium-metal,material,llm_inferred
+zirconium redox stabilizer,tech:zirconium-redox-stabilizer,material,source_document
+zirconium silicide neutron reflector,tech:zirconium-silicide-neutron-reflector,material,source_document
+zirconium silicide reflector material irradiation,tech:zirconium-silicide-reflector-material-irradiation,process,source_document
+zoned enrichment,tech:zoned-enrichment,process,source_document
+zro2 reflector,tech:zro2-reflector,material,source_document

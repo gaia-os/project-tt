@@ -1,0 +1,248 @@
+name,id_a,id_b,score_a,score_b
+7lif thf4 blanket salt,tech:7lif-thf4-blanket-salt,tech:7lif-thf4-blanket-salt,0.016,0.01
+7lif uf4 fuel salt,tech:7lif-uf4-fuel-salt,tech:7lif-uf4-fuel-salt,0.008,0.01
+a 60 antifreeze,tech:a-60-antifreeze,tech:a-60-antifreeze,0.008,0.01
+additive manufacturing of fcm fuel,tech:additive-manufacturing-of-fcm-fuel,tech:additive-manufacturing-of-fcm-fuel,0.014,0.01
+advanced process control system,tech:advanced-process-control-system,tech:advanced-process-control-system,0.016,0.055
+aero derivative turbomachinery,tech:aero-derivative-turbomachinery,tech:aero-derivative-turbomachinery,0.008,0.01
+air cooled heat exchanger,tech:air-cooled-heat-exchanger,tech:air-cooled-heat-sink,0.122,0.221
+air cooled spent fuel storage,tech:air-cooled-spent-fuel-storage,tech:air-cooled-spent-fuel-storage,0.016,0.01
+alloy 690,tech:alloy-690,tech:alloy-690,0.059,0.908
+alloy 800h,tech:alloy-800h,tech:alloy-800h,0.384,0.882
+amphora shaped inner vessel,tech:amphora-shaped-inner-vessel,tech:amphora-shaped-inner-vessel,0.008,0.01
+argon cover gas system,tech:argon-cover-gas-system,tech:argon-cover-gas-system,0.8,0.027
+atmospheric pressure reactor vessel,tech:atmospheric-pressure-reactor-vessel,tech:atmospheric-pressure-reactor-vessel,0.016,0.01
+austenitic stainless steel cladding,tech:austenitic-stainless-steel-cladding,tech:austenitic-stainless-steel-cladding,0.008,0.44
+automated control system,tech:automated-control-system,tech:automated-control-system,0.175,0.711
+automatic depressurization system,tech:automatic-depressurization-system,tech:automatic-depressurization-system,0.04,0.019
+autonomous consensus steering electronics,tech:autonomous-consensus-steering-electronics,tech:autonomous-consensus-steering-electronics,0.008,0.01
+back pressure steam turbine,tech:back-pressure-steam-turbine,tech:back-pressure-steam-turbine,0.008,0.01
+bayonet heat exchanger pressure channels,tech:bayonet-heat-exchanger-pressure-channels,tech:bayonet-heat-exchanger-pressure-channels,0.008,0.01
+bismuth telluride thermoelectric modules,tech:bismuth-telluride-thermoelectric-modules,tech:bismuth-telluride-thermoelectric-modules,0.008,0.01
+boron carbide b4c control rods,tech:boron-carbide-b4c-control-rods,tech:boron-carbide-b4c-absorber-rods,0.171,0.173
+boron carbide shutdown assemblies,tech:boron-carbide-shutdown-assemblies,tech:boron-carbide-shutdown-assemblies,0.008,0.01
+boron free operation,tech:boron-free-operation,tech:boron-free-operation,0.008,0.029
+brayton cycle power conversion system,tech:brayton-cycle-power-conversion-system,tech:brayton-cycle-power-conversion-system,0.047,0.152
+burnable absorbers,tech:burnable-absorbers,tech:burnable-absorbers,0.161,0.232
+caisson water filling system,tech:caisson-water-filling-system,tech:caisson-water-filling-system,0.008,0.01
+calcium hydride moderator,tech:calcium-hydride-moderator,tech:calcium-hydride-moderator,0.008,0.01
+canister containment subsystem,tech:canister-containment-subsystem,tech:canister-containment-subsystem,0.008,0.01
+canned motor pump,tech:canned-motor-pump,tech:canned-motor-pump,0.078,0.096
+carbon carbon composite materials,tech:carbon-carbon-composite-materials,tech:carbon-carbon-composite-materials,0.014,0.01
+cavity flooding system,tech:cavity-flooding-system,tech:cavity-flooding-system,0.008,0.01
+central insurance absorber cia rod,tech:central-insurance-absorber-cia-rod,tech:central-insurance-absorber-cia-rod,0.008,0.01
+ceramic fuel sleeve,tech:ceramic-fuel-sleeve,tech:ceramic-fuel-sleeve,0.008,0.01
+cermet fuel,tech:cermet-fuel,tech:cermet-fuel,0.062,0.01
+chemical and volume control system cvcs,tech:chemical-and-volume-control-system-cvcs,tech:chemical-and-volume-control-system-cvcs,0.039,0.019
+chromium nickel alloy cladding,tech:chromium-nickel-alloy-cladding,tech:chromium-nickel-alloy-cladding,0.912,0.01
+civil engineering structure,tech:civil-engineering-structure,tech:civil-engineering-structure,0.0,0.0
+closed fuel cycle,tech:closed-fuel-cycle,tech:closed-fuel-cycle,0.016,0.029
+co2 secondary loop,tech:co2-secondary-loop,tech:co2-secondary-loop,0.008,0.01
+coated particle fuel,tech:coated-particle-fuel,tech:coated-particle-fuel,0.0,0.0
+coated particle fuel fabrication,tech:coated-particle-fuel-fabrication,tech:coated-fuel-particle-fabrication,0.0,0.406
+cogeneration system,tech:cogeneration-system,tech:cogeneration-system,0.031,0.01
+compact heat exchanger,tech:compact-heat-exchanger,tech:compact-heat-exchanger,0.008,0.334
+concrete biological shield,tech:concrete-biological-shield,tech:concrete-biological-shield,0.902,0.462
+concrete containment,tech:concrete-containment,tech:concrete-containment,0.069,0.056
+concrete strengthened steel modules cssms,tech:concrete-strengthened-steel-modules-cssms,tech:concrete-strengthened-steel-modules-cssms,0.008,0.01
+conjugate heat transfer analysis,tech:conjugate-heat-transfer-analysis,tech:conjugate-heat-transfer-analysis,0.844,0.228
+containment pressure and radioactivity suppression system,tech:passive-containment-suppression-system,tech:containment-pressure-and-radioactivity-suppression-system,0.016,0.01
+containment structure,tech:containment-structure,tech:confinement-structure,0.0,0.01
+control drums,tech:control-drums,tech:control-drums,0.054,0.067
+control rod drive mechanism crdm,tech:control-rod-drive-mechanism,tech:control-rod-drive-mechanism,0.448,0.805
+control rods,tech:neutron-absorber-control-rods,tech:control-rods,0.157,0.77
+conventional island,tech:conventional-island,tech:conventional-island,0.008,0.01
+conventional neutron absorber,tech:conventional-neutron-absorber,tech:conventional-neutron-absorber,0.952,0.032
+coolant purification system,tech:coolant-purification-system,tech:coolant-purification-system,0.07,0.01
+core barrel,tech:core-barrel,tech:metallic-core-barrel,0.047,0.038
+core catcher,tech:core-catcher,tech:core-catcher,0.028,0.05
+core make up tank,tech:core-make-up-tank,tech:core-make-up-tank,0.021,0.07
+criticality safety analysis,tech:criticality-safety-analysis,tech:generic-criticality-safety-analysis,0.678,0.158
+delayed neutron detection,tech:delayed-neutron-detection,tech:delayed-neutron-detection,0.008,0.779
+demineralizer package,tech:demineralizer-package,tech:demineralizer-package,0.112,0.025
+desalination,tech:desalination,tech:desalination,0.023,0.019
+diagrid structure,tech:diagrid-structure,tech:diagrid-structure,0.008,0.056
+digital twin,tech:digital-twin,tech:digital-twin,0.9,0.019
+direct reactor auxiliary cooling system dracs,tech:direct-reactor-auxiliary-cooling-system-dracs,tech:direct-reactor-auxiliary-cooling-system-dracs,0.008,0.01
+dispersion fuel,tech:dispersion-fuel,tech:dispersion-fuel,0.0,0.0
+district heating system,tech:district-heating-system,tech:district-heating-system,0.023,0.038
+diverse nuclear instrumentation systems,tech:diverse-nuclear-instrumentation-systems,tech:diverse-nuclear-instrumentation-systems,0.008,0.01
+dry cask storage,tech:dry-cask-storage,tech:dry-cask-storage-for-spent-fuel,0.109,0.13
+dual vessel configuration,tech:dual-vessel-configuration,tech:dual-vessel-configuration,0.008,0.01
+electric motor,tech:electric-motor,tech:electric-motor,0.018,0.402
+electromagnetic pump,tech:electromagnetic-pump,tech:electromagnetic-em-pump,0.0,0.598
+ethanol coolant,tech:ethanol-coolant,tech:ethanol-coolant,0.008,0.01
+eutectic gallium indium tin ega in sn coolant,tech:eutectic-gallium-indium-tin-ega-in-sn-coolant,tech:eutectic-gallium-indium-tin-ega-in-sn-coolant,0.008,0.01
+ex vessel corium retention,tech:ex-vessel-corium-retention,tech:ex-vessel-corium-retention,0.008,0.01
+factory modular fabrication,tech:factory-modular-fabrication,tech:factory-modular-fabrication,0.241,0.389
+failed fuel separator,tech:failed-fuel-separator,tech:failed-fuel-separator,0.014,0.017
+fiber optic temperature sensors,tech:fiber-optic-temperature-sensors,tech:fiber-optic-temperature-sensors,0.033,0.01
+fission gas extraction system,tech:fission-gas-purge-tubing,tech:fission-gas-extraction-system,0.016,0.017
+fluoride salt coolant,tech:fluoride-salt-coolant,tech:fluoride-salt-coolant,0.789,0.058
+forging,tech:forging,tech:metal-forging,0.525,0.342
+fuel assembly,tech:fuel-assembly,tech:fuel-assembly,0.118,0.0
+fuel compact fabrication,tech:fuel-compact-fabrication,tech:fuel-compact-fabrication,0.014,0.19
+fuel handling system,tech:fuel-handling-system,tech:fuel-handling-machine,0.064,0.143
+fuel performance modelling,tech:fuel-performance-modelling,tech:fuel-performance-modelling-and-simulation-tools,0.803,0.888
+fuel qualification,tech:fuel-qualification,tech:fuel-qualification,0.8,0.01
+fuel salt heat exchanger,tech:fuel-salt-heat-exchanger,tech:fuel-salt-heat-exchanger,0.027,0.01
+fuel transport container,tech:fuel-transport-container,tech:fuel-transport-container,0.02,0.025
+fully ceramic microencapsulated fcm fuel,tech:fully-ceramic-microencapsulated-fcm-fuel,tech:fully-ceramic-microencapsulated-fcm-fuel,0.016,0.02
+gadolinium metal,tech:gadolinium-metal,tech:gadolinium-metal,0.95,0.008
+gas circulator,tech:gas-circulator,tech:gas-circulator,0.8,0.027
+gas coolant,tech:gas-coolant,tech:gas-coolant,0.788,0.0
+gas purification system,tech:gas-purification-system,tech:gas-purification-system,0.784,0.222
+graphite block assembly,tech:graphite-block-assembly,tech:graphite-block-assembly,0.039,0.605
+guard vessel,tech:guard-vessel,tech:guard-vessel,0.075,0.029
+haleu down blending,tech:haleu-down-blending,tech:haleu-down-blending,0.404,0.01
+haleu enrichment,tech:haleu-enrichment,tech:haleu-enrichment,0.422,0.378
+haleu fuel fabrication,tech:haleu-fuel-fabrication,tech:haleu-fuel-fabrication,0.061,0.377
+haleu metallisation,tech:haleu-metallisation,tech:haleu-metallisation,0.008,0.375
+haleu supply,tech:haleu-supply,tech:haleu-supply,0.061,0.372
+haleu triso fuel,tech:haleu-triso-fuel,tech:haleu-triso-fuel,0.008,0.01
+hastelloy n alloy,tech:hastelloy-n-alloy,tech:hastelloy-n-alloy,0.073,0.783
+heat pipe,tech:heat-pipe,tech:heat-pipe,0.862,0.191
+heat pipe heat exchanger hphe,tech:heat-pipe-heat-exchanger-hphe,tech:heat-pipe-heat-exchanger-hphe,0.008,0.01
+heat treatment,tech:heat-treatment,tech:generic-heat-treatment,0.841,1.0
+heavy water moderator,tech:heavy-water-moderator,tech:heavy-water-moderator,0.016,0.02
+helium coolant,tech:helium-coolant,tech:helium-coolant,0.837,0.541
+helium purification system,tech:helium-purification-system,tech:helium-purification-system,0.803,0.497
+high assay low enriched uranium haleu,tech:haleu,tech:high-assay-low-enriched-uranium-haleu,0.469,0.472
+high speed electric motor,tech:high-speed-electric-motor,tech:high-speed-electric-motor-drive,0.905,0.406
+high temperature intermediate heat exchanger,tech:high-temperature-intermediate-heat-exchanger,tech:high-temperature-intermediate-heat-exchanger,0.008,0.01
+hot gas duct,tech:hot-gas-duct,tech:hot-gas-duct,0.023,0.019
+htp2 fuel,tech:htp2-fuel,tech:htp2-fuel,0.008,0.689
+hydro accumulators,tech:hydro-accumulators,tech:hydro-accumulators,0.008,0.136
+hydrogen production,tech:hydrogen-production,tech:hydrogen-production,0.436,0.01
+in core instrumentation,tech:in-core-instrumentation,tech:in-core-instrumentation,0.097,0.071
+in vessel pressurizer,tech:in-vessel-pressurizer,tech:in-vessel-pressurizer,0.008,0.017
+inconel alloy,tech:inconel-alloy,tech:inconel-alloy,0.334,0.772
+industrial valves,tech:industrial-valves,tech:industrial-valves,0.802,0.063
+inert gas canister storage,tech:inert-gas-canister-storage,tech:inert-gas-canister-storage,0.008,0.01
+integral crossflow preheater,tech:integral-crossflow-preheater,tech:integral-crossflow-preheater,0.008,0.01
+integral effects test iet,tech:integral-effects-test-iet,tech:integrated-effects-tests-iets,0.008,0.019
+integral forging process,tech:integral-forging-process,tech:integral-forging-process,0.008,0.047
+integral pressurizer,tech:integral-pressurizer,tech:integral-pressurizer,0.008,0.019
+integrated heat exchanger,tech:integrated-heat-exchanger,tech:integrated-heat-exchanger,0.008,0.01
+intermediate heat exchanger ihx,tech:intermediate-heat-exchanger-ihx,tech:intermediate-heat-exchanger-ihx,0.098,0.289
+iron cask containment,tech:iron-cask-containment,tech:iron-cask-containment,0.008,0.01
+isolation condenser system,tech:isolation-condenser-system,tech:isolation-condenser-system,0.008,0.01
+isotopic concentration sensors,tech:isotopic-concentration-sensors,tech:isotopic-concentration-sensors,0.637,0.01
+lead bismuth eutectic lbe alloy,tech:lead-bismuth-eutectic-lbe-alloy,tech:lead-bismuth-eutectic-lbe-alloy,0.786,0.873
+lead coolant,tech:lead-coolant,tech:lead-coolant,0.054,0.885
+leu fuel salt production,tech:leu-fuel-salt-production,tech:leu-fuel-salt-production,0.075,0.01
+liquid metal coolant,tech:liquid-metal-coolant,tech:liquid-metal-coolant,0.134,0.071
+liquid neutron absorber thermometer,tech:liquid-neutron-absorber-thermometer,tech:liquid-neutron-absorber-thermometer,0.008,0.01
+liquid sodium coolant,tech:liquid-sodium-coolant,tech:liquid-sodium-coolant,0.815,0.695
+main circulation compressor,tech:main-circulation-compressor,tech:main-circulation-compressor,0.784,0.189
+mechanical control and protection system,tech:mechanical-control-and-protection-system,tech:mechanical-control-and-protection-system,0.008,0.017
+mechanically triggered emergency cooling system,tech:mechanically-triggered-emergency-cooling-system,tech:mechanically-triggered-emergency-cooling-system,0.008,0.01
+metal and water shielding tank,tech:metal-and-water-shielding-tank,tech:metal-and-water-shielding-tank,0.016,0.019
+metal hydride moderator,tech:metal-hydride-moderator,tech:metal-hydride-moderator,0.02,0.01
+metallic thorium fuel,tech:metallic-thorium-fuel,tech:metallic-thorium-fuel,0.008,0.01
+metallic u zr alloy fuel,tech:metallic-u-zr-alloy-fuel,tech:metallic-u-zr-alloy-fuel,0.031,0.434
+metamic neutron absorber,tech:metamic-neutron-absorber,tech:metamic-neutron-absorber,0.008,0.01
+molten salt fuel fabrication,tech:molten-salt-fuel-fabrication,tech:molten-salt-fuel-fabrication,0.074,0.01
+molten salt monitoring tools,tech:molten-salt-monitoring-tools,tech:molten-salt-monitoring-tools,0.07,0.01
+molten salt test system,tech:molten-salt-test-system,tech:molten-salt-test-system,0.07,0.01
+mox ceramic cercer fuel,tech:mox-ceramic-cercer-fuel,tech:mox-ceramic-cercer-fuel,0.016,0.019
+mox fuel,tech:mox-fuel,tech:mox-fuel,0.051,0.038
+mox fuel fabrication,tech:mox-fuel-fabrication,tech:mox-fuel-fabrication,0.051,0.076
+natural circulation chimney,tech:natural-circulation-chimney,tech:natural-circulation-chimney,0.008,0.019
+natural uranium fuel,tech:natural-uranium-fuel,tech:natural-uranium-fuel,0.409,0.383
+neutron moderator,tech:neutron-moderator,tech:neutron-moderator,0.879,0.0
+neutron reflector,tech:neutron-reflector,tech:neutron-reflector,0.04,0.019
+nuclear steam supply system,tech:nuclear-steam-supply-system,tech:nuclear-steam-supply-system,0.016,0.019
+off gas management system,tech:off-gas-management-system,tech:off-gas-management-system,0.031,0.019
+once through fuel cycle,tech:once-through-fuel-cycle,tech:once-through-fuel-cycle,0.093,0.067
+once through steam generator,tech:once-through-steam-generator,tech:once-through-steam-generator,0.062,0.086
+online refueling,tech:online-refuelling,tech:online-refueling,0.07,0.063
+open fuel cycle,tech:open-fuel-cycle,tech:open-fuel-cycle,0.008,0.019
+oxygen control system,tech:oxygen-control-system,tech:oxygen-control-system,0.008,0.871
+passive containment cooling system,tech:passive-containment-cooling-system,tech:passive-containment-cooling-system,0.047,0.058
+passive core cooling system,tech:passive-core-cooling-system,tech:passive-emergency-core-cooling-system,0.008,0.048
+passive feed bleed system,tech:passive-feed-bleed-system,tech:passive-feed-bleed-system,0.008,0.01
+passive pool air cooling system,tech:passive-pool-air-cooling-system,tech:passive-pool-air-cooling-system,0.008,0.01
+passive shutdown rods,tech:passive-shutdown-rods,tech:passive-shutdown-rods,0.008,0.01
+pebble bed core,tech:pebble-bed-core,tech:pebble-bed-core,0.016,0.029
+pebble handling system,tech:pebble-handling-system,tech:pebble-handling-system,0.008,0.01
+permanent side reflector,tech:permanent-side-reflector,tech:permanent-side-reflector,0.008,0.01
+plate heat exchanger,tech:plate-heat-exchanger,tech:plate-heat-exchanger,0.016,0.019
+plutonium fuel,tech:plutonium-fuel,tech:plutonium-fuel,0.088,0.156
+pool type reactor design,tech:pool-type-reactor-design,tech:pool-type-reactor-vessel,0.016,0.029
+post irradiation examination,tech:post-irradiation-examination,tech:post-irradiation-examination,0.897,0.968
+potassium nitrate kno3,tech:potassium-nitrate-kno3,tech:potassium-nitrate-kno3,0.0,0.098
+pressure suppression containment,tech:pressure-suppression-containment,tech:pressure-suppression-containment,0.008,0.01
+pressurizer,tech:pressurizer,tech:pressurizer,0.124,0.067
+primary circuit components,tech:primary-circuit-components,tech:primary-circuit-components,0.014,0.01
+primary heat exchanger,tech:primary-heat-exchanger,tech:primary-heat-exchanger,0.055,0.056
+printed circuit heat exchanger pche,tech:printed-circuit-heat-exchanger-pche,tech:printed-circuit-heat-exchanger-pche,0.044,0.017
+probabilistic risk assessment pra,tech:probabilistic-risk-assessment-pra,tech:probabilistic-risk-assessment-pra,0.343,0.102
+protective shell,tech:protective-shell,tech:protective-shell,0.008,0.071
+pumps and valves,tech:pumps-and-valves,tech:pumps-and-valves,0.797,0.039
+pyroprocessing,tech:pyroprocessing,tech:pyroprocessing,0.082,0.081
+reactivity control system,tech:reactivity-control-system,tech:reactivity-control-system,0.026,0.01
+reactor atmosphere conditioning system,tech:reactor-atmosphere-conditioning-system,tech:reactor-atmosphere-conditioning-system,0.008,0.01
+reactor core internals,tech:reactor-core-internals,tech:reactor-core-internals,0.02,0.086
+reactor module,tech:reactor-module,tech:reactor-module,0.014,0.048
+reactor pressure vessel,tech:reactor-pressure-vessel,tech:reactor-pressure-vessel,0.518,0.532
+reactor safety injection system,tech:reactor-safety-injection-system,tech:reactor-safety-injection-system,0.008,0.01
+reactor simulator,tech:reactor-simulator,tech:reactor-simulator,0.804,0.019
+reactor vessel as spent fuel cask,tech:reactor-vessel-as-spent-fuel-cask,tech:reactor-vessel-as-spent-fuel-cask,0.008,0.01
+redox control unit,tech:redox-control-unit,tech:redox-control-unit,0.022,0.01
+refractory insulation layer,tech:refractory-insulation-layer,tech:refractory-insulation-layer,0.032,0.094
+refuelling complex,tech:refuelling-complex,tech:refuelling-complex,0.008,0.01
+reinforced concrete,tech:reinforced-concrete,tech:reinforced-concrete,0.118,0.123
+reprocessing,tech:reprocessing,tech:reprocessing,0.141,0.167
+reserve shutdown system,tech:reserve-shutdown-system,tech:reserve-shutdown-system,0.023,0.019
+safety feature component control system,tech:safety-feature-component-control-system,tech:safety-feature-component-control-system,0.008,0.01
+salt material interaction testing,tech:salt-material-interaction-testing,tech:salt-material-interaction-testing,0.146,0.01
+salt purification,tech:salt-purification,tech:salt-purification,0.792,0.872
+salt salt heat exchanger,tech:salt-salt-heat-exchanger,tech:salt-salt-heat-exchanger,0.026,0.01
+salt sco2 heat exchanger,tech:salt-sco2-heat-exchanger,tech:salt-sco2-heat-exchanger,0.008,0.01
+salt venting system,tech:salt-venting-system,tech:salt-venting-system,0.008,0.01
+scada control system,tech:scada-control-system,tech:scada-control-system,0.9,0.01
+secure vault subsystem,tech:secure-vault-subsystem,tech:secure-vault-subsystem,0.008,0.01
+seismic isolation,tech:seismic-isolation,tech:seismic-isolation,0.008,0.1
+self actuated shutdown system sass,tech:self-actuated-shutdown-system-sass,tech:self-actuated-shutdown-system-sass,0.008,0.01
+shore refuelling,tech:shore-refuelling,tech:shore-refuelling,0.008,0.01
+silicon carbide foam heat exchanger,tech:silicon-carbide-foam-heat-exchanger,tech:silicon-carbide-foam-heat-exchanger,0.008,0.01
+sodium air heat exchanger,tech:sodium-air-heat-exchanger,tech:sodium-air-heat-exchanger,0.016,0.019
+sodium leak detection,tech:sodium-leak-detection,tech:sodium-leak-detection,0.022,0.01
+sodium nitrate nano3,tech:sodium-nitrate-nano3,tech:sodium-nitrate-nano3,0.0,0.0
+sodium purification,tech:sodium-purification-system,tech:sodium-purification,0.803,0.68
+sodium salt heat exchanger,tech:sodium-salt-heat-exchanger,tech:sodium-salt-heat-exchanger,0.016,0.019
+sodium water reaction pressure relief system,tech:sodium-water-reaction-pressure-relief-system,tech:sodium-water-reaction-pressure-relief-system,0.008,0.01
+solid neutron absorber grid plates,tech:solid-neutron-absorber-grid-plates,tech:solid-neutron-absorber-grid-plates,0.008,0.01
+soluble boron reactivity control,tech:soluble-boron,tech:soluble-boron-reactivity-control,0.507,0.038
+spark plasma sintering,tech:spark-plasma-sintering,tech:spark-plasma-sintering,0.953,0.834
+spent fuel pool,tech:spent-fuel-pool,tech:spent-fuel-pool,0.097,0.137
+spent fuel pool cooling system,tech:spent-fuel-pool-cooling-system,tech:spent-fuel-pool-cooling-system,0.022,0.019
+spent fuel storage system,tech:spent-fuel-storage-system,tech:spent-fuel-storage-system,0.023,0.0
+starting neutron source,tech:starting-neutron-source,tech:starting-neutron-source,0.014,0.017
+steam dryer,tech:steam-dryer,tech:steam-dryer,0.008,0.01
+steam generator,tech:steam-generator,tech:steam-generator,0.198,0.559
+steam turbine,tech:steam-turbine,tech:steam-turbine,0.155,0.132
+surface treatment,tech:surface-treatment,tech:surface-treatment,0.91,0.024
+test qualification loop,tech:test-qualification-loop,tech:test-qualification-loop,0.008,0.01
+thermal testing,tech:thermal-testing,tech:thermal-testing,0.852,0.0
+thorium blanket salt,tech:thorium-blanket-salt,tech:thorium-blanket-salt,0.008,0.01
+thorium fuel cycle,tech:thorium-fuel-cycle,tech:thorium-breeding,0.008,0.08
+transport container,tech:transport-container,tech:transport-container,0.107,0.01
+transportable reactor design,tech:transportable-reactor-design,tech:transportable-reactor-design,0.008,0.01
+triso fuel fabrication,tech:triso-fuel-fabrication,tech:triso-fuel-fabrication,0.257,0.104
+triso fuel in prismatic blocks,tech:triso-fuel-in-prismatic-blocks,tech:triso-fuel-in-prismatic-blocks,0.031,0.106
+triso pebble fuel manufacturing,tech:triso-pebble-fuel-manufacturing,tech:triso-pebble-fuel-manufacturing,0.044,0.01
+truncated fuel assembly,tech:truncated-fuel-assembly,tech:truncated-fuel-assembly,0.008,0.01
+tube bending and welding,tech:tube-bending-and-welding,tech:tube-bending-and-welding,0.128,0.548
+turbomachinery,tech:turbomachinery,tech:turbomachinery,0.0,0.0
+uranium enrichment,tech:uranium-enrichment,tech:uranium-enrichment,0.99,0.827
+uranium fuel,tech:uranium-fuel,tech:uranium-fuel,0.007,0.0
+uranium hydride fuel,tech:uranium-hydride-fuel,tech:uranium-hydride-fuel,0.008,0.889
+uranium silicide fuel,tech:uranium-silicide-fuel,tech:uranium-silicide-fuel,0.008,0.01
+uranium zirconium hydride uzrh fuel,tech:uranium-zirconium-hydride-uzrh-fuel,tech:uranium-zirconium-hydride-uzrh-fuel,0.02,0.01
+vented fuel tube,tech:vented-fuel-tube,tech:vented-fuel-tube,0.016,0.025
+waste to stable salt watss process,tech:waste-to-stable-salt-watss-process,tech:waste-to-stable-salt-watss-process,0.008,0.01
+water steam dumping system,tech:water-steam-dumping-system,tech:water-steam-dumping-system,0.008,0.01
+yttria stabilized zirconia ysz electrolyte,tech:yttria-stabilized-zirconia-ysz-electrolyte,tech:yttria-stabilized-zirconia-ysz-electrolyte,0.8,0.024
+zirconium alloy reflector,tech:zirconium-alloy-reflector,tech:zirconium-alloy-reflector,0.008,0.01

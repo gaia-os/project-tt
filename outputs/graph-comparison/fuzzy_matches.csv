@@ -1,0 +1,86 @@
+name_a,name_b,ratio
+17x17 fuel assembly,17x17 pwr fuel assembly,0.905
+2cr 1mo steel,2 cr 1mo steel,0.963
+316 stainless steel,316h stainless steel,0.974
+active magnetic bearings,active magnetic bearings ambs,0.906
+additive manufacturing am,additive manufacturing,0.936
+chromium ferritic martensitic steel,chromium ferritic martensitic steel cladding,0.886
+cold traps,cold trap,0.947
+data diodes,data diode,0.952
+digital instrumentation and control i c,digital instrumentation and control system,0.889
+digital rod control system,digital control system,0.917
+diverse actuation system,diverse actuation system das,0.923
+diverse protection system,diverse protection system dps,0.926
+emergency boration injection system,emergency boron injection system,0.955
+emergency feed water system,active emergency feed water system,0.885
+emergency heat exchanger,emergency heat exchangers ehxs,0.889
+engineering test unit etu,engineering test units etus,0.962
+filtered release vents,filtered release vent,0.977
+fine motion control rod drives,fine motion control rod drive,0.983
+fission product vent system fpvs,fission product vent system,0.915
+floating nuclear power plant,floating nuclear power plant fnpp,0.918
+fuel containment structure,double containment structure,0.889
+fuel salt storage tank,fuel salt storage tanks,0.978
+gas cooled reactor core,gas cooled fast reactor core,0.902
+gravity driven safety shutdown rod,gravity driven safety shutdown rods,0.986
+heat exchangers,heat exchanger,0.966
+hexagonal fuel assembly,hexagonal fuel assemblies,0.917
+high performance computing hpc simulation,ai high performance computing simulation,0.914
+high temperature nickel based superalloys,high temperature nickel base alloy,0.907
+in containment refueling water storage tank,in containment refueling water storage tank irwst,0.935
+in vessel transfer machine,in vessel transfer machine ivtm,0.912
+integral isolation valves,integral isolation valve,0.98
+intermediate heat transfer fluid,intermediate heat transport fluid,0.923
+korea fuel assembly kofa,korea fuel assembly,0.884
+lead cooled fast reactor core,gas cooled fast reactor core,0.912
+leak tight containment,leak tight steel containment,0.88
+liquid metallic u cr fuel,liquid metallic u cr alloy fuel,0.893
+liquid silicon infiltration lsi,liquid silicon infiltration lsi process,0.886
+loose parts and vibration monitoring system,loose parts and vibration monitoring,0.911
+magnetic bearing main blower,magnetic bearing blower,0.902
+metal fuel fabrication,metallic fuel fabrication,0.936
+mixed uranium plutonium nitride fuel,mixed uranium plutonium nitride fuel mnup,0.935
+mobile reactor system,mobile microreactor system,0.894
+moisture separator re heater,moisture separator re heater msr,0.933
+molten salt reactor component,molten salt reactor safety component,0.892
+multilayer metal concrete reactor vessel,multilayer metal concrete vessel,0.889
+passive decay heat removal,passive decay heat removal system,0.881
+passive emergency core cooling system peccs,emergency core cooling system eccs,0.883
+passive reactor caisson water flooding system,reactor caisson water flooding system,0.902
+passive residual heat removal prhr system,passive residual heat removal system,0.935
+passive safety systems,passive safety system,0.977
+passive spent fuel cooling system,passive spent fuel cooling,0.881
+plant protection system,plant protection system pps,0.92
+powder metallurgical fuel fabrication,powder metallurgical fabrication,0.928
+pressurization system,self pressurization system,0.894
+programmable logic controllers plc,programmable logic controllers,0.938
+reactor cavity air cooling system,reactor cavity cooling system,0.935
+reactor cooling system,reactor vault cooling system,0.88
+reactor heat removal system,active reactor heat removal system,0.885
+reactor pit cooling system,reactor cavity cooling system,0.909
+reactor protection system rps,reactor protection system,0.926
+reactor recirculation valves,reactor recirculation valve,0.982
+reactor safety valves,reactor safety valve,0.976
+reactor trip prevention system,reactor trip prevention system rtps,0.923
+reactor vent valves,reactor vent valve,0.973
+secondary heat exchanger,secondary heat exchanger shx,0.923
+shutdown mechanism,shutdown mechanism sdm,0.9
+silicon carbide composite cladding,silicon carbide sic composite cladding,0.944
+silicon carbide neutron flux monitors,silicon carbide neutron flux monitor,0.986
+sodium heat pipes,sodium heat pipe,0.97
+solid oxide electrolysis cell soec,solid oxide electrolysis cell,0.921
+solid state heat conduction system,solid state heat conduction,0.885
+spent fuel storage cask,spent fuel storage tank,0.913
+steam separators,steam separator,0.968
+tertiary coolant system,tertiary coolant system tcs,0.92
+thermal convection heat transfer,natural convection heat transfer,0.906
+thermal hydraulic test loop,thermal hydraulic loop,0.898
+thermo syphon heat pipe,thermosiphon heat pipes,0.913
+thermoelectric generator teg,thermoelectric generator,0.923
+titanium alloy heat exchanger,titanium alloy heat exchangers,0.983
+triso fuel,triso x fuel,0.909
+un triso fuel,uco triso fuel,0.889
+uninterruptible power supply,uninterruptible power supply ups,0.933
+uranium carbide uco fuel,uranium carbide uc fuel,0.979
+uranium dioxide uo2 triso fuel,uranium dioxide uo2 fuel,0.889
+uranium tetrafluoride uf,uranium tetrafluoride,0.933

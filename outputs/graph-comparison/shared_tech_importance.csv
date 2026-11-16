@@ -1,0 +1,248 @@
+name,score_a,score_b,delta,reach_a,reach_b
+gadolinium metal,0.95,0.008,0.942,103,1
+conventional neutron absorber,0.952,0.032,0.92,103,4
+chromium nickel alloy cladding,0.912,0.01,0.902,103,1
+scada control system,0.9,0.01,0.89,103,1
+surface treatment,0.91,0.024,0.886,103,3
+digital twin,0.9,0.019,0.881,103,2
+uranium hydride fuel,0.008,0.889,-0.881,1,100
+neutron moderator,0.879,0.0,0.879,103,0
+oxygen control system,0.008,0.871,-0.863,1,99
+thermal testing,0.852,0.0,0.852,103,0
+alloy 690,0.059,0.908,-0.849,9,102
+lead coolant,0.054,0.885,-0.831,7,99
+fuel qualification,0.8,0.01,0.79,103,1
+gas coolant,0.788,0.0,0.788,103,0
+reactor simulator,0.804,0.019,0.785,103,2
+yttria stabilized zirconia ysz electrolyte,0.8,0.024,0.776,103,3
+argon cover gas system,0.8,0.027,0.773,103,3
+gas circulator,0.8,0.027,0.773,103,3
+delayed neutron detection,0.008,0.779,-0.771,1,99
+pumps and valves,0.797,0.039,0.758,103,5
+industrial valves,0.802,0.063,0.739,103,8
+fluoride salt coolant,0.789,0.058,0.731,103,6
+hastelloy n alloy,0.073,0.783,-0.71,11,96
+htp2 fuel,0.008,0.689,-0.681,1,89
+heat pipe,0.862,0.191,0.671,103,24
+isotopic concentration sensors,0.637,0.01,0.627,98,1
+conjugate heat transfer analysis,0.844,0.228,0.616,103,30
+control rods,0.157,0.77,-0.613,23,96
+electromagnetic pump,0.0,0.598,-0.598,0,77
+main circulation compressor,0.784,0.189,0.595,103,25
+graphite block assembly,0.039,0.605,-0.566,6,77
+gas purification system,0.784,0.222,0.562,103,29
+automated control system,0.175,0.711,-0.536,26,91
+criticality safety analysis,0.678,0.158,0.52,100,21
+high speed electric motor,0.905,0.406,0.499,103,53
+alloy 800h,0.384,0.882,-0.498,62,100
+soluble boron reactivity control,0.507,0.038,0.469,79,4
+concrete biological shield,0.902,0.462,0.44,103,59
+inconel alloy,0.334,0.772,-0.438,54,96
+austenitic stainless steel cladding,0.008,0.44,-0.432,1,58
+hydrogen production,0.436,0.01,0.426,68,1
+tube bending and welding,0.128,0.548,-0.42,21,72
+coated particle fuel fabrication,0.0,0.406,-0.406,0,54
+metallic u zr alloy fuel,0.031,0.434,-0.403,4,56
+haleu down blending,0.404,0.01,0.394,64,1
+electric motor,0.018,0.402,-0.384,3,53
+haleu metallisation,0.008,0.375,-0.367,1,50
+steam generator,0.198,0.559,-0.361,27,71
+control rod drive mechanism crdm,0.448,0.805,-0.357,65,95
+compact heat exchanger,0.008,0.334,-0.326,1,44
+haleu fuel fabrication,0.061,0.377,-0.316,8,50
+haleu supply,0.061,0.372,-0.311,10,50
+helium purification system,0.803,0.497,0.306,103,64
+helium coolant,0.837,0.541,0.296,103,64
+probabilistic risk assessment pra,0.343,0.102,0.241,52,12
+intermediate heat exchanger ihx,0.098,0.289,-0.191,13,36
+forging,0.525,0.342,0.183,83,45
+fuel compact fabrication,0.014,0.19,-0.176,2,25
+uranium enrichment,0.99,0.827,0.163,103,103
+heat treatment,0.841,1.0,-0.159,103,103
+triso fuel fabrication,0.257,0.104,0.153,35,11
+factory modular fabrication,0.241,0.389,-0.148,31,42
+salt material interaction testing,0.146,0.01,0.136,23,1
+hydro accumulators,0.008,0.136,-0.128,1,18
+sodium purification,0.803,0.68,0.123,103,87
+liquid sodium coolant,0.815,0.695,0.12,103,87
+spark plasma sintering,0.953,0.834,0.119,103,102
+fuel assembly,0.118,0.0,0.118,19,0
+brayton cycle power conversion system,0.047,0.152,-0.105,6,18
+air cooled heat exchanger,0.122,0.221,-0.099,19,27
+potassium nitrate kno3,0.0,0.098,-0.098,0,13
+transport container,0.107,0.01,0.097,17,1
+seismic isolation,0.008,0.1,-0.092,1,13
+demineralizer package,0.112,0.025,0.087,18,3
+lead bismuth eutectic lbe alloy,0.786,0.873,-0.087,103,99
+fuel performance modelling,0.803,0.888,-0.085,103,100
+salt purification,0.792,0.872,-0.08,103,99
+fuel handling system,0.064,0.143,-0.079,10,18
+triso fuel in prismatic blocks,0.031,0.106,-0.075,4,11
+thorium fuel cycle,0.008,0.08,-0.072,1,9
+burnable absorbers,0.161,0.232,-0.071,21,25
+post irradiation examination,0.897,0.968,-0.071,103,103
+plutonium fuel,0.088,0.156,-0.068,13,19
+reactor core internals,0.02,0.086,-0.066,3,11
+leu fuel salt production,0.075,0.01,0.065,12,1
+molten salt fuel fabrication,0.074,0.01,0.064,10,1
+liquid metal coolant,0.134,0.071,0.063,21,9
+protective shell,0.008,0.071,-0.063,1,9
+refractory insulation layer,0.032,0.094,-0.062,5,12
+coolant purification system,0.07,0.01,0.06,11,1
+molten salt monitoring tools,0.07,0.01,0.06,11,1
+molten salt test system,0.07,0.01,0.06,11,1
+pressurizer,0.124,0.067,0.057,16,8
+cermet fuel,0.062,0.01,0.052,8,1
+core make up tank,0.021,0.07,-0.049,3,9
+diagrid structure,0.008,0.056,-0.048,1,7
+guard vessel,0.075,0.029,0.046,10,3
+haleu enrichment,0.422,0.378,0.044,66,50
+passive core cooling system,0.008,0.048,-0.04,1,5
+spent fuel pool,0.097,0.137,-0.04,13,17
+advanced process control system,0.016,0.055,-0.039,2,7
+integral forging process,0.008,0.047,-0.039,1,6
+reactor module,0.014,0.048,-0.034,2,6
+triso pebble fuel manufacturing,0.044,0.01,0.034,7,1
+printed circuit heat exchanger pche,0.044,0.017,0.027,7,2
+in core instrumentation,0.097,0.071,0.026,13,8
+natural uranium fuel,0.409,0.383,0.026,65,51
+once through fuel cycle,0.093,0.067,0.026,12,7
+reprocessing,0.141,0.167,-0.026,21,21
+mox fuel fabrication,0.051,0.076,-0.025,8,9
+once through steam generator,0.062,0.086,-0.024,8,9
+fiber optic temperature sensors,0.033,0.01,0.023,5,1
+spent fuel storage system,0.023,0.0,0.023,3,0
+steam turbine,0.155,0.132,0.023,24,16
+core catcher,0.028,0.05,-0.022,4,6
+automatic depressurization system,0.04,0.019,0.021,6,2
+boron free operation,0.008,0.029,-0.021,1,3
+cogeneration system,0.031,0.01,0.021,4,1
+dry cask storage,0.109,0.13,-0.021,14,14
+neutron reflector,0.04,0.019,0.021,6,2
+chemical and volume control system cvcs,0.039,0.019,0.02,5,2
+canned motor pump,0.078,0.096,-0.018,10,10
+fuel salt heat exchanger,0.027,0.01,0.017,4,1
+reactivity control system,0.026,0.01,0.016,4,1
+salt salt heat exchanger,0.026,0.01,0.016,4,1
+district heating system,0.023,0.038,-0.015,3,4
+reactor pressure vessel,0.518,0.532,-0.014,69,67
+closed fuel cycle,0.016,0.029,-0.013,2,3
+concrete containment,0.069,0.056,0.013,11,7
+control drums,0.054,0.067,-0.013,7,7
+mox fuel,0.051,0.038,0.013,7,4
+pebble bed core,0.016,0.029,-0.013,2,3
+pool type reactor design,0.016,0.029,-0.013,2,3
+off gas management system,0.031,0.019,0.012,4,2
+redox control unit,0.022,0.01,0.012,3,1
+sodium leak detection,0.022,0.01,0.012,3,1
+integral effects test iet,0.008,0.019,-0.011,1,2
+integral pressurizer,0.008,0.019,-0.011,1,2
+natural circulation chimney,0.008,0.019,-0.011,1,2
+open fuel cycle,0.008,0.019,-0.011,1,2
+passive containment cooling system,0.047,0.058,-0.011,6,6
+containment structure,0.0,0.01,-0.01,0,1
+metal hydride moderator,0.02,0.01,0.01,3,1
+uranium zirconium hydride uzrh fuel,0.02,0.01,0.01,3,1
+core barrel,0.047,0.038,0.009,6,4
+in vessel pressurizer,0.008,0.017,-0.009,1,2
+mechanical control and protection system,0.008,0.017,-0.009,1,2
+vented fuel tube,0.016,0.025,-0.009,2,3
+online refueling,0.07,0.063,0.007,9,7
+uranium fuel,0.007,0.0,0.007,1,0
+7lif thf4 blanket salt,0.016,0.01,0.006,2,1
+air cooled spent fuel storage,0.016,0.01,0.006,2,1
+atmospheric pressure reactor vessel,0.016,0.01,0.006,2,1
+containment pressure and radioactivity suppression system,0.016,0.01,0.006,2,1
+fuel transport container,0.02,0.025,-0.005,3,3
+reinforced concrete,0.118,0.123,-0.005,19,16
+additive manufacturing of fcm fuel,0.014,0.01,0.004,2,1
+carbon carbon composite materials,0.014,0.01,0.004,2,1
+desalination,0.023,0.019,0.004,3,2
+fully ceramic microencapsulated fcm fuel,0.016,0.02,-0.004,2,2
+heavy water moderator,0.016,0.02,-0.004,2,2
+hot gas duct,0.023,0.019,0.004,3,2
+primary circuit components,0.014,0.01,0.004,2,1
+reserve shutdown system,0.023,0.019,0.004,3,2
+failed fuel separator,0.014,0.017,-0.003,2,2
+high assay low enriched uranium haleu,0.469,0.472,-0.003,64,50
+metal and water shielding tank,0.016,0.019,-0.003,2,2
+mox ceramic cercer fuel,0.016,0.019,-0.003,2,2
+nuclear steam supply system,0.016,0.019,-0.003,2,2
+plate heat exchanger,0.016,0.019,-0.003,2,2
+sodium air heat exchanger,0.016,0.019,-0.003,2,2
+sodium salt heat exchanger,0.016,0.019,-0.003,2,2
+spent fuel pool cooling system,0.022,0.019,0.003,3,2
+starting neutron source,0.014,0.017,-0.003,2,2
+7lif uf4 fuel salt,0.008,0.01,-0.002,1,1
+a 60 antifreeze,0.008,0.01,-0.002,1,1
+aero derivative turbomachinery,0.008,0.01,-0.002,1,1
+amphora shaped inner vessel,0.008,0.01,-0.002,1,1
+autonomous consensus steering electronics,0.008,0.01,-0.002,1,1
+back pressure steam turbine,0.008,0.01,-0.002,1,1
+bayonet heat exchanger pressure channels,0.008,0.01,-0.002,1,1
+bismuth telluride thermoelectric modules,0.008,0.01,-0.002,1,1
+boron carbide b4c control rods,0.171,0.173,-0.002,22,18
+boron carbide shutdown assemblies,0.008,0.01,-0.002,1,1
+caisson water filling system,0.008,0.01,-0.002,1,1
+calcium hydride moderator,0.008,0.01,-0.002,1,1
+canister containment subsystem,0.008,0.01,-0.002,1,1
+cavity flooding system,0.008,0.01,-0.002,1,1
+central insurance absorber cia rod,0.008,0.01,-0.002,1,1
+ceramic fuel sleeve,0.008,0.01,-0.002,1,1
+co2 secondary loop,0.008,0.01,-0.002,1,1
+concrete strengthened steel modules cssms,0.008,0.01,-0.002,1,1
+conventional island,0.008,0.01,-0.002,1,1
+direct reactor auxiliary cooling system dracs,0.008,0.01,-0.002,1,1
+diverse nuclear instrumentation systems,0.008,0.01,-0.002,1,1
+dual vessel configuration,0.008,0.01,-0.002,1,1
+ethanol coolant,0.008,0.01,-0.002,1,1
+eutectic gallium indium tin ega in sn coolant,0.008,0.01,-0.002,1,1
+ex vessel corium retention,0.008,0.01,-0.002,1,1
+haleu triso fuel,0.008,0.01,-0.002,1,1
+heat pipe heat exchanger hphe,0.008,0.01,-0.002,1,1
+high temperature intermediate heat exchanger,0.008,0.01,-0.002,1,1
+inert gas canister storage,0.008,0.01,-0.002,1,1
+integral crossflow preheater,0.008,0.01,-0.002,1,1
+integrated heat exchanger,0.008,0.01,-0.002,1,1
+iron cask containment,0.008,0.01,-0.002,1,1
+isolation condenser system,0.008,0.01,-0.002,1,1
+liquid neutron absorber thermometer,0.008,0.01,-0.002,1,1
+mechanically triggered emergency cooling system,0.008,0.01,-0.002,1,1
+metallic thorium fuel,0.008,0.01,-0.002,1,1
+metamic neutron absorber,0.008,0.01,-0.002,1,1
+passive feed bleed system,0.008,0.01,-0.002,1,1
+passive pool air cooling system,0.008,0.01,-0.002,1,1
+passive shutdown rods,0.008,0.01,-0.002,1,1
+pebble handling system,0.008,0.01,-0.002,1,1
+permanent side reflector,0.008,0.01,-0.002,1,1
+pressure suppression containment,0.008,0.01,-0.002,1,1
+reactor atmosphere conditioning system,0.008,0.01,-0.002,1,1
+reactor safety injection system,0.008,0.01,-0.002,1,1
+reactor vessel as spent fuel cask,0.008,0.01,-0.002,1,1
+refuelling complex,0.008,0.01,-0.002,1,1
+safety feature component control system,0.008,0.01,-0.002,1,1
+salt sco2 heat exchanger,0.008,0.01,-0.002,1,1
+salt venting system,0.008,0.01,-0.002,1,1
+secure vault subsystem,0.008,0.01,-0.002,1,1
+self actuated shutdown system sass,0.008,0.01,-0.002,1,1
+shore refuelling,0.008,0.01,-0.002,1,1
+silicon carbide foam heat exchanger,0.008,0.01,-0.002,1,1
+sodium water reaction pressure relief system,0.008,0.01,-0.002,1,1
+solid neutron absorber grid plates,0.008,0.01,-0.002,1,1
+steam dryer,0.008,0.01,-0.002,1,1
+test qualification loop,0.008,0.01,-0.002,1,1
+thorium blanket salt,0.008,0.01,-0.002,1,1
+transportable reactor design,0.008,0.01,-0.002,1,1
+truncated fuel assembly,0.008,0.01,-0.002,1,1
+uranium silicide fuel,0.008,0.01,-0.002,1,1
+waste to stable salt watss process,0.008,0.01,-0.002,1,1
+water steam dumping system,0.008,0.01,-0.002,1,1
+zirconium alloy reflector,0.008,0.01,-0.002,1,1
+fission gas extraction system,0.016,0.017,-0.001,2,2
+primary heat exchanger,0.055,0.056,-0.001,7,6
+pyroprocessing,0.082,0.081,0.001,13,10
+civil engineering structure,0.0,0.0,0,0,0
+coated particle fuel,0.0,0.0,0,0,0
+dispersion fuel,0.0,0.0,0,0,0
+sodium nitrate nano3,0.0,0.0,0,0,0
+turbomachinery,0.0,0.0,0,0,0
