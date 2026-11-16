@@ -47,6 +47,11 @@ packages = [
 managed = true
 python-preference = "managed"
 
+[tool.uv.workspace]
+members = [
+    "infact",
+]
+
 [tool.hatch.metadata]
 allow-direct-references = true
 
