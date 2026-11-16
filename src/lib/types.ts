@@ -119,6 +119,15 @@ export interface SmrReactorDetails {
   images: SmrImageRef[];
   regulators: SmrNodeRef[];
   organisations: SmrNodeRef[];
+  /** Technologies with a direct ENABLES edge to this reactor (absent in datasets seeded before it existed). */
+  enabled_by?: (SmrNodeRef & {
+    category: string | null;
+    provenance: string[];
+    verified: boolean;
+    role: string | null;
+    quote: string | null;
+    document: string | null;
+  })[];
 }
 
 export interface SmrTechnologyDetails {

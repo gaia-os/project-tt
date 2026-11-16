@@ -297,6 +297,30 @@ const imageDocs: Document[] = [];
 const nodeDocs: Document[] = [];
 const detailDocs: Document[] = [];
 
+// Direct tech->reactor ENABLES edges per reactor, enriched with the evidence
+// (role / quote) recorded in the technology's frontmatter.
+const seededTechs = new Map(
+  techFiles.filter(({ fm }) => fm.type === 'Technology' && fm.name).map(({ fm }) => [fm.id as string, fm]),
+);
+const reactorEnabledBy = new Map<string, Document[]>();
+for (const e of graph.edges) {
+  if (e.type !== 'ENABLES' || !seededTechs.has(e.source)) continue;
+  const tech = seededTechs.get(e.source)!;
+  const evidence = (tech.enables?.reactors ?? []).find((r: Yaml) => r.id === e.target);
+  const list = reactorEnabledBy.get(e.target) ?? [];
+  list.push({
+    id: e.source,
+    name: tech.name,
+    category: CATEGORY_LABELS[tech.category] ?? tech.category ?? null,
+    provenance: e.provenance ?? [],
+    verified: evidence?.verified ?? e.verified ?? false,
+    role: evidence?.evidence?.[0]?.role ?? null,
+    quote: evidence?.evidence?.[0]?.quote ?? null,
+    document: evidence?.evidence?.[0]?.document ?? e.documents?.[0] ?? null,
+  });
+  reactorEnabledBy.set(e.target, list);
+}
+
 for (const { file, fm, body } of reactorFiles) {
   if (fm.type !== 'SMRDesign') continue;
   const iaea = fm.iaea ?? {};
@@ -450,6 +474,9 @@ for (const { file, fm, body } of reactorFiles) {
       ...(nea.entities?.organisations ?? []).map((o: Yaml) => o.id),
       ...(iaea.entities?.organisations ?? []).map((o: Yaml) => o.id),
     ]).map((id) => ({ id, name: nodeNames.get(id) ?? stripPrefix(id) })),
+    enabled_by: (reactorEnabledBy.get(fm.id) ?? []).sort(
+      (a, b) => String(a.category).localeCompare(String(b.category)) || String(a.name).localeCompare(String(b.name)),
+    ),
   });
 }
 

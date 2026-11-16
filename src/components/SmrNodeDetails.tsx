@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink, Maximize2 } from 'lucide-react';
 import {
   SmrImageRef,
@@ -194,12 +194,62 @@ function ImageGallery({ images, topic }: { images: SmrImageRef[]; topic: TopicKe
   );
 }
 
+function ReactorEnabledBy({
+  enabledBy,
+  onSelectNode,
+}: {
+  enabledBy: NonNullable<SmrReactorDetails['enabled_by']>;
+  onSelectNode?: (nodeId: string) => void;
+}) {
+  const groups = useMemo(() => {
+    const byCategory = new Map<string, typeof enabledBy>();
+    for (const e of enabledBy) {
+      const key = e.category ?? 'Other';
+      byCategory.set(key, [...(byCategory.get(key) ?? []), e]);
+    }
+    return [...byCategory.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+  }, [enabledBy]);
+
+  return (
+    <Section title={`Enabled by technologies (${enabledBy.length})`}>
+      <Accordion type="multiple" className="w-full">
+        {groups.map(([category, items]) => (
+          <AccordionItem key={category} value={category} className="border-b-0">
+            <AccordionTrigger className="py-1.5 text-sm hover:no-underline">
+              <span>
+                {category} <span className="text-xs text-gray-400 tabular-nums">({items.length})</span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent>
+              <ul className="space-y-1.5 text-xs">
+                {items.map((e) => (
+                  <li key={e.id}>
+                    <div className="flex flex-wrap items-center gap-1">
+                      <NodeLink node={e} onSelectNode={onSelectNode} />
+                      {e.verified && <span className="text-green-700" title="Quote verified in source">✓</span>}
+                      <ProvenanceBadges provenance={e.provenance} />
+                    </div>
+                    {e.role && <p className="text-gray-600">{e.role}</p>}
+                    {e.quote && <p className="ml-2 border-l-2 pl-2 italic text-gray-500">“{e.quote}”</p>}
+                  </li>
+                ))}
+              </ul>
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+    </Section>
+  );
+}
+
 function ReactorDetails({
   details,
   topic,
+  onSelectNode,
 }: {
   details: SmrReactorDetails;
   topic: TopicKey;
+  onSelectNode?: (nodeId: string) => void;
 }) {
   const [showAllSpecs, setShowAllSpecs] = useState(false);
   const specs = showAllSpecs ? details.specs : details.specs.slice(0, 8);
@@ -305,6 +355,10 @@ function ReactorDetails({
             </Button>
           )}
         </Section>
+      )}
+
+      {details.enabled_by && details.enabled_by.length > 0 && (
+        <ReactorEnabledBy enabledBy={details.enabled_by} onSelectNode={onSelectNode} />
       )}
 
       {details.classification.applications.length > 0 && (
@@ -600,7 +654,7 @@ export function SmrNodeDetails({ nodeId, topic, onSelectNode }: SmrNodeDetailsPr
   if (state === 'error' || !details) return <p className="text-sm text-red-600">Could not load details for this node.</p>;
 
   return details.kind === 'reactor' ? (
-    <ReactorDetails details={details} topic={topic} />
+    <ReactorDetails details={details} topic={topic} onSelectNode={onSelectNode} />
   ) : (
     <TechnologyDetails details={details} onSelectNode={onSelectNode} />
   );
