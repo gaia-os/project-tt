@@ -177,7 +177,19 @@ const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange, onSe
           <TabsContent value="info" className="flex-1 overflow-auto mt-0">
             {selectedNode.data.smr ? (
               <CardContent className="pt-4">
-                <SmrNodeDetails nodeId={selectedNode.id} topic={topic} onSelectNode={onSelectNode} />
+                <SmrNodeDetails
+                  nodeId={selectedNode.id}
+                  topic={topic}
+                  onSelectNode={onSelectNode}
+                  onSelectCompany={(companyId) => {
+                    fetch(
+                      `/investment-tech-tree/api/companies/${encodeURIComponent(companyId)}?topic=${topic}`,
+                    )
+                      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
+                      .then((data) => setModalCompany(data.company))
+                      .catch(() => {});
+                  }}
+                />
               </CardContent>
             ) : (
             <CardContent className="space-y-4 pt-4">

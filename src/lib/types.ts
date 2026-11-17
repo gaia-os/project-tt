@@ -175,7 +175,15 @@ export interface SmrTechnologyDetails {
     availability: string | null;
     trl_band: string | null;
     summary: string | null;
-    suppliers: { name: string; role: string | null; location: string | null; url: string | null; org_id: string | null }[];
+    suppliers: {
+      name: string;
+      role: string | null;
+      location: string | null;
+      url: string | null;
+      org_id: string | null;
+      /** Seeder-resolved: org_id exists as a company in this dataset. */
+      org_in_db?: boolean;
+    }[];
     milestones: { date: string; event: string; url?: string }[];
     scaling_factors: string[];
     /** Absent in datasets seeded before deployment evidence was carried through. */

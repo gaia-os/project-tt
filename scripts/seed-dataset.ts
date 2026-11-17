@@ -275,6 +275,9 @@ const orgFiles = listMarkdown(path.join(DATA_DIR, 'orgs')).map((f) => ({ file: f
 
 const nodeNames = new Map(graph.nodes.map((n) => [n.id as string, n.name as string]));
 const techMeta = new Map(graph.nodes.filter((n) => n.label === 'Technology').map((n) => [n.id as string, n]));
+const knownOrgIds = new Set(
+  orgFiles.filter(({ fm }) => fm.type === 'Organisation').map(({ fm }) => fm.id as string),
+);
 
 // ---------------------------------------------------------------------------
 // Reactors
@@ -567,6 +570,7 @@ for (const { fm } of techFiles) {
             location: s.location ?? null,
             url: s.url ?? null,
             org_id: s.org_id ?? null,
+            org_in_db: typeof s.org_id === 'string' && knownOrgIds.has(s.org_id),
           })),
           milestones: deployment.milestones ?? [],
           scaling_factors: deployment.scaling_factors ?? [],

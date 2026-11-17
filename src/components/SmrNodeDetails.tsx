@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink, Maximize2 } from 'lucide-react';
 import {
+  SmrDeploymentEvidence,
   SmrImageRef,
   SmrNodeDetails as SmrNodeDetailsData,
   SmrNodeRef,
@@ -27,6 +28,8 @@ interface SmrNodeDetailsProps {
   topic: TopicKey;
   /** Select another tech-tree node (only works for nodes in the current layout). */
   onSelectNode?: (nodeId: string) => void;
+  /** Open the overview for a company id (e.g. "oklo" for org:oklo). */
+  onSelectCompany?: (companyId: string) => void;
 }
 
 const humanize = (value: string) =>
@@ -56,6 +59,61 @@ const claimLabel = (claim: string) => {
   if (i < 0) return claim === 'trl_band' ? 'TRL band' : humanize(claim);
   return `${humanize(claim.slice(0, i))}: ${claim.slice(i + 1)}`;
 };
+
+const domainOf = (url: string) => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+};
+
+interface DeploymentSource {
+  n: number;
+  url: string;
+  evidence: SmrDeploymentEvidence[];
+}
+
+/**
+ * Numbered source list for the deployment section: unique URLs ordered by
+ * first appearance in evidence, then suppliers, then milestones. The same
+ * number is shown as a [n] ref next to the claim and above its source.
+ */
+function useDeploymentSources(deployment: SmrTechnologyDetails['deployment']) {
+  return useMemo(() => {
+    const byUrl = new Map<string, DeploymentSource>();
+    const add = (url?: string | null) => {
+      if (!url) return;
+      if (!byUrl.has(url)) byUrl.set(url, { n: byUrl.size + 1, url, evidence: [] });
+    };
+    for (const e of deployment?.evidence ?? []) add(e.url);
+    for (const s of deployment?.suppliers ?? []) add(s.url);
+    for (const m of deployment?.milestones ?? []) add(m.url);
+    for (const e of deployment?.evidence ?? []) {
+      if (e.url) byUrl.get(e.url)?.evidence.push(e);
+    }
+    const sources = [...byUrl.values()];
+    const refNum = (url?: string | null) => (url ? sources.find((s) => s.url === url) : undefined);
+    const claimUrl = (claim: string) =>
+      (deployment?.evidence ?? []).find((e) => e.claim === claim)?.url ?? undefined;
+    return { sources, refNum, claimUrl };
+  }, [deployment]);
+}
+
+function SourceRef({ source }: { source?: DeploymentSource }) {
+  if (!source) return null;
+  return (
+    <a
+      href={source.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="ml-0.5 align-super text-[10px] font-medium text-blue-700 hover:underline"
+      title={source.url}
+    >
+      [{source.n}]
+    </a>
+  );
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -464,18 +522,31 @@ function ReactorDetails({
 function TechnologyDetails({
   details,
   onSelectNode,
+  onSelectCompany,
 }: {
   details: SmrTechnologyDetails;
   onSelectNode?: (nodeId: string) => void;
+  onSelectCompany?: (companyId: string) => void;
 }) {
   const { importance, deployment } = details;
+  const { sources, refNum, claimUrl } = useDeploymentSources(deployment);
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         <Badge variant="outline">{details.category}</Badge>
         {importance.abstraction && <Badge variant="outline">{humanize(importance.abstraction)}</Badge>}
-        {deployment?.availability && <Badge variant="secondary">{humanize(deployment.availability)}</Badge>}
-        {deployment?.trl_band && <Badge variant="secondary">TRL {deployment.trl_band}</Badge>}
+        {deployment?.availability && (
+          <Badge variant="secondary">
+            {humanize(deployment.availability)}
+            <SourceRef source={refNum(claimUrl('availability'))} />
+          </Badge>
+        )}
+        {deployment?.trl_band && (
+          <Badge variant="secondary">
+            TRL {deployment.trl_band}
+            <SourceRef source={refNum(claimUrl('trl_band'))} />
+          </Badge>
+        )}
         {details.origin === 'llm_inferred' && (
           <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100" title="Node inferred by an LLM, not found in the source documents">
             LLM-inferred node
@@ -524,11 +595,19 @@ function TechnologyDetails({
                 {deployment.suppliers.map((s, i) => (
                   <tr key={i} className="border-t align-top">
                     <td className="py-1 pr-2">
-                      {s.url ? (
-                        <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
+                      {s.org_id && s.org_in_db && onSelectCompany ? (
+                        <button
+                          type="button"
+                          onClick={() => onSelectCompany(s.org_id!.replace(/^org:/, ''))}
+                          className="font-medium text-blue-700 hover:underline text-left"
+                          title="Show company overview"
+                        >
                           {s.name}
-                        </a>
-                      ) : s.name}
+                        </button>
+                      ) : (
+                        s.name
+                      )}
+                      <SourceRef source={refNum(s.url ?? claimUrl(`supplier:${s.name}`))} />
                     </td>
                     <td className="py-1 pr-2">{s.role ? humanize(s.role) : '—'}</td>
                     <td className="py-1 text-gray-600">{s.location && !/not stated/i.test(s.location) ? s.location : '—'}</td>
@@ -541,14 +620,8 @@ function TechnologyDetails({
             <ul className="text-xs space-y-0.5">
               {deployment.milestones.map((m, i) => (
                 <li key={i}>
-                  <span className="font-semibold">{m.date}</span> —{' '}
-                  {m.url ? (
-                    <a href={m.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
-                      {m.event}
-                    </a>
-                  ) : (
-                    m.event
-                  )}
+                  <span className="font-semibold">{m.date}</span> — {m.event}
+                  <SourceRef source={refNum(m.url ?? claimUrl(`milestone:${m.event}`))} />
                 </li>
               ))}
             </ul>
@@ -556,36 +629,46 @@ function TechnologyDetails({
           {deployment.scaling_factors.length > 0 && (
             <p className="text-xs"><span className="text-gray-500">Scaling factors:</span> {deployment.scaling_factors.join('; ')}</p>
           )}
-          {deployment.evidence && deployment.evidence.length > 0 && (
+          {sources.length > 0 && (
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="evidence" className="border-b-0">
                 <AccordionTrigger className="py-1.5 text-xs hover:no-underline">
-                  Evidence & sources ({deployment.evidence.length})
+                  Evidence & sources ({sources.length})
                 </AccordionTrigger>
                 <AccordionContent>
-                  <ul className="space-y-2 text-xs">
-                    {deployment.evidence.map((e, i) => (
-                      <li key={i}>
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${VERDICT_STYLES[e.verified ?? ''] ?? 'bg-gray-100 text-gray-700'}`}
+                  <ul className="space-y-2.5 text-xs">
+                    {sources.map((src) => (
+                      <li key={src.n}>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="font-medium text-gray-500">[{src.n}]</span>
+                          <a
+                            href={src.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-0.5 text-blue-700 hover:underline"
+                            title={src.url}
                           >
-                            {e.verified ? humanize(e.verified) : 'Unverified'}
-                          </span>
-                          {e.claim && <span className="text-gray-500">{claimLabel(e.claim)}</span>}
-                          {e.url && (
-                            <a
-                              href={e.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-0.5 text-blue-700 hover:underline"
-                            >
-                              <ExternalLink size={10} /> source
-                            </a>
-                          )}
+                            <ExternalLink size={10} /> {domainOf(src.url)}
+                          </a>
                         </div>
-                        {e.quote && (
-                          <p className="ml-2 mt-0.5 border-l-2 pl-2 italic text-gray-500">“{e.quote}”</p>
+                        {src.evidence.length > 0 && (
+                          <ul className="mt-0.5 space-y-1.5">
+                            {src.evidence.map((e, i) => (
+                              <li key={i}>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span
+                                    className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${VERDICT_STYLES[e.verified ?? ''] ?? 'bg-gray-100 text-gray-700'}`}
+                                  >
+                                    {e.verified ? humanize(e.verified) : 'Unverified'}
+                                  </span>
+                                  {e.claim && <span className="text-gray-500">{claimLabel(e.claim)}</span>}
+                                </div>
+                                {e.quote && (
+                                  <p className="ml-2 mt-0.5 border-l-2 pl-2 italic text-gray-500">“{e.quote}”</p>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
                         )}
                       </li>
                     ))}
@@ -681,7 +764,7 @@ function TechnologyDetails({
   );
 }
 
-export function SmrNodeDetails({ nodeId, topic, onSelectNode }: SmrNodeDetailsProps) {
+export function SmrNodeDetails({ nodeId, topic, onSelectNode, onSelectCompany }: SmrNodeDetailsProps) {
   const [details, setDetails] = useState<SmrNodeDetailsData | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
 
@@ -714,6 +797,6 @@ export function SmrNodeDetails({ nodeId, topic, onSelectNode }: SmrNodeDetailsPr
   return details.kind === 'reactor' ? (
     <ReactorDetails details={details} topic={topic} onSelectNode={onSelectNode} />
   ) : (
-    <TechnologyDetails details={details} onSelectNode={onSelectNode} />
+    <TechnologyDetails details={details} onSelectNode={onSelectNode} onSelectCompany={onSelectCompany} />
   );
 }
