@@ -570,6 +570,13 @@ for (const { fm } of techFiles) {
           })),
           milestones: deployment.milestones ?? [],
           scaling_factors: deployment.scaling_factors ?? [],
+          evidence: (deployment.evidence ?? []).map((e: Yaml) => ({
+            claim: e.claim ?? null,
+            quote: e.quote ?? null,
+            url: e.url ?? null,
+            source: e.source ?? null,
+            verified: e.verified ?? null,
+          })),
         }
       : null,
   });

@@ -44,6 +44,19 @@ const MILESTONE_DOT: Record<string, string> = {
   planned: 'bg-gray-300',
 };
 
+const VERDICT_STYLES: Record<string, string> = {
+  exact: 'bg-emerald-100 text-emerald-800',
+  approximate: 'bg-amber-100 text-amber-800',
+  not_found: 'bg-red-100 text-red-700',
+};
+
+/** 'supplier:Air Products' -> 'Supplier: Air Products'; 'trl_band' -> 'TRL band'. */
+const claimLabel = (claim: string) => {
+  const i = claim.indexOf(':');
+  if (i < 0) return claim === 'trl_band' ? 'TRL band' : humanize(claim);
+  return `${humanize(claim.slice(0, i))}: ${claim.slice(i + 1)}`;
+};
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-2 pb-3 border-b">
@@ -528,13 +541,58 @@ function TechnologyDetails({
             <ul className="text-xs space-y-0.5">
               {deployment.milestones.map((m, i) => (
                 <li key={i}>
-                  <span className="font-semibold">{m.date}</span> — {m.event}
+                  <span className="font-semibold">{m.date}</span> —{' '}
+                  {m.url ? (
+                    <a href={m.url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
+                      {m.event}
+                    </a>
+                  ) : (
+                    m.event
+                  )}
                 </li>
               ))}
             </ul>
           )}
           {deployment.scaling_factors.length > 0 && (
             <p className="text-xs"><span className="text-gray-500">Scaling factors:</span> {deployment.scaling_factors.join('; ')}</p>
+          )}
+          {deployment.evidence && deployment.evidence.length > 0 && (
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="evidence" className="border-b-0">
+                <AccordionTrigger className="py-1.5 text-xs hover:no-underline">
+                  Evidence & sources ({deployment.evidence.length})
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ul className="space-y-2 text-xs">
+                    {deployment.evidence.map((e, i) => (
+                      <li key={i}>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${VERDICT_STYLES[e.verified ?? ''] ?? 'bg-gray-100 text-gray-700'}`}
+                          >
+                            {e.verified ? humanize(e.verified) : 'Unverified'}
+                          </span>
+                          {e.claim && <span className="text-gray-500">{claimLabel(e.claim)}</span>}
+                          {e.url && (
+                            <a
+                              href={e.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-0.5 text-blue-700 hover:underline"
+                            >
+                              <ExternalLink size={10} /> source
+                            </a>
+                          )}
+                        </div>
+                        {e.quote && (
+                          <p className="ml-2 mt-0.5 border-l-2 pl-2 italic text-gray-500">“{e.quote}”</p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           )}
         </Section>
       )}

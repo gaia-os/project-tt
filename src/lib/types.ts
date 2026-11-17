@@ -68,6 +68,16 @@ export interface SmrNodeRef {
   name: string;
 }
 
+export interface SmrDeploymentEvidence {
+  /** What the evidence backs: 'availability' | 'trl_band' | 'supplier:<name>' | 'milestone:<event>' | 'scaling:<factor>'. */
+  claim: string | null;
+  quote: string | null;
+  url: string | null;
+  source: string | null;
+  /** Quote verification verdict: 'exact' | 'approximate' | 'not_found'. */
+  verified: string | null;
+}
+
 export interface SmrCitation {
   title: string | null;
   year: number | null;
@@ -168,6 +178,8 @@ export interface SmrTechnologyDetails {
     suppliers: { name: string; role: string | null; location: string | null; url: string | null; org_id: string | null }[];
     milestones: { date: string; event: string; url?: string }[];
     scaling_factors: string[];
+    /** Absent in datasets seeded before deployment evidence was carried through. */
+    evidence?: SmrDeploymentEvidence[];
   } | null;
 }
 
