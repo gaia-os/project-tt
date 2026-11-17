@@ -1,349 +1,549 @@
-"""Merge two extracted technology graphs into their intersection.
+"""Merge two extracted datasets into the part both runs agree on.
 
-Keeps only nodes that exist in BOTH runs:
-  - ReactorDesign: exact ID match (the IAEA ARIS catalogue)
-  - Organisation:  exact normalised-name match
-  - Technology:   exact normalised-name match PLUS fuzzy matches (ratio >= 0.88)
+A dataset is a folder with ``technologies/graph.json`` plus the markdown the
+seeder reads (``reactors/``, ``orgs/``, ``technologies/``). The output is a
+complete dataset folder that ``scripts/seed-dataset.ts`` can seed as-is.
 
-Edges: union of edges from either graph whose endpoints both survive.
-Each merged edge gets ``source_graph`` in {both, <run_a>, <run_b>}; edges found in
-only one run are marked ``verified=false``. Provenance/documents are unioned.
+Nodes (one-to-one, run A's id becomes the canonical id):
+  - ReactorDesign: same id.
+  - Organisation / Technology, strongest evidence first:
+      1. same normalised name
+      2. pairs listed in ``<out>/approved-matches.csv`` (columns id_a,id_b)
+      3. both runs list the other run's name as an alias (markdown frontmatter)
+      4. same name after light normalisation (plurals, spacing, trailing acronym)
+      5. organisations only: one run lists the other's name as an alias
+    Weaker evidence is NOT merged: technologies that share an id but not a name,
+    or where only one run lists the other as an alias (both often pair a term
+    with a narrower or broader one), and similar-looking names. Those are
+    written to ``<out>/review-candidates.csv``.
+    Copy the rows you accept into ``approved-matches.csv`` and re-run.
 
-Importance scores on shared technologies are averaged.
+Edges: only (source, target, type) triples present in BOTH runs. Run A's
+ENABLES graph is acyclic, so the result is too (checked, the script aborts
+otherwise).
+
+Technologies that no longer lead to any reactor through the shared ENABLES
+edges (directly or via other technologies) are dead ends in the tree and are
+dropped together with their edges; ``--keep-dead-ends`` keeps them.
+
+Technology markdown is regenerated from run A's file so that every relation
+list in it (used in reactors, enabled by, enables, broader, narrower) contains
+exactly the merged edges. Reactor and organisation markdown is copied from A.
 
 Usage:
     python scripts/merge_graphs.py data/extracted/smr data/extracted/smr-qwen38-next-flash \
-        --out data/extracted/merged
+        --out data/extracted/merged --label "SMRs (merged: smr + qwen38)"
 
-Writes <out>/technologies/graph.json and <out>/merge-report.md.
+Requires PyYAML. ``<out>/dataset.json`` and ``approved-matches.csv`` are never
+overwritten; ``reactors/``, ``orgs/`` and ``technologies/`` are rebuilt.
 """
 
 from __future__ import annotations
 
 import argparse
+import csv
 import json
+import os
 import re
 import shutil
-import statistics
 import sys
+from collections import Counter, defaultdict
 from difflib import SequenceMatcher
 from pathlib import Path
 
+try:
+    import yaml
+except ImportError:
+    sys.exit("merge_graphs.py needs PyYAML to rewrite markdown frontmatter (pip install pyyaml)")
+
 FUZZY_THRESHOLD = 0.88
+GENERATED_DIRS = ("reactors", "orgs", "technologies")
+FM_RE = re.compile(r"^---\n(.*?)\n---\n?(.*)$", re.S)
+MERGED_NOTE = (
+    "\n\nThis tech tree is the intersection of two independent extractions of the same sources: "
+    "it only contains the technologies, organisations, reactor designs and relations that both "
+    "extractions agree on."
+)
+
+_SafeLoader = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+_SafeDumper = getattr(yaml, "CSafeDumper", yaml.SafeDumper)
 
 
-def norm_name(s: str) -> str:
-    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+class FrontmatterLoader(_SafeLoader):
+    """Safe loader that keeps dates as strings, so files round-trip unchanged."""
 
 
-def fuzzy_ratio(a: str, b: str) -> float:
-    return SequenceMatcher(None, a, b).ratio()
+FrontmatterLoader.yaml_implicit_resolvers = {
+    first: [(tag, rx) for tag, rx in resolvers if tag != "tag:yaml.org,2002:timestamp"]
+    for first, resolvers in _SafeLoader.yaml_implicit_resolvers.items()
+}
 
 
+# --------------------------------------------------------------------------- #
+# IO
+# --------------------------------------------------------------------------- #
 def load_graph(run_dir: Path) -> dict:
     p = run_dir / "technologies" / "graph.json"
     if not p.exists():
         sys.exit(f"missing {p}")
-    with p.open() as f:
-        return json.load(f)
+    return json.loads(p.read_text())
 
 
-def index_nodes(g: dict) -> dict:
-    """id -> node."""
-    return {n["id"]: n for n in g["nodes"]}
-
-
-def by_label(g: dict, label: str) -> dict:
-    """normalised name -> node, for a given label."""
-    return {norm_name(n["name"]): n for n in g["nodes"] if n["label"] == label}
-
-
-def avg(a, b):
-    if a is None and b is None:
+def read_md(path: Path) -> tuple[dict, str] | None:
+    m = FM_RE.match(path.read_text())
+    if not m:
         return None
-    if a is None:
-        return b
-    if b is None:
-        return a
-    return round((a + b) / 2, 4)
+    fm = yaml.load(m.group(1), Loader=FrontmatterLoader)
+    return (fm, m.group(2)) if isinstance(fm, dict) else None
 
 
-def merge_importance(ia: dict | None, ib: dict | None) -> dict | None:
-    if not ia and not ib:
-        return None
-    if ia and not ib:
-        return ia
-    if ib and not ia:
-        return ib
-    out = dict(ia)
-    out["score"] = avg(ia.get("score"), ib.get("score"))
-    out["reactor_reach"] = avg(ia.get("reactor_reach"), ib.get("reactor_reach"))
-    out["direct_reactors"] = avg(ia.get("direct_reactors"), ib.get("direct_reactors"))
-    out["enabled_descendants"] = avg(ia.get("enabled_descendants"), ib.get("enabled_descendants"))
-    out["edge_quality"] = avg(ia.get("edge_quality"), ib.get("edge_quality"))
+def write_md(path: Path, fm: dict, body: str) -> None:
+    text = yaml.dump(fm, Dumper=_SafeDumper, allow_unicode=True, sort_keys=False, width=10**9)
+    path.write_text(f"---\n{text}---\n{body}")
+
+
+def load_entities(run_dir: Path, sub: str, type_name: str) -> dict[str, tuple[dict, str, Path]]:
+    """frontmatter id -> (frontmatter, body, path) for every markdown file of that type."""
+    out: dict[str, tuple[dict, str, Path]] = {}
+    for path in sorted((run_dir / sub).glob("*.md")):
+        parsed = read_md(path)
+        if parsed and parsed[0].get("type") == type_name and parsed[0].get("id"):
+            out[parsed[0]["id"]] = (*parsed, path)
     return out
 
 
-def union_lists(a, b):
-    a = a or []
-    b = b or []
+# --------------------------------------------------------------------------- #
+# Name matching
+# --------------------------------------------------------------------------- #
+def norm_name(s: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (s or "").lower()).strip()
+
+
+def _singular(token: str) -> str:
+    if len(token) > 4 and token.endswith("ies"):
+        return token[:-3] + "y"
+    if len(token) > 3 and token.endswith("s") and not token.endswith(("ss", "us", "is")):
+        return token[:-1]
+    return token
+
+
+def canonical_key(name: str) -> str:
+    """Normalised name without plural endings, spacing or a trailing acronym of itself."""
+    tokens = norm_name(name).split()
+    if len(tokens) >= 3:
+        acronym = tokens[-1]
+        for start in range(len(tokens) - 2):
+            initials = "".join(t[0] for t in tokens[start:-1])
+            if acronym in (initials, initials + "s"):
+                tokens = tokens[:-1]
+                break
+    return "".join(_singular(t) for t in tokens)
+
+
+def match_nodes(
+    nodes_a: list[dict],
+    nodes_b: list[dict],
+    aliases_a: dict[str, set[str]],
+    aliases_b: dict[str, set[str]],
+    approved: dict[str, set[str]],
+    one_way_alias: bool,
+) -> tuple[list[tuple[str, str, str]], int, list[tuple[str, str, str]]]:
+    """One-to-one matches as (id_a, id_b, method), the number of rejected rival
+    candidates, and the weak pairs (id_a, id_b, reason) that were not merged."""
+    name_a = {n["id"]: norm_name(n["name"]) for n in nodes_a}
+    name_b = {n["id"]: norm_name(n["name"]) for n in nodes_b}
+    by_name_b, by_canon_b, by_alias_b = defaultdict(list), defaultdict(list), defaultdict(list)
+    for n in nodes_b:
+        by_name_b[name_b[n["id"]]].append(n["id"])
+        by_canon_b[canonical_key(n["name"])].append(n["id"])
+        for alias in aliases_b.get(n["id"], ()):
+            by_alias_b[alias].append(n["id"])
+
+    candidates: set[tuple[int, str, str, str]] = set()
+    weak: list[tuple[str, str, str]] = []
+    for n in nodes_a:
+        ia, na = n["id"], name_a[n["id"]]
+        for ib in by_name_b.get(na, ()):
+            candidates.add((0, ia, ib, "name"))
+        if ia in name_b and name_b[ia] != na:
+            if one_way_alias:
+                candidates.add((4, ia, ia, "id"))
+            else:
+                weak.append((ia, ia, "same id, different name"))
+        for ib in approved.get(ia, ()):
+            if ib in name_b:
+                candidates.add((1, ia, ib, "approved"))
+        a_lists_b = {ib for alias in aliases_a.get(ia, ()) for ib in by_name_b.get(alias, ())}
+        b_lists_a = set(by_alias_b.get(na, ()))
+        for ib in a_lists_b | b_lists_a:
+            if ib in a_lists_b and ib in b_lists_a:
+                candidates.add((2, ia, ib, "alias_mutual"))
+            elif one_way_alias:
+                candidates.add((4, ia, ib, "alias"))
+            else:
+                weak.append((ia, ib, "one run lists the other as alias"))
+        for ib in by_canon_b.get(canonical_key(n["name"]), ()):
+            candidates.add((3, ia, ib, "normalised"))
+
+    matches, used_a, used_b, rejected = [], set(), set(), 0
+    for _, ia, ib, method in sorted(candidates):
+        if ia in used_a or ib in used_b:
+            rejected += (ia in used_a) != (ib in used_b)  # a real rival, not a duplicate route
+            continue
+        used_a.add(ia)
+        used_b.add(ib)
+        matches.append((ia, ib, method))
+    return matches, rejected, [w for w in weak if w[0] not in used_a and w[1] not in used_b]
+
+
+def fuzzy_candidates(
+    left_a: list[dict], left_b: list[dict], threshold: float
+) -> list[tuple[str, str, str, str, float]]:
+    """Best look-alike in B for each unmatched A node. For review only, never merged."""
+    names_b = [(n["id"], n["name"], norm_name(n["name"])) for n in left_b]
     out = []
-    seen = []
-    for item in [*a, *b]:
-        try:
-            if item not in seen:
-                seen.append(item)
-                out.append(item)
-        except TypeError:
-            # unhashable / nested dicts: dedupe by json repr
-            key = json.dumps(item, sort_keys=True)
-            if key not in seen:
-                seen.append(key)
-                out.append(item)
+    for n in left_a:
+        sm = SequenceMatcher(None, "", norm_name(n["name"]))  # seq2 is cached by difflib
+        best: tuple[str, str] | None = None
+        best_ratio = 0.0
+        for ib, raw_b, nb in names_b:
+            sm.set_seq1(nb)
+            if sm.real_quick_ratio() < threshold or sm.quick_ratio() < threshold:
+                continue
+            ratio = sm.ratio()
+            if ratio > best_ratio:
+                best, best_ratio = (ib, raw_b), ratio
+        if best and best_ratio >= threshold:
+            out.append((n["id"], n["name"], best[0], best[1], round(best_ratio, 3)))
+    return sorted(out, key=lambda r: -r[4])
+
+
+# --------------------------------------------------------------------------- #
+# Merge helpers
+# --------------------------------------------------------------------------- #
+def union_lists(a: list | None, b: list | None) -> list:
+    out, seen = [], set()
+    for item in [*(a or []), *(b or [])]:
+        key = json.dumps(item, sort_keys=True, default=str)
+        if key not in seen:
+            seen.add(key)
+            out.append(item)
     return out
 
 
+def mean(a, b):
+    values = [v for v in (a, b) if isinstance(v, (int, float))]
+    return round(sum(values) / len(values), 4) if values else None
+
+
+def assert_acyclic(edges: list[dict]) -> None:
+    adj, indeg = defaultdict(list), Counter()
+    nodes = set()
+    for e in edges:
+        if e["type"] == "ENABLES":
+            adj[e["source"]].append(e["target"])
+            indeg[e["target"]] += 1
+            nodes.update((e["source"], e["target"]))
+    queue = [n for n in nodes if indeg[n] == 0]
+    seen = 0
+    while queue:
+        u = queue.pop()
+        seen += 1
+        for v in adj[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0:
+                queue.append(v)
+    if seen != len(nodes):
+        sys.exit(f"merged ENABLES graph has a cycle ({len(nodes) - seen} nodes involved), aborting")
+
+
+def reach_stats(edges: list[dict], reactor_ids: set[str]) -> dict[str, dict]:
+    """Per technology: direct reactors, reachable reactors and reachable technologies."""
+    adj = defaultdict(set)
+    for e in edges:
+        if e["type"] == "ENABLES":
+            adj[e["source"]].add(e["target"])
+    stats = {}
+    for start in adj:
+        seen, stack = set(), list(adj[start])
+        while stack:
+            u = stack.pop()
+            if u not in seen:
+                seen.add(u)
+                stack.extend(adj.get(u, ()))
+        stats[start] = {
+            "direct_reactors": len(adj[start] & reactor_ids),
+            "reactor_reach": len(seen & reactor_ids),
+            "enabled_descendants": len(seen - reactor_ids),
+        }
+    return stats
+
+
+def rebuild_out_dir(out: Path, sources: tuple[Path, Path]) -> None:
+    if out.resolve() in {s.resolve() for s in sources}:
+        sys.exit("--out must not be one of the input folders")
+    out.mkdir(parents=True, exist_ok=True)
+    for sub in GENERATED_DIRS:
+        path = out / sub
+        if path.is_symlink() or path.is_file():
+            sys.exit(f"{path} is not a plain directory, refusing to replace it")
+        if path.exists():
+            shutil.rmtree(path)
+        path.mkdir()
+
+
+def link(target: Path, link_path: Path) -> None:
+    if target.exists() and not link_path.exists() and not link_path.is_symlink():
+        link_path.symlink_to(os.path.relpath(target.resolve(), link_path.parent.resolve()))
+
+
+# --------------------------------------------------------------------------- #
+# Main
+# --------------------------------------------------------------------------- #
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("run_a", type=Path)
     ap.add_argument("run_b", type=Path)
     ap.add_argument("--out", type=Path, default=Path("data/extracted/merged"))
+    ap.add_argument("--label", help="display label for a newly created dataset.json")
     ap.add_argument("--fuzzy", type=float, default=FUZZY_THRESHOLD,
-                    help="name similarity threshold for fuzzy tech merge")
-    ap.add_argument("--copy-markdown", action="store_true", default=True,
-                    help="copy markdown frontmatter files for surviving nodes (default: on)")
-    ap.add_argument("--no-copy-markdown", dest="copy_markdown", action="store_false",
-                    help="skip copying markdown files")
+                    help="name similarity above which unmatched pairs are listed for review")
+    ap.add_argument("--keep-dead-ends", action="store_true",
+                    help="keep shared technologies that do not lead to any reactor")
     args = ap.parse_args()
 
     name_a, name_b = args.run_a.name, args.run_b.name
     ga, gb = load_graph(args.run_a), load_graph(args.run_b)
-    na, nb = index_nodes(ga), index_nodes(gb)
+    md_a = {sub: load_entities(args.run_a, sub, kind) for sub, kind in
+            (("technologies", "Technology"), ("orgs", "Organisation"), ("reactors", "SMRDesign"))}
+    md_b = {sub: load_entities(args.run_b, sub, kind) for sub, kind in
+            (("technologies", "Technology"), ("orgs", "Organisation"))}
 
-    # ---- build canonical node set & id maps --------------------------------
-    # canonical_id -> merged node dict
-    merged_nodes: dict[str, dict] = {}
-    # (graph_key, original_id) -> canonical_id
-    id_map_a: dict[str, str] = {}
-    id_map_b: dict[str, str] = {}
+    approved: dict[str, set[str]] = defaultdict(set)
+    approved_path = args.out / "approved-matches.csv"
+    if approved_path.exists():
+        with approved_path.open(newline="") as f:
+            for row in csv.DictReader(f):
+                if row.get("id_a") and row.get("id_b"):
+                    approved[row["id_a"].strip()].add(row["id_b"].strip())
 
-    stats = {"reactor": 0, "org_exact": 0, "tech_exact": 0, "tech_fuzzy": 0}
+    # ---- match nodes -------------------------------------------------------
+    def aliases(md: dict[str, tuple[dict, str, Path]]) -> dict[str, set[str]]:
+        return {i: {norm_name(a) for a in (fm.get("aliases") or []) if a} for i, (fm, _, _) in md.items()}
 
-    def add_canonical(node_a: dict, node_b: dict | None, merged_from: list[str]) -> dict:
-        cid = node_a["id"]
-        m = dict(node_a)
-        m["merged_from"] = merged_from
-        if node_b is not None:
-            m["importance"] = merge_importance(node_a.get("importance"), node_b.get("importance"))
-        merged_nodes[cid] = m
-        return m
+    by_label_a = defaultdict(list)
+    by_label_b = defaultdict(list)
+    for n in ga["nodes"]:
+        by_label_a[n["label"]].append(n)
+    for n in gb["nodes"]:
+        by_label_b[n["label"]].append(n)
+    node_a = {n["id"]: n for n in ga["nodes"]}
+    node_b = {n["id"]: n for n in gb["nodes"]}
 
-    # 1. ReactorDesign: exact ID match
-    ra = {n["id"]: n for n in ga["nodes"] if n["label"] == "ReactorDesign"}
-    rb = {n["id"]: n for n in gb["nodes"] if n["label"] == "ReactorDesign"}
-    for rid in ra:
-        if rid in rb:
-            add_canonical(ra[rid], rb[rid], [name_a, name_b])
-            id_map_a[rid] = rid
-            id_map_b[rid] = rid
-            stats["reactor"] += 1
+    matches: dict[str, list[tuple[str, str, str]]] = {}
+    rivals: dict[str, int] = {}
+    weak_pairs: list[tuple[str, str, str]] = []
+    reactor_ids_b = {n["id"] for n in by_label_b["ReactorDesign"]}
+    matches["ReactorDesign"] = [(n["id"], n["id"], "id") for n in by_label_a["ReactorDesign"]
+                                if n["id"] in reactor_ids_b]
+    for label, sub in (("Organisation", "orgs"), ("Technology", "technologies")):
+        matches[label], rivals[label], weak = match_nodes(
+            by_label_a[label], by_label_b[label], aliases(md_a[sub]), aliases(md_b[sub]), approved,
+            one_way_alias=label == "Organisation")
+        weak_pairs += weak
 
-    # 2. Organisation: exact normalised-name match
-    oa = by_label(ga, "Organisation")
-    ob = by_label(gb, "Organisation")
-    for nm, na_node in oa.items():
-        if nm in ob:
-            nb_node = ob[nm]
-            add_canonical(na_node, nb_node, [name_a, name_b])
-            id_map_a[na_node["id"]] = na_node["id"]
-            id_map_b[nb_node["id"]] = na_node["id"]
-            stats["org_exact"] += 1
+    b_to_a = {ib: ia for pairs in matches.values() for ia, ib, _ in pairs}
+    kept = set(b_to_a.values())
 
-    # 3. Technology: exact name match first
-    ta = by_label(ga, "Technology")
-    tb = by_label(gb, "Technology")
-    matched_b_names: set[str] = set()
-    for nm, na_node in ta.items():
-        if nm in tb:
-            nb_node = tb[nm]
-            add_canonical(na_node, nb_node, [name_a, name_b])
-            id_map_a[na_node["id"]] = na_node["id"]
-            id_map_b[nb_node["id"]] = na_node["id"]
-            matched_b_names.add(nm)
-            stats["tech_exact"] += 1
-
-    # 4. Technology: fuzzy match on the leftovers
-    only_a = {nm: n for nm, n in ta.items() if nm not in tb}
-    only_b = {nm: n for nm, n in tb.items() if nm not in ta and nm not in matched_b_names}
-    only_b_names_sorted = sorted(only_b)
-    fuzzy_pairs = []
-    for nm_a, na_node in sorted(only_a.items()):
-        best, best_r = None, 0.0
-        for nm_b in only_b_names_sorted:
-            r = fuzzy_ratio(nm_a, nm_b)
-            if r > best_r:
-                best, best_r = nm_b, r
-                if best_r == 1.0:
-                    break
-        if best is not None and best_r >= args.fuzzy:
-            nb_node = only_b[best]
-            add_canonical(na_node, nb_node, [name_a, name_b])
-            id_map_a[na_node["id"]] = na_node["id"]
-            id_map_b[nb_node["id"]] = na_node["id"]
-            matched_b_names.add(best)
-            stats["tech_fuzzy"] += 1
-            fuzzy_pairs.append((nm_a, best, round(best_r, 3)))
-
-    # ---- merge edges -------------------------------------------------------
-    def translate(graph_key: str, edge: dict, id_map: dict[str, str]) -> dict | None:
-        s = id_map.get(edge["source"])
-        t = id_map.get(edge["target"])
-        if s is None or t is None:
-            return None
-        return (s, t, edge["type"])
-
-    # key (s,t,type) -> {graph: edge}
-    edge_index: dict[tuple, dict] = {}
-    for e in ga["edges"]:
-        k = translate(name_a, e, id_map_a)
-        if k is None:
-            continue
-        edge_index.setdefault(k, {})[name_a] = e
+    # ---- edges both runs agree on ------------------------------------------
+    edges_a = {(e["source"], e["target"], e["type"]): e for e in ga["edges"]
+               if e["source"] in kept and e["target"] in kept}
+    edges_b = {}
     for e in gb["edges"]:
-        k = translate(name_b, e, id_map_b)
-        if k is None:
-            continue
-        edge_index.setdefault(k, {})[name_b] = e
-
+        s, t = b_to_a.get(e["source"]), b_to_a.get(e["target"])
+        if s and t:
+            edges_b[(s, t, e["type"])] = e
     merged_edges = []
-    edge_stats = {"both": 0, name_a: 0, name_b: 0}
-    for (s, t, etype), sources in edge_index.items():
-        ea = sources.get(name_a)
-        eb = sources.get(name_b)
-        base = dict(ea or eb)
-        base["source"] = s
-        base["target"] = t
-        base["type"] = etype
-        if ea and eb:
-            base["source_graph"] = "both"
-            base["verified"] = bool(ea.get("verified") or eb.get("verified"))
-            base["provenance"] = union_lists(ea.get("provenance"), eb.get("provenance"))
-            base["documents"] = union_lists(ea.get("documents"), eb.get("documents"))
-            base["citations"] = union_lists(ea.get("citations"), eb.get("citations"))
-            base["roles"] = union_lists(ea.get("roles"), eb.get("roles"))
-            # relation_type: prefer A, fall back to B
-            base["relation_type"] = ea.get("relation_type") or eb.get("relation_type")
-            edge_stats["both"] += 1
-        elif ea:
-            base["source_graph"] = name_a
-            base["verified"] = False
-            edge_stats[name_a] += 1
-        else:
-            base["source_graph"] = name_b
-            base["verified"] = False
-            edge_stats[name_b] += 1
-        merged_edges.append(base)
+    for key in sorted(edges_a.keys() & edges_b.keys()):
+        ea, eb = edges_a[key], edges_b[key]
+        edge = dict(ea)
+        edge["verified"] = bool(ea.get("verified") or eb.get("verified"))
+        for field in ("provenance", "documents", "citations", "roles"):
+            if ea.get(field) is not None or eb.get(field) is not None:
+                edge[field] = union_lists(ea.get(field), eb.get(field))
+        edge["relation_type"] = ea.get("relation_type") or eb.get("relation_type")
+        merged_edges.append(edge)
 
-    # ---- write outputs -----------------------------------------------------
-    out_graph = {"nodes": list(merged_nodes.values()), "edges": merged_edges}
-    out_dir = args.out
-    (out_dir / "technologies").mkdir(parents=True, exist_ok=True)
-    with (out_dir / "technologies" / "graph.json").open("w") as f:
-        json.dump(out_graph, f, indent=2)
+    assert_acyclic(merged_edges)
+    reactor_ids = {ia for ia, _, _ in matches["ReactorDesign"]}
+    stats = reach_stats(merged_edges, reactor_ids)
+    dead_ends = sorted(ia for ia, _, _ in matches["Technology"]
+                       if not stats.get(ia, {}).get("reactor_reach"))
+    if not args.keep_dead_ends:
+        gone = set(dead_ends)
+        matches["Technology"] = [m for m in matches["Technology"] if m[0] not in gone]
+        merged_edges = [e for e in merged_edges if e["source"] not in gone and e["target"] not in gone]
+        stats = reach_stats(merged_edges, reactor_ids)
 
-    # ---- copy markdown for surviving nodes ---------------------------------
-    md_stats = {"reactors": 0, "orgs": 0, "techs": 0, "images_symlinked": False}
-    if args.copy_markdown:
-        # Build canonical_id -> original_id_in_a and original_id_in_b
-        # so we can find the markdown files in each source folder.
-        # The markdown filename is the slug of the node id (minus prefix).
-        def slug(node_id: str) -> str:
-            return re.sub(r"^[a-z]+:", "", node_id)
+    # ---- merged nodes ------------------------------------------------------
+    merged_nodes = []
+    for label in ("ReactorDesign", "Organisation", "Technology"):
+        for ia, ib, method in sorted(matches[label]):
+            node = dict(node_a[ia])
+            node["merged_from"] = {name_a: ia, name_b: ib}
+            node["matched_by"] = method
+            if label == "Technology":
+                imp_a = node_a[ia].get("importance") or {}
+                imp_b = node_b[ib].get("importance") or {}
+                node["importance"] = {
+                    **imp_a,
+                    "score": mean(imp_a.get("score"), imp_b.get("score")),
+                    "edge_quality": mean(imp_a.get("edge_quality"), imp_b.get("edge_quality")),
+                    **stats.get(ia, {"direct_reactors": 0, "reactor_reach": 0, "enabled_descendants": 0}),
+                }
+            merged_nodes.append(node)
+    names = {n["id"]: n["name"] for n in merged_nodes}
 
-        # For fuzzy-merged techs, the canonical id is A's id; B's markdown
-        # (if it exists under B's id) is also copied as an alias file so the
-        # seeder can still find B's richer frontmatter if A's is thinner.
-        for subdir, label in [("reactors", "ReactorDesign"),
-                             ("orgs", "Organisation"),
-                             ("technologies", "Technology")]:
-            dest = out_dir / subdir
-            dest.mkdir(parents=True, exist_ok=True)
-            for cid, mnode in merged_nodes.items():
-                if mnode["label"] != label:
-                    continue
-                # prefer run A's markdown; fall back to run B
-                src_a = args.run_a / subdir / f"{slug(cid)}.md"
-                src_b = args.run_b / subdir / f"{slug(cid)}.md"
-                src = src_a if src_a.exists() else (src_b if src_b.exists() else None)
-                if src is None:
-                    # try B's id for fuzzy-merged techs
-                    continue
-                shutil.copy2(src, dest / src.name)
-                if label == "ReactorDesign":
-                    md_stats["reactors"] += 1
-                elif label == "Organisation":
-                    md_stats["orgs"] += 1
-                else:
-                    md_stats["techs"] += 1
+    # ---- write dataset folder ----------------------------------------------
+    out = args.out
+    rebuild_out_dir(out, (args.run_a, args.run_b))
+    (out / "technologies" / "graph.json").write_text(
+        json.dumps({"nodes": merged_nodes, "edges": merged_edges}, indent=2))
 
-        # iaea-aris/ and nea/ hold source docs + images referenced by relative
-        # paths from reactors/*.md. They're identical across runs (same IAEA
-        # catalogue), so symlink run A's copies instead of duplicating ~17MB.
-        for shared in ("iaea-aris", "nea"):
-            link = out_dir / shared
-            target = (args.run_a / shared).resolve()
-            if target.exists() and not link.exists():
-                link.symlink_to(target)
-                if shared == "iaea-aris":
-                    md_stats["images_symlinked"] = True
+    edge_set = {(e["source"], e["target"], e["type"]): e for e in merged_edges}
+    missing_md = Counter()
+    merged_importance = {n["id"]: n.get("importance") for n in merged_nodes}
 
-        # geocode cache: copy run A's (shared Nominatim cache)
-        geo_a = args.run_a / ".geocode-cache.json"
-        if geo_a.exists():
-            shutil.copy2(geo_a, out_dir / ".geocode-cache.json")
+    def keep(entries, key_of, make_missing, wanted):
+        """Entries of a frontmatter relation list that are merged edges, plus any edge it lacks."""
+        entries = [x for x in (entries or []) if key_of(x.get("id")) in edge_set]
+        have = {x["id"] for x in entries}
+        return entries + [make_missing(i, edge_set[key_of(i)]) for i in sorted(wanted - have)]
 
-    # report
-    rep = []
-    rep.append(f"# Merged graph: `{name_a}` + `{name_b}`\n")
-    rep.append("## Node counts\n")
-    rep.append("| kind | count |")
-    rep.append("| --- | --- |")
-    rep.append(f"| ReactorDesign (exact ID) | {stats['reactor']} |")
-    rep.append(f"| Organisation (exact name) | {stats['org_exact']} |")
-    rep.append(f"| Technology (exact name) | {stats['tech_exact']} |")
-    rep.append(f"| Technology (fuzzy >= {args.fuzzy}) | {stats['tech_fuzzy']} |")
-    rep.append(f"| **Total merged nodes** | **{len(merged_nodes)}** |")
-    rep.append("")
-    rep.append("## Edge counts\n")
-    rep.append("| source_graph | count |")
-    rep.append("| --- | --- |")
-    rep.append(f"| both | {edge_stats['both']} |")
-    rep.append(f"| only {name_a} | {edge_stats[name_a]} |")
-    rep.append(f"| only {name_b} | {edge_stats[name_b]} |")
-    rep.append(f"| **Total merged edges** | **{len(merged_edges)}** |")
-    rep.append("")
-    if args.copy_markdown:
-        rep.append("## Markdown files copied\n")
-        rep.append("| kind | count |")
-        rep.append("| --- | --- |")
-        rep.append(f"| reactors/*.md | {md_stats['reactors']} |")
-        rep.append(f"| orgs/*.md | {md_stats['orgs']} |")
-        rep.append(f"| technologies/*.md | {md_stats['techs']} |")
-        rep.append(f"| iaea-aris/ (symlinked) | {'yes' if md_stats['images_symlinked'] else 'no'} |")
-        rep.append("")
-    rep.append(f"## Fuzzy tech matches ({len(fuzzy_pairs)})\n")
-    rep.append("| name_a | name_b | ratio |")
-    rep.append("| --- | --- | --- |")
-    for a, b, r in fuzzy_pairs[:30]:
-        rep.append(f"| {a} | {b} | {r} |")
-    if len(fuzzy_pairs) > 30:
-        rep.append(f"\n... and {len(fuzzy_pairs) - 30} more (see fuzzy matches above).")
-    (out_dir / "merge-report.md").write_text("\n".join(rep) + "\n")
+    for ia, ib, _ in matches["Technology"]:
+        if ia not in md_a["technologies"]:
+            missing_md["technologies"] += 1
+            continue
+        fm, body, path = md_a["technologies"][ia]
+        fm = dict(fm)
+        outgoing = {(t, typ) for (s, t, typ) in edge_set if s == ia}
+        incoming = {(s, typ) for (s, t, typ) in edge_set if t == ia}
+        enables = dict(fm.get("enables") or {})
+        enables["reactors"] = keep(
+            enables.get("reactors"), lambda i: (ia, i, "ENABLES"),
+            lambda i, e: {"id": i, "name": names[i], "verified": e.get("verified", False), "evidence": []},
+            {t for t, typ in outgoing if typ == "ENABLES" and t in reactor_ids})
+        enables["technologies"] = keep(
+            enables.get("technologies"), lambda i: (ia, i, "ENABLES"),
+            lambda i, e: {"id": i, "name": names[i], "provenance": e.get("provenance") or []},
+            {t for t, typ in outgoing if typ == "ENABLES" and t not in reactor_ids})
+        fm["enables"] = enables
+        fm["enabled_by"] = keep(
+            fm.get("enabled_by"), lambda i: (i, ia, "ENABLES"),
+            lambda i, e: {"id": i, "name": names[i], "provenance": e.get("provenance") or [],
+                          "relation_type": e.get("relation_type"), "rationale": None,
+                          "citations": e.get("citations") or []},
+            {s for s, typ in incoming if typ == "ENABLES"})
+        fm["broader"] = keep(
+            fm.get("broader"), lambda i: (ia, i, "BROADER"),
+            lambda i, e: {"id": i, "name": names[i], "provenance": e.get("provenance") or []},
+            {t for t, typ in outgoing if typ == "BROADER"})
+        fm["narrower"] = keep(
+            fm.get("narrower"), lambda i: (i, ia, "BROADER"),
+            lambda i, e: {"id": i, "name": names[i]},
+            {s for s, typ in incoming if typ == "BROADER"})
+        fm["importance"] = merged_importance[ia]
+        other_name = node_b[ib]["name"]
+        if norm_name(other_name) != norm_name(fm["name"]):
+            fm["aliases"] = union_lists(fm.get("aliases"), [other_name])
+        write_md(out / "technologies" / path.name, fm, body)
 
-    print(f"merged {len(merged_nodes)} nodes, {len(merged_edges)} edges -> {out_dir}/technologies/graph.json")
-    if args.copy_markdown:
-        print(f"markdown: {md_stats['reactors']} reactors, {md_stats['orgs']} orgs, {md_stats['techs']} techs")
-    print(f"report -> {out_dir}/merge-report.md")
+    for label, sub in (("ReactorDesign", "reactors"), ("Organisation", "orgs")):
+        for ia, _, _ in matches[label]:
+            if ia in md_a[sub]:
+                src = md_a[sub][ia][2]
+                shutil.copy2(src, out / sub / src.name)
+            else:
+                missing_md[sub] += 1
+
+    # Source documents, figures and logos are referenced by relative path from the
+    # markdown and are the same in both runs: link run A's instead of copying them.
+    for shared in ("iaea-aris", "nea"):
+        link(args.run_a / shared, out / shared)
+    link(args.run_a / "orgs" / "logos", out / "orgs" / "logos")
+    geocode = args.run_a / ".geocode-cache.json"
+    if geocode.exists() and not (out / ".geocode-cache.json").exists():
+        shutil.copy2(geocode, out / ".geocode-cache.json")
+
+    dataset = out / "dataset.json"
+    if not dataset.exists():
+        base_path = args.run_a / "dataset.json"
+        base = json.loads(base_path.read_text()) if base_path.exists() else {}
+        meta = {"label": args.label or f"{base.get('label', name_a)} (merged: {name_a} + {name_b})"}
+        if base.get("systemPrompt"):
+            marker = "\n\nIMPORTANT INSTRUCTIONS"
+            prompt = base["systemPrompt"]
+            meta["systemPrompt"] = (prompt.replace(marker, MERGED_NOTE + marker, 1)
+                                    if marker in prompt else prompt + MERGED_NOTE)
+        dataset.write_text(json.dumps(meta, indent=2, ensure_ascii=False) + "\n")
+
+    # ---- audit files -------------------------------------------------------
+    with (out / "matches.csv").open("w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["kind", "method", "id_a", "name_a", "id_b", "name_b"])
+        for label in ("Organisation", "Technology"):
+            for ia, ib, method in sorted(matches[label], key=lambda m: (m[2], m[0])):
+                w.writerow([label, method, ia, node_a[ia]["name"], ib, node_b[ib]["name"]])
+
+    matched_a = {ia for pairs in matches.values() for ia, _, _ in pairs} | set(dead_ends)
+    left_a = [n for n in by_label_a["Technology"] if n["id"] not in matched_a]
+    left_b = [n for n in by_label_b["Technology"] if n["id"] not in b_to_a]
+    review = [(ia, node_a[ia]["name"], ib, node_b[ib]["name"], reason, "")
+              for ia, ib, reason in sorted(set(weak_pairs), key=lambda w: (w[2], w[0], w[1]))]
+    listed = {(r[0], r[2]) for r in review}
+    review += [(ia, na, ib, nb, "similar name", ratio)
+               for ia, na, ib, nb, ratio in fuzzy_candidates(left_a, left_b, args.fuzzy)
+               if (ia, ib) not in listed]
+    with (out / "review-candidates.csv").open("w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["id_a", "name_a", "id_b", "name_b", "reason", "ratio"])
+        w.writerows(review)
+
+    methods = {label: Counter(m for _, _, m in matches[label]) for label in matches}
+    types = Counter(e["type"] for e in merged_edges)
+    rows = [
+        f"# Merged dataset: `{name_a}` + `{name_b}`", "",
+        "Only nodes and edges that both runs agree on.", "",
+        "## Nodes", "", "| kind | matched | how |", "| --- | --- | --- |",
+    ]
+    for label in ("ReactorDesign", "Organisation", "Technology"):
+        how = ", ".join(f"{m}: {c}" for m, c in sorted(methods[label].items()))
+        rows.append(f"| {label} | {len(matches[label])} | {how} |")
+    rows += [
+        "", f"Shared technologies that do not lead to any reactor: {len(dead_ends)} "
+            f"({'kept' if args.keep_dead_ends else 'dropped'}).",
+        f"Rival candidates rejected by one-to-one matching: "
+        f"{rivals['Technology']} technologies, {rivals['Organisation']} organisations.",
+        f"Possible matches left unmerged for review: {len(review)} (`review-candidates.csv`).",
+        f"Approved pairs applied: {methods['Technology'].get('approved', 0)}.",
+        "", "## Edges", "", "| type | in both runs |", "| --- | --- |",
+        *[f"| {t} | {c} |" for t, c in sorted(types.items())],
+        f"| **total** | **{len(merged_edges)}** |", "",
+        f"Run A has {len(ga['edges'])} edges, run B has {len(gb['edges'])}.", "",
+    ]
+    if missing_md:
+        rows += ["## Missing markdown", "", *[f"- {k}: {v}" for k, v in missing_md.items()], ""]
+    (out / "merge-report.md").write_text("\n".join(rows))
+
+    print(f"nodes: {len(merged_nodes)} "
+          f"({', '.join(f'{len(matches[k])} {k}' for k in matches)})")
+    print(f"edges: {len(merged_edges)} ({', '.join(f'{c} {t}' for t, c in sorted(types.items()))})")
+    print(f"technologies not leading to any reactor: {len(dead_ends)}"
+          f"{' (kept)' if args.keep_dead_ends else ' (dropped)'}")
+    print(f"for review: {len(review)} possible matches -> {out}/review-candidates.csv")
+    if missing_md:
+        print(f"WARNING missing markdown: {dict(missing_md)}")
+    print(f"report -> {out}/merge-report.md")
 
 
 if __name__ == "__main__":

@@ -580,47 +580,8 @@ for (const { fm } of techFiles) {
 // ---------------------------------------------------------------------------
 
 const nodeIds = new Set(nodeDocs.map((n) => n.id as string));
-
-// Break cycles among ENABLES edges so the layered layout produces a proper
-// DAG (no technology can end up to the right of the reactors it feeds).
-// Strategy: build the ENABLES subgraph on surviving nodes, do a DFS, and
-// drop any edge that closes a back-edge (i.e. points to a node already on
-// the current DFS stack). Self-loops are dropped outright. This is the
-// standard "remove back-edges" cycle-breaking; it keeps the first-seen
-// direction and drops the redundant reverse edge.
-const enablesEdges = graph.edges.filter(
-  (e) => e.type === 'ENABLES' && nodeIds.has(e.source) && nodeIds.has(e.target),
-);
-const enablesAdj = new Map<string, string[]>();
-for (const e of enablesEdges) {
-  if (e.source === e.target) continue; // drop self-loops
-  if (!enablesAdj.has(e.source)) enablesAdj.set(e.source, []);
-  enablesAdj.get(e.source)!.push(e.target);
-}
-const cycleDropped = new Set<string>();
-const dfsColor = new Map<string, 'gray' | 'black'>(); // gray = on stack
-function breakCycles(u: string) {
-  dfsColor.set(u, 'gray');
-  for (const v of enablesAdj.get(u) ?? []) {
-    const color = dfsColor.get(v);
-    if (color === 'gray') {
-      // back-edge u -> v : drop it
-      cycleDropped.add(`${u}->${v}`);
-    } else if (color !== 'black') {
-      breakCycles(v);
-    }
-  }
-  dfsColor.set(u, 'black');
-}
-for (const id of nodeIds) {
-  if (dfsColor.get(id) !== 'black') breakCycles(id);
-}
-if (cycleDropped.size > 0) {
-  console.log(`  cycle-breaking: dropped ${cycleDropped.size} back-edges from ENABLES`);
-}
-
-const edgeDocs = enablesEdges
-  .filter((e) => e.source !== e.target && !cycleDropped.has(`${e.source}->${e.target}`))
+const edgeDocs = graph.edges
+  .filter((e) => e.type === 'ENABLES' && nodeIds.has(e.source) && nodeIds.has(e.target))
   .map((e) => {
     const provenance: string[] = e.provenance ?? [];
     return {

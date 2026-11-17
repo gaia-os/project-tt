@@ -211,24 +211,26 @@ const layoutGraph = async (
   visibleEdges: Edge[],
   selectedNodeId?: string,
 ) => {
+  // Reactors are the end of every chain, so in a mixed view they all belong in
+  // the last (rightmost) layer. Two things otherwise scatter them: each reactor
+  // sits one layer after its own longest chain of technologies, and ELK lays
+  // out disconnected parts of the tree side by side, each with its own layers.
+  // Views with only reactors (or none) keep ELK's default packing.
+  const isReactor = (node: UiNode) => node.data?.nodeLabel === 'ReactorConcept';
+  const pinReactors = visibleNodes.some(isReactor) && !visibleNodes.every(isReactor);
+
   const graph = {
     id: 'root',
     layoutOptions: {
       'elk.algorithm': 'layered',
       'elk.layered.spacing.nodeNodeBetweenLayers': '100',
-      // Force reactors into the last (rightmost) layer so no technology can
-      // ever be laid out to their right, even when ENABLES cycles between
-      // technologies force ELK to break edge direction arbitrarily.
-      'elk.layered.layering.layerConstraint': 'LAST_SEPARATE',
+      ...(pinReactors ? { 'elk.separateConnectedComponents': 'false' } : {}),
     },
     children: visibleNodes.map((node) => ({
       ...node,
-      // Per-node override: only reactors are pinned to the last layer.
-      // Techs remain free to occupy any earlier layer based on the DAG.
-      layoutOptions:
-        node.data?.nodeLabel === 'ReactorConcept'
-          ? { 'elk.layered.layering.layerConstraint': 'LAST' }
-          : undefined,
+      ...(pinReactors && isReactor(node)
+        ? { layoutOptions: { 'elk.layered.layering.layerConstraint': 'LAST' } }
+        : {}),
     })),
     edges: visibleEdges.map((edge) => ({
       id: `${edge.source}-${edge.target}`,
