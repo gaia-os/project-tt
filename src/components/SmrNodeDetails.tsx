@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, ExternalLink, Maximize2 } from 'lucide-react';
 import {
   SmrDeploymentEvidence,
@@ -100,18 +100,27 @@ function useDeploymentSources(deployment: SmrTechnologyDetails['deployment']) {
   }, [deployment]);
 }
 
-function SourceRef({ source }: { source?: DeploymentSource }) {
+function SourceRef({
+  source,
+  onShow,
+}: {
+  source?: DeploymentSource;
+  onShow: (n: number) => void;
+}) {
   if (!source) return null;
   return (
-    <a
-      href={source.url}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onShow(source.n);
+      }}
       className="ml-0.5 align-super text-[10px] font-medium text-blue-700 hover:underline"
-      title={source.url}
+      title={`Jump to source [${source.n}] in evidence & sources`}
     >
       [{source.n}]
-    </a>
+    </button>
   );
 }
 
@@ -530,6 +539,29 @@ function TechnologyDetails({
 }) {
   const { importance, deployment } = details;
   const { sources, refNum, claimUrl } = useDeploymentSources(deployment);
+  const [evidenceOpen, setEvidenceOpen] = useState<string>();
+  const [highlightedSource, setHighlightedSource] = useState<number | null>(null);
+
+  const sourceAnchorId = useCallback(
+    (n: number) => `ev-src-${details.id}-${n}`,
+    [details.id],
+  );
+  const showSource = useCallback(
+    (n: number) => {
+      setEvidenceOpen('evidence');
+      setHighlightedSource(n);
+      // Wait for the accordion content to mount before scrolling.
+      window.setTimeout(() => {
+        document
+          .getElementById(sourceAnchorId(n))
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      window.setTimeout(() => {
+        setHighlightedSource((current) => (current === n ? null : current));
+      }, 2000);
+    },
+    [sourceAnchorId],
+  );
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-1.5">
@@ -538,13 +570,13 @@ function TechnologyDetails({
         {deployment?.availability && (
           <Badge variant="secondary">
             {humanize(deployment.availability)}
-            <SourceRef source={refNum(claimUrl('availability'))} />
+            <SourceRef source={refNum(claimUrl('availability'))} onShow={showSource} />
           </Badge>
         )}
         {deployment?.trl_band && (
           <Badge variant="secondary">
             TRL {deployment.trl_band}
-            <SourceRef source={refNum(claimUrl('trl_band'))} />
+            <SourceRef source={refNum(claimUrl('trl_band'))} onShow={showSource} />
           </Badge>
         )}
         {details.origin === 'llm_inferred' && (
@@ -607,7 +639,10 @@ function TechnologyDetails({
                       ) : (
                         s.name
                       )}
-                      <SourceRef source={refNum(s.url ?? claimUrl(`supplier:${s.name}`))} />
+                      <SourceRef
+                        source={refNum(s.url ?? claimUrl(`supplier:${s.name}`))}
+                        onShow={showSource}
+                      />
                     </td>
                     <td className="py-1 pr-2">{s.role ? humanize(s.role) : '—'}</td>
                     <td className="py-1 text-gray-600">{s.location && !/not stated/i.test(s.location) ? s.location : '—'}</td>
@@ -621,7 +656,10 @@ function TechnologyDetails({
               {deployment.milestones.map((m, i) => (
                 <li key={i}>
                   <span className="font-semibold">{m.date}</span> — {m.event}
-                  <SourceRef source={refNum(m.url ?? claimUrl(`milestone:${m.event}`))} />
+                  <SourceRef
+                    source={refNum(m.url ?? claimUrl(`milestone:${m.event}`))}
+                    onShow={showSource}
+                  />
                 </li>
               ))}
             </ul>
@@ -630,7 +668,13 @@ function TechnologyDetails({
             <p className="text-xs"><span className="text-gray-500">Scaling factors:</span> {deployment.scaling_factors.join('; ')}</p>
           )}
           {sources.length > 0 && (
-            <Accordion type="single" collapsible className="w-full">
+            <Accordion
+              type="single"
+              collapsible
+              className="w-full"
+              value={evidenceOpen}
+              onValueChange={setEvidenceOpen}
+            >
               <AccordionItem value="evidence" className="border-b-0">
                 <AccordionTrigger className="py-1.5 text-xs hover:no-underline">
                   Evidence & sources ({sources.length})
@@ -638,7 +682,13 @@ function TechnologyDetails({
                 <AccordionContent>
                   <ul className="space-y-2.5 text-xs">
                     {sources.map((src) => (
-                      <li key={src.n}>
+                      <li
+                        key={src.n}
+                        id={sourceAnchorId(src.n)}
+                        className={`rounded px-1 -mx-1 transition-colors duration-700 ${
+                          highlightedSource === src.n ? 'bg-amber-100' : ''
+                        }`}
+                      >
                         <div className="flex items-baseline gap-1.5">
                           <span className="font-medium text-gray-500">[{src.n}]</span>
                           <a
