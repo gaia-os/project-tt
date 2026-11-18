@@ -271,3 +271,4 @@ kg/mongo/data/
 kg/neo4j/data/
 
 #==========================
+merge_fails.txt

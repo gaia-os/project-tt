@@ -412,6 +412,7 @@ def main() -> None:
 
     edge_set = {(e["source"], e["target"], e["type"]): e for e in merged_edges}
     missing_md = Counter()
+    dropped_refs = Counter()
     merged_importance = {n["id"]: n.get("importance") for n in merged_nodes}
 
     def keep(entries, key_of, make_missing, wanted):
@@ -453,16 +454,67 @@ def main() -> None:
             lambda i, e: {"id": i, "name": names[i]},
             {s for s, typ in incoming if typ == "BROADER"})
         fm["importance"] = merged_importance[ia]
+        dep = fm.get("deployment")
+        if isinstance(dep, dict):
+            for s in dep.get("suppliers") or []:
+                if isinstance(s, dict) and s.get("org_id") and s["org_id"] not in names:
+                    del s["org_id"]
+                    dropped_refs["technologies.deployment.suppliers.org_id"] += 1
+            tpr = dep.get("trl_per_reactor")
+            if isinstance(tpr, list):
+                kept_tpr = [e for e in tpr
+                            if not isinstance(e, dict) or not e.get("id") or e["id"] in names]
+                dropped_refs["technologies.deployment.trl_per_reactor.id"] += len(tpr) - len(kept_tpr)
+                dep["trl_per_reactor"] = kept_tpr
         other_name = node_b[ib]["name"]
         if norm_name(other_name) != norm_name(fm["name"]):
             fm["aliases"] = union_lists(fm.get("aliases"), [other_name])
         write_md(out / "technologies" / path.name, fm, body)
 
+    def drop_dangling_refs(fm: dict, sub: str) -> tuple[dict, int]:
+        """Remove references to entities without a merged file; returns (fm, #removed).
+
+        Pure reference lists (orgs' supplies/develops, reactors' related) lose the whole
+        entry; entries that also carry display data (reactors' developers) only lose
+        their id. The nea/iaea source subtrees, entities mention lists and bodies stay
+        verbatim: they record what each source stated, not graph membership."""
+        fm = dict(fm)
+        removed = 0
+        if sub == "orgs":
+            for key, field in (("supplies", "tech"),):
+                if key in fm:
+                    kept_entries = [s for s in fm[key] or [] if s.get(field) in names]
+                    removed += len(fm[key] or []) - len(kept_entries)
+                    fm[key] = kept_entries
+            if "develops" in fm:
+                kept_dev = [d for d in fm["develops"] or [] if d in names]
+                removed += len(fm["develops"] or []) - len(kept_dev)
+                fm["develops"] = kept_dev
+        elif sub == "reactors":
+            if "developers" in fm:
+                devs = []
+                for d in fm["developers"] or []:
+                    if d.get("id") and d["id"] not in names:
+                        d = {k: v for k, v in d.items() if k != "id"}
+                        removed += 1
+                    devs.append(d)
+                fm["developers"] = devs
+            if "related" in fm:
+                kept_rel = [r for r in fm["related"] or [] if r.get("reactor_id") in names]
+                removed += len(fm["related"] or []) - len(kept_rel)
+                fm["related"] = kept_rel
+        return fm, removed
+
     for label, sub in (("ReactorDesign", "reactors"), ("Organisation", "orgs")):
         for ia, _, _ in matches[label]:
             if ia in md_a[sub]:
-                src = md_a[sub][ia][2]
-                shutil.copy2(src, out / sub / src.name)
+                fm, body, src = md_a[sub][ia]
+                fm, removed = drop_dangling_refs(fm, sub)
+                dropped_refs[f"{sub}.{label}"] += removed
+                if removed:
+                    write_md(out / sub / src.name, fm, body)
+                else:
+                    shutil.copy2(src, out / sub / src.name)
             else:
                 missing_md[sub] += 1
 
@@ -530,6 +582,10 @@ def main() -> None:
         *[f"| {t} | {c} |" for t, c in sorted(types.items())],
         f"| **total** | **{len(merged_edges)}** |", "",
         f"Run A has {len(ga['edges'])} edges, run B has {len(gb['edges'])}.", "",
+        "Frontmatter references to entities without a merged file removed: "
+            f"{sum(dropped_refs.values())} "
+            f"({', '.join(f'{k}: {v}' for k, v in sorted(dropped_refs.items())) or 'none'}).",
+        "",
     ]
     if missing_md:
         rows += ["## Missing markdown", "", *[f"- {k}: {v}" for k, v in missing_md.items()], ""]
@@ -541,6 +597,8 @@ def main() -> None:
     print(f"technologies not leading to any reactor: {len(dead_ends)}"
           f"{' (kept)' if args.keep_dead_ends else ' (dropped)'}")
     print(f"for review: {len(review)} possible matches -> {out}/review-candidates.csv")
+    if dropped_refs:
+        print(f"dangling references removed: {dict(dropped_refs)}")
     if missing_md:
         print(f"WARNING missing markdown: {dict(missing_md)}")
     print(f"report -> {out}/merge-report.md")
