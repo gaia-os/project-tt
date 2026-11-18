@@ -54,3 +54,25 @@ FORMATTING REQUIREMENTS - VERY IMPORTANT:
 
 Remember: Format everything as HTML with proper tags and spacing. No plain text or markdown formatting.`;
 }
+
+/** Shape of `GET /api/topics` entries — the selectable datasets. */
+export interface TopicSummary {
+  id: TopicKey;
+  label: string;
+}
+
+/**
+ * Topics are discovered dynamically, so this only checks that a stored value
+ * is a plausible dataset id. Whether the dataset still exists is decided
+ * server-side (and by `useTopics` results) instead.
+ */
+export function isTopicKey(value: unknown): value is TopicKey {
+  return (
+    typeof value === 'string' && /^[\w][\w-]{0,127}$/.test(value)
+  );
+}
+
+/** Display label for a topic id, preferring the dataset's own label. */
+export function labelForTopic(topics: TopicSummary[], id: TopicKey): string {
+  return topics.find((topic) => topic.id === id)?.label ?? titleizeLabel(id);
+}

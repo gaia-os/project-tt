@@ -53,6 +53,8 @@ interface CompanyExplorerProps {
   error: string | null;
   selectedEntityId?: string;
   requestedFocusNodeId?: string | null;
+  /** When set, the directory is already filtered to this technology id. */
+  techFilter?: string | null;
   onSelectCompany: (company: CompanySummary) => void;
   onSelectTechnology: (node: UiNode) => void;
 }
@@ -66,13 +68,14 @@ export function CompanyExplorer({
   error,
   selectedEntityId,
   requestedFocusNodeId,
+  techFilter = null,
   onSelectCompany,
   onSelectTechnology,
 }: CompanyExplorerProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [region, setRegion] = useState<ProductRegion>('All');
   const [category, setCategory] = useState('All');
-  const [primaryOnly, setPrimaryOnly] = useState(true);
+  const [primaryOnly, setPrimaryOnly] = useState(!techFilter);
   const [sort, setSort] = useState<CompanyDirectorySort>('name');
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
   const [nodes, setNodes] = useState<CompanyGraphNode[]>([]);
@@ -475,6 +478,8 @@ export function CompanyExplorer({
               <CompanySelectionDetails
                 company={selectedEntry.company}
                 topic={topic}
+                mappings={data?.available ? data.mappings : []}
+                techTree={techTree}
                 embedded
                 onShowTechnology={(technologyId) =>
                   selectTechnology(technologyId)

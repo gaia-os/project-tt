@@ -7,6 +7,8 @@ import Chat from './Chat';
 import Simulations from './Simulations';
 import { UiNode, TechTree } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
+import { ExplorerPanel } from '@/lib/explorerUrlState';
+import { ChatScope } from '@/lib/chatContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 
@@ -19,9 +21,17 @@ interface TabPanelProps {
   onNodeSelect?: (nodeId: string) => void;
   onShowNodeDetailsRef?: (fn: () => void) => void;
   onShowCompaniesViewRef?: (fn: () => void) => void;
+  onShowChatRef?: (fn: () => void) => void;
+  /** Reopens the welcome flow from the empty details panel. */
+  onChooseTechnology?: () => void;
+  /** URL `panel` value; null means details. */
+  panel?: ExplorerPanel | null;
+  onPanelChange?: (panel: ExplorerPanel) => void;
+  /** What the chat talks about (pathway, custom tree, view…). */
+  chatScope?: ChatScope | null;
 }
 
-type TabType = 'details' | 'chat' | 'simulations';
+type TabType = ExplorerPanel;
 
 const TabPanel = ({
   selectedNode,
@@ -32,42 +42,50 @@ const TabPanel = ({
   onNodeSelect,
   onShowNodeDetailsRef,
   onShowCompaniesViewRef,
+  onShowChatRef,
+  onChooseTechnology,
+  panel = null,
+  onPanelChange,
+  chatScope = null,
 }: TabPanelProps) => {
-  const [activeTab, setActiveTab] = useState<TabType>('chat');
+  const [activeTab, setActiveTab] = useState<TabType>(panel ?? 'details');
   const [nodeDetailsSubView, setNodeDetailsSubView] = useState<NodeDetailsSubView>('info');
   const previousNodeIdRef = useRef<string | undefined>(undefined);
-  
-  // tracks what sub-view should be applied on the next node selection
   const pendingSubViewRef = useRef<NodeDetailsSubView | null>(null);
 
-  // Expose imperative callbacks to TechTree.
-  // These set pendingSubViewRef then switch the active tab.
-  // When the same node is already selected, TechTree calls both
-  // showNodeDetailsTabRef and showCompaniesSubViewRef directly so the
-  // sub-view is applied immediately via setNodeDetailsSubView below.
+  useEffect(() => {
+    setActiveTab(panel ?? 'details');
+  }, [panel]);
+
   useEffect(() => {
     if (onShowNodeDetailsRef) {
       onShowNodeDetailsRef(() => {
         pendingSubViewRef.current = 'info';
         setActiveTab('details');
-        // Apply immediately in case selectedNode hasn't changed
+        onPanelChange?.('details');
         setNodeDetailsSubView('info');
       });
     }
-  }, [onShowNodeDetailsRef]);
+  }, [onShowNodeDetailsRef, onPanelChange]);
 
   useEffect(() => {
     if (onShowCompaniesViewRef) {
       onShowCompaniesViewRef(() => {
         pendingSubViewRef.current = 'companies';
         setActiveTab('details');
-        // Apply immediately in case selectedNode hasn't changed
+        onPanelChange?.('details');
         setNodeDetailsSubView('companies');
       });
     }
-  }, [onShowCompaniesViewRef]);
+  }, [onShowCompaniesViewRef, onPanelChange]);
 
-  // Auto-switch to details when a node is selected from the chat tab
+  useEffect(() => {
+    onShowChatRef?.(() => {
+      setActiveTab('chat');
+      onPanelChange?.('chat');
+    });
+  }, [onShowChatRef, onPanelChange]);
+
   useEffect(() => {
     if (
       selectedNode &&
@@ -75,29 +93,28 @@ const TabPanel = ({
       previousNodeIdRef.current !== selectedNode.id
     ) {
       setActiveTab('details');
+      onPanelChange?.('details');
     }
     previousNodeIdRef.current = selectedNode?.id;
-  }, [selectedNode, activeTab]);
+  }, [selectedNode, activeTab, onPanelChange]);
 
-  // When the selected node changes, consume any pending sub-view.
-  // Only reset to 'info' when there is no pending sub-view queued.
   useEffect(() => {
     if (pendingSubViewRef.current !== null) {
       setNodeDetailsSubView(pendingSubViewRef.current);
       pendingSubViewRef.current = null;
-    } else {
-      // Only reset to 'info' on a genuine node change (not on initial mount
-      // where previousNodeIdRef hasn't been set yet), and only when no
-      // sub-view was explicitly requested.
-      if (previousNodeIdRef.current !== undefined) {
-        setNodeDetailsSubView('info');
-      }
+    } else if (previousNodeIdRef.current !== undefined) {
+      setNodeDetailsSubView('info');
     }
   }, [selectedNode?.id]);
 
+  const handleTabChange = (value: string) => {
+    const next = value as TabType;
+    setActiveTab(next);
+    onPanelChange?.(next);
+  };
+
   return (
     <>
-      {/* Toggle Button */}
       <Button
         variant="ghost"
         size="sm"
@@ -108,6 +125,7 @@ const TabPanel = ({
             : 'top-4 right-4'
         }`}
         title={isPanelExpanded ? 'Collapse panel' : 'Expand panel'}
+        aria-label={isPanelExpanded ? 'Collapse panel' : 'Expand panel'}
       >
         {isPanelExpanded ? (
           <ChevronRight className="h-5 w-5" />
@@ -116,7 +134,6 @@ const TabPanel = ({
         )}
       </Button>
 
-      {/* Panel container */}
       <div
         className={`fixed top-0 right-0 z-40 h-full w-full md:w-1/2 flex flex-col bg-white shadow-lg transition-all duration-300 ${
           isPanelExpanded ? 'translate-x-0' : 'translate-x-full'
@@ -124,17 +141,17 @@ const TabPanel = ({
       >
         <Tabs
           value={activeTab}
-          onValueChange={(value) => setActiveTab(value as TabType)}
+          onValueChange={handleTabChange}
           className="flex flex-col h-full"
         >
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="chat" className="flex items-center space-x-2">
-              <MessageSquare size={16} />
-              <span>Chat</span>
-            </TabsTrigger>
             <TabsTrigger value="details" className="flex items-center space-x-2">
               <Info size={16} />
               <span>Node Details</span>
+            </TabsTrigger>
+            <TabsTrigger value="chat" className="flex items-center space-x-2">
+              <MessageSquare size={16} />
+              <span>Chat</span>
             </TabsTrigger>
             <TabsTrigger value="simulations" className="flex items-center space-x-2">
               <BarChart3 size={16} />
@@ -143,7 +160,7 @@ const TabPanel = ({
           </TabsList>
 
           <TabsContent value="chat" className="flex-1 overflow-y-auto mt-0">
-            <Chat topic={topic} />
+            <Chat topic={topic} scope={chatScope} />
           </TabsContent>
 
           <TabsContent value="details" className="flex-1 overflow-y-auto mt-0">
@@ -153,6 +170,7 @@ const TabPanel = ({
               activeSubView={nodeDetailsSubView}
               onSubViewChange={setNodeDetailsSubView}
               onSelectNode={onNodeSelect}
+              onChooseTechnology={onChooseTechnology}
             />
           </TabsContent>
 

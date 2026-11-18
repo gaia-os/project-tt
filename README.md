@@ -10,12 +10,75 @@ The platform features a full CRUD interface for editing the technology tree, AI-
 
 ## Key Features
 
+### Guided First Visit
+
+- **Welcome flow**: First-time visitors pick a sector, then a deployment
+  concept from translucent cards showing TRL, category and prerequisite
+  count. "Skip to the full map" is always available, and the picker can be
+  reopened from the toolbar or the empty details panel.
+- **Guided pathway**: The chosen concept's upstream chain is shown on the
+  tree, staged by dependency level. The floating guide steps through each
+  stage (←/→ keys, Esc to exit), dims everything else, and ends with links to
+  companies, the assistant, another technology, or the full map.
+- **Shareable state**: Topic, view, focused node and pathway step live in the
+  URL (`?topic=nuclear&pathway=concept_hts_tokamak&step=2`).
+
 ### Interactive Technology Graph
 
 - **Visual Technology Mapping**: Interactive graph showing fusion reactor concepts, enabling technologies, and milestones
 - **Technology Readiness Levels**: Current and projected TRL tracking for each technology node
 - **Relationship Visualization**: Clear depiction of dependencies and connections between technologies
 - **Node Highlighting**: Interactive selection with connected element highlighting
+
+### Scaling the Tree Down
+
+- **Aggregate nodes**: "Aggregate" in the toolbar draws each group of nodes
+  (by category & role, category, or role) as one summary node with its
+  member count, TRL range, role mix and a few member names. Links between
+  groups merge into one arrow labelled with how many links it carries.
+- **Folding and unfolding**: Clicking an aggregate unfolds it into a framed
+  group of its members; the frame's "Fold" button collapses it again, and
+  "Unfold all / Fold all" work on every group. Any node whose prerequisites
+  feed only into it gets a `−` toggle that folds that branch into the node
+  (shown as `+N`). Shared prerequisites are never hidden. The toggled element
+  stays in place on screen.
+- **Animated folding**: Folds and unfolds morph instead of jumping: nodes
+  glide to their new places, unfolded nodes grow out of the node or
+  aggregate that held them, folded ones glide back into it, and a frame
+  grows out of its aggregate. If an unfold grows past the screen edge, the
+  camera glides to show it. Respects "reduce motion".
+- **Compare trees**: Puts up to four trees side by side (tech trees and your
+  own trees), scaled down to aggregates, with node and link counts, longest
+  prerequisite chain, median TRL, mature share, role mix and the TRL
+  distribution on shared scales. The first column is the baseline; for trees
+  of the same topic an "Overlap with baseline" row counts shared nodes and
+  lists the ones only a tree has. "Open aggregated" switches the main view to
+  that tree.
+- **Zoom all the way out**: The zoom-out limit follows the tree's size, so
+  even the largest tree fits on screen, and the first view shows the whole
+  tree. Zoomed out, node buttons hide and nodes become role-coloured blocks
+  that keep the tree's shape readable.
+- **Smooth zooming**: Wheel zoom also works over the panels floating on the
+  canvas (tree picker, legend, filters, zoom buttons), and mouse-wheel notches
+  glide instead of jumping. Scrollable panels still scroll normally.
+
+### Your Own Trees
+
+- **Build**: "My trees → New tree" (or "From current view") turns on the
+  tree builder: click nodes to add or remove them, click an aggregate to take
+  its whole group, Shift+drag to pick an area, and grow the selection with
+  its prerequisites, dependents or everything the current filters show.
+  Give it a name and notes, and save.
+- **Quick save**: Save a guided pathway, a connected-nodes view or a
+  search/filter result as a tree in one step.
+- **Select**: Saved trees appear in the tree picker and under "My trees".
+  Opening one shows only its nodes (the URL gets `tree=`), with search,
+  filters, aggregation and folding working as usual. Edit, rename,
+  duplicate, delete, and export/import them as JSON.
+- **Storage**: Trees are kept in this browser (`localStorage`) and store
+  only node ids, so they follow later edits to the data; nodes deleted since
+  are reported as missing. A `tree=` link only works in the browser that has
+  the tree.
 
 ### Multi-View Explorer
 
@@ -31,8 +94,18 @@ The platform features a full CRUD interface for editing the technology tree, AI-
 ### AI-Powered Chat Interface
 
 - **Contextual Assistance**: Chat is proxied to the kg-service, where `qwen3.8:27b` (Ollama) answers with an agentic loop — it calls KG tools (entity resolution, concept expansion, paper dossiers, vector search over paper chunks, guarded read-only Cypher) and cites papers by id
+- **Talks about what you selected**: The chat's context follows the most
+  specific selection on screen — the tree being built, a guided pathway
+  (with its stages, bottleneck and current step), an open custom tree (with
+  your notes), or the whole topic tree. The connected-nodes view and the
+  search/category/role filters narrow it further. Selections are sent with
+  their prerequisite links. A chip above the input shows what the assistant
+  sees, with a switch back to the whole tree.
+- **One conversation per context**: The whole tree, each pathway, each
+  custom tree and the tree being built keep their own history (saved
+  locally; the 30 most recent scoped conversations are kept). A reply that
+  arrives after you switch context lands in the conversation it was asked in.
 - **Technology Queries**: Ask questions about specific technologies, milestones, or investment opportunities
-- **Persistent History**: Chat history saved locally for continuity
 
 ### Literature Overlay & Curation
 
@@ -128,17 +201,42 @@ src/
 │   ├── EditTechTreePanel.tsx    # CRUD interface for editing
 │   ├── AiAssistantPanel.tsx     # Specialized AI for document analysis and edit suggestions
 │   ├── GroupSelector.tsx        # Graph grouping and filtering
-│   ├── CustomNode.tsx           # Custom node rendering
+│   ├── CustomNode.tsx           # Custom node rendering (with branch fold toggle)
+│   ├── AggregateNode.tsx        # One node standing for a whole group
+│   ├── GroupFrameNode.tsx       # Frame around an unfolded group
+│   ├── TreeComparison.tsx       # "Compare trees" dialog (topics and custom trees)
+│   ├── AnimatedReactFlow.tsx    # React Flow plus animated relayouts
+│   ├── TreeBuilderPanel.tsx     # Floating card for building a custom tree
+│   ├── BoxSelection.tsx         # Shift+drag area pick while building
+│   ├── SaveTreeDialog.tsx       # Save a pathway/view as a custom tree
+│   ├── MyTreesDialog.tsx        # List and manage custom trees
+│   ├── techTreeNodeTypes.tsx    # Stable React Flow node types (context-driven)
 │   ├── NodeActions.tsx          # Node action buttons
 │   ├── Legend.tsx               # Graph legend
 │   ├── MobileWarning.tsx        # Mobile device warning
-│   └── LoadingSpinner.tsx       # Loading state
+│   ├── LoadingSpinner.tsx       # Loading state
+│   ├── onboarding/              # Welcome flow (sector and technology cards)
+│   └── pathway/                 # Guided pathway floating guide
 ├── hooks/              # Custom React hooks
-│   └── useTechTree.ts  # Hook for fetching tech tree data
+│   ├── useTechTree.ts           # Shared, de-duplicated tech tree fetch
+│   ├── useExplorerUrlState.ts   # Topic/view/focus/pathway/step in the URL
+│   ├── useCanvasWheel.ts        # Wheel zoom over canvas panels, smoothed notches
+│   ├── useCustomTrees.ts        # Shared store of custom trees (localStorage)
+│   ├── useTreeBuilder.ts        # Draft state of the tree being built
+│   └── usePathwayMode.ts        # Pathway subgraph and guide steps
 ├── lib/                # Utility libraries
 │   ├── types.ts        # TypeScript type definitions
-│   ├── elkjs.ts        # Graph layout engine
-│   ├── geminiClient.ts # AI client integration
+│   ├── pathway.ts      # Upstream pathway staging and guide steps
+│   ├── technologyCatalog.ts # Picker cards for deployment concepts
+│   ├── onboardingStorage.ts # First-visit flag and last topic
+│   ├── deploymentEstimate.ts # Shared scheduler estimate
+│   ├── treeProjection.ts # Aggregation, branch folding and tree summaries
+│   ├── canvasZoom.ts   # Size-based zoom-out limit and zoom detail levels
+│   ├── layoutTransition.ts # Plans and interpolates relayout animations
+│   ├── customTrees.ts  # Custom tree model, storage format, graph helpers
+│   ├── chatContext.ts  # Chat scope, request payload and context text
+│   ├── chatThreadStorage.ts # One stored conversation per chat context
+│   ├── elkjs.ts        # Graph layout engine (incl. frames for unfolded groups)
 │   ├── mongodb.ts      # MongoDB connection
 │   └── utils.ts        # Utility functions
 ```
@@ -146,8 +244,8 @@ src/
 ### State Management
 
 - **React Hooks**: Local component state management
-- **Local Storage**: Persistent chat history and user preferences
-- **Context API**: Shared state for graph interactions
+- **URL**: Topic, explorer view, focused node, guided pathway step and open custom tree
+- **Local Storage**: Chat conversations (one per context), custom trees, onboarding completion and last topic
 - **MongoDB**: Server-side persistent storage for all tech tree data
 
 ## Getting Started
@@ -231,6 +329,24 @@ src/
 - `npm run audit:data` - Validate active graph, company mapping, and location data
 - `npm run generate:company-locations` - Regenerate verified city coordinates
   from headquarters text using the local GeoNames gazetteer
+
+### Make Shortcuts
+
+`make help` lists everything. The common ones:
+
+- `make ready` - install dependencies, create `.env.local` if missing, start
+  MongoDB (`gaia-tt-mongo` on port 27017) and seed any empty database
+- `make dev` - start MongoDB and the dev server at
+  `http://localhost:3000/investment-tech-tree`
+- `make up` / `make down` - build and run the production image
+  (`gaia-tt-app`) with MongoDB, or stop both; `make logs` follows the app
+- `make check` - lint, typecheck and unit tests
+- `make db-status` - node, edge and company counts per database
+- `make seed` - reload nodes and edges from `data/*.json` (replaces admin edits)
+
+Chat needs the kg-service; on a workstation use `make tunnel SERVER=user@host`
+and set `KG_SERVICE_URL`/`KG_API_KEY` in `.env.local`. The `stack-*` targets
+run the full `kg/` stack and need a Linux host with an NVIDIA GPU.
 
 ### Remote Services via SSH Port Forwarding
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { LABEL_COLORS, UiNode, CompanyInfo } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
+import { nodeRoleLabel } from '@/lib/nodeRoles';
 import { Manual } from './Manual';
 import CompanyDetails from './CompanyDetails';
 import { SmrNodeDetails } from './SmrNodeDetails';
@@ -28,6 +29,7 @@ type NodeDetailsProps = {
   activeSubView: NodeDetailsSubView;
   onSubViewChange: (v: NodeDetailsSubView) => void;
   onSelectNode?: (nodeId: string) => void;
+  onChooseTechnology?: () => void;
 };
 
 interface InfactAnalysis {
@@ -56,7 +58,14 @@ const getProbabilityColor = (probabilityText: string): string => {
   return 'bg-green-600';
 };
 
-const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange, onSelectNode }: NodeDetailsProps) => {
+const NodeDetails = ({
+  selectedNode,
+  topic,
+  activeSubView,
+  onSubViewChange,
+  onSelectNode,
+  onChooseTechnology,
+}: NodeDetailsProps) => {
   const [showInfactModal, setShowInfactModal] = useState(false);
   const [companies, setCompanies] = useState<CompanyInfo[]>([]);
   const [companiesLoading, setCompaniesLoading] = useState(false);
@@ -76,7 +85,7 @@ const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange, onSe
       .finally(() => setCompaniesLoading(false));
   }, [activeSubView, selectedNode, topic]);
 
-  if (!selectedNode) return <Manual />;
+  if (!selectedNode) return <Manual onChooseTechnology={onChooseTechnology} />;
 
   const infactAnalysis = selectedNode.data?.infact_analysis as
     | InfactAnalysis
@@ -158,7 +167,7 @@ const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange, onSe
             variant="secondary"
             className={`bg-${LABEL_COLORS[selectedNode.data.nodeLabel]}`}
           >
-            {selectedNode.data.nodeLabel}
+            {nodeRoleLabel(selectedNode.data.nodeLabel)}
           </Badge>
         </CardHeader>
 
@@ -309,13 +318,28 @@ const NodeDetails = ({ selectedNode, topic, activeSubView, onSubViewChange, onSe
                     {companies.map((company) => (
                       <AccordionItem key={company.id} value={company.id}>
                         <AccordionTrigger className="text-sm text-left">
-                          <span className="flex items-center gap-2">
+                          <span className="flex flex-wrap items-center gap-2">
                             {company.canonical_name}
                             {company.is_primary && (
                               <Badge className="bg-yellow-400 text-yellow-900 text-[10px] px-1 py-0">
                                 Primary
                               </Badge>
                             )}
+                            {company.relation_method && (
+                              <Badge variant="secondary" className="text-[10px] px-1 py-0">
+                                {company.relation_method}
+                              </Badge>
+                            )}
+                            {Array.isArray(company.relation_roles) &&
+                              (company.relation_roles as string[]).map((role) => (
+                                <Badge
+                                  key={role}
+                                  variant="outline"
+                                  className="text-[10px] px-1 py-0"
+                                >
+                                  {role.replace(/_/g, ' ')}
+                                </Badge>
+                              ))}
                           </span>
                         </AccordionTrigger>
                         <AccordionContent>

@@ -38,17 +38,35 @@ import {
   getCountryBubbleRadius,
   groupCompanyLocations,
 } from '@/lib/geography';
+import {
+  buildCompanyWorldFacets,
+  buildWorldFilterCatalog,
+  EMPTY_WORLD_FILTERS,
+  filterCompaniesByWorldFilters,
+  WorldViewFilters,
+} from '@/lib/worldFilters';
+import { TopicKey } from '@/lib/topicConfig';
 import { CountryMapDrawer } from './CountryMapDrawer';
+import { ReactorMapDrawer } from './ReactorMapDrawer';
+import { WorldFilterPanel } from './WorldFilterPanel';
 import { LoadingSpinner } from './LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
+export interface WorldReactorSelection {
+  nodeId: string;
+  label: string;
+  fromCountryName?: string;
+}
+
 interface WorldExplorerProps {
   data: CompanyViewResponse | null;
   techTree: TechTree | null;
+  topic: TopicKey;
   isLoading: boolean;
   error: string | null;
   selectedCountryIso?: string;
+  selectedReactor?: WorldReactorSelection | null;
   onSelectCountry: (
     countryIso: string,
     countryName: string,
@@ -56,6 +74,9 @@ interface WorldExplorerProps {
     companies: CompanySummary[],
   ) => void;
   onClearCountry: () => void;
+  onShowReactor: (nodeId: string, label: string) => void;
+  onClearReactor: () => void;
+  onBackFromReactor?: () => void;
   onShowCompany: (company: CompanySummary) => void;
   onShowTechnology: (technologyId: string) => void;
 }
@@ -74,6 +95,29 @@ const MAX_ZOOM = 6;
 const MAP_COLORS = ['#dbeafe', '#93c5fd', '#60a5fa', '#2563eb', '#1e3a8a'];
 const COMPANY_LOCATIONS: CompanyLocation[] = [];
 
+/**
+ * Natural Earth country polygons include overseas territories, so the
+ * geometric centroid for France sits in the Atlantic. Prefer a mainland
+ * point when placing the company bubble.
+ */
+const MAINLAND_CENTROIDS: Record<string, [number, number]> = {
+  FR: [2.35, 46.6],
+  NL: [5.3, 52.1],
+  NO: [8.5, 60.5],
+  PT: [-8.0, 39.6],
+  US: [-98.5, 39.8],
+};
+
+function countryBubbleCoordinates(
+  countryIso: string | null | undefined,
+  geographyCentroid: [number, number],
+): [number, number] {
+  if (countryIso && MAINLAND_CENTROIDS[countryIso]) {
+    return MAINLAND_CENTROIDS[countryIso];
+  }
+  return geographyCentroid;
+}
+
 function getCountryColor(count: number, maximum: number): string {
   if (count === 0 || maximum === 0) return '#e5e7eb';
   const index = Math.min(
@@ -86,11 +130,16 @@ function getCountryColor(count: number, maximum: number): string {
 export function WorldExplorer({
   data,
   techTree,
+  topic,
   isLoading,
   error,
   selectedCountryIso,
+  selectedReactor = null,
   onSelectCountry,
   onClearCountry,
+  onShowReactor,
+  onClearReactor,
+  onBackFromReactor,
   onShowCompany,
   onShowTechnology,
 }: WorldExplorerProps) {
@@ -104,17 +153,41 @@ export function WorldExplorer({
   const [activeCountryIso, setActiveCountryIso] = useState<string | null>(
     selectedCountryIso ?? null,
   );
+  const [filters, setFilters] = useState<WorldViewFilters>(EMPTY_WORLD_FILTERS);
 
   useEffect(() => {
-    if (selectedCountryIso) setActiveCountryIso(selectedCountryIso);
+    setActiveCountryIso(selectedCountryIso ?? null);
   }, [selectedCountryIso]);
+
+  const companyFacets = useMemo(
+    () =>
+      data?.available
+        ? buildCompanyWorldFacets(data.companies, data.mappings, techTree)
+        : new Map(),
+    [data, techTree],
+  );
+  const filterCatalog = useMemo(
+    () => buildWorldFilterCatalog(companyFacets),
+    [companyFacets],
+  );
+  const filteredCompanies = useMemo(
+    () =>
+      data?.available
+        ? filterCompaniesByWorldFilters(
+            data.companies,
+            companyFacets,
+            filters,
+          )
+        : [],
+    [data, companyFacets, filters],
+  );
 
   const aggregates = useMemo(
     () =>
       data?.available
-        ? aggregateCompaniesByCountry(data.companies, layer, region)
+        ? aggregateCompaniesByCountry(filteredCompanies, layer, region)
         : [],
-    [data, layer, region],
+    [data, filteredCompanies, layer, region],
   );
   const aggregateByCountry = useMemo(
     () => new Map(aggregates.map((aggregate) => [aggregate.countryIso, aggregate])),
@@ -132,24 +205,36 @@ export function WorldExplorer({
     : undefined;
   const unlocatedCompanies = useMemo(
     () =>
-      data?.available
-        ? data.companies.filter(
-            (company) => getCompanyCountries(company, layer).length === 0,
-          )
-        : [],
-    [data, layer],
+      filteredCompanies.filter(
+        (company) => getCompanyCountries(company, layer).length === 0,
+      ),
+    [filteredCompanies, layer],
   );
   const locationGroups = useMemo(() => {
     if (!data?.available || layer !== 'headquarters') return [];
+    const filteredIds = new Set(filteredCompanies.map((company) => company.id));
     const groups = groupCompanyLocations(
       data.locations ?? COMPANY_LOCATIONS,
-      data.companies,
+      filteredCompanies,
     );
     return groups.filter((group) => {
       if (!aggregateByCountry.has(group.countryIso)) return false;
-      return !activeCountryIso || group.countryIso === activeCountryIso;
+      if (activeCountryIso && group.countryIso !== activeCountryIso) {
+        return false;
+      }
+      return group.companies.some((company) => filteredIds.has(company.id));
     });
-  }, [data, layer, aggregateByCountry, activeCountryIso]);
+  }, [data, layer, filteredCompanies, aggregateByCountry, activeCountryIso]);
+
+  useEffect(() => {
+    if (!activeCountryIso) return;
+    if (aggregateByCountry.has(activeCountryIso)) return;
+    setActiveCountryIso(null);
+    onClearCountry();
+    // Parent passes a fresh callback each render; only re-check when the
+    // filtered country set or selection changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeCountryIso, aggregateByCountry]);
   const verifiedCompanyCount = useMemo(
     () =>
       new Set(
@@ -196,6 +281,10 @@ export function WorldExplorer({
     onClearCountry();
   };
 
+  const changeFilters = (nextFilters: WorldViewFilters) => {
+    setFilters(nextFilters);
+  };
+
   const changeZoom = (increment: number) => {
     setPosition((current) => ({
       ...current,
@@ -228,86 +317,100 @@ export function WorldExplorer({
   return (
     <div className="relative h-full w-full overflow-hidden bg-slate-50">
       <div
-        className={`absolute top-4 z-20 w-72 rounded-lg border border-gray-200 bg-white/95 p-4 shadow-sm transition-all ${
-          selectedAggregate ? 'right-[25rem]' : 'right-4'
+        className={`glass-panel absolute top-4 z-20 flex max-h-[calc(100%-2rem)] w-80 flex-col overflow-hidden transition-all ${
+          selectedAggregate || selectedReactor ? 'right-[25rem]' : 'right-4'
         }`}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <Globe2 className="h-4 w-4 text-blue-700" />
-              <h2 className="text-sm font-semibold text-gray-900">World view</h2>
+        <div className="overflow-y-auto p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <Globe2 className="h-4 w-4 text-blue-700" />
+                <h2 className="text-sm font-semibold text-gray-900">
+                  World view
+                </h2>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                {coveredCompanies} of {mappedCompanies} mapped companies have
+                data for this layer.
+              </p>
             </div>
-            <p className="mt-1 text-xs text-gray-500">
-              {coveredCompanies} of {mappedCompanies} mapped companies have data
-              for this layer.
+            <Badge variant="secondary">{aggregates.length} countries</Badge>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant={layer === 'headquarters' ? 'default' : 'outline'}
+              onClick={() => changeLayer('headquarters')}
+            >
+              Headquarters
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={layer === 'manufacturing' ? 'default' : 'outline'}
+              onClick={() => changeLayer('manufacturing')}
+            >
+              Manufacturing
+            </Button>
+          </div>
+
+          <div className="mt-3">
+            <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-gray-500">
+              Product region
             </p>
+            <div className="flex flex-wrap gap-1">
+              {PRODUCT_REGIONS.map((option) => (
+                <Button
+                  key={option}
+                  type="button"
+                  size="sm"
+                  variant={region === option ? 'secondary' : 'ghost'}
+                  className="h-7 px-2 text-xs"
+                  onClick={() => changeRegion(option)}
+                >
+                  {option}
+                </Button>
+              ))}
+            </div>
           </div>
-          <Badge variant="secondary">{aggregates.length} countries</Badge>
-        </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant={layer === 'headquarters' ? 'default' : 'outline'}
-            onClick={() => changeLayer('headquarters')}
-          >
-            Headquarters
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant={layer === 'manufacturing' ? 'default' : 'outline'}
-            onClick={() => changeLayer('manufacturing')}
-          >
-            Manufacturing
-          </Button>
-        </div>
-
-        <div className="mt-3">
-          <p className="mb-1.5 text-xs font-medium uppercase tracking-wide text-gray-500">
-            Product region
-          </p>
-          <div className="flex flex-wrap gap-1">
-            {PRODUCT_REGIONS.map((option) => (
-              <Button
-                key={option}
-                type="button"
-                size="sm"
-                variant={region === option ? 'secondary' : 'ghost'}
-                className="h-7 px-2 text-xs"
-                onClick={() => changeRegion(option)}
-              >
-                {option}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 text-xs text-gray-500">
-          <span>Unknown / unlocated</span>
-          <span className="font-medium text-gray-800">
-            {unlocatedCompanies.length}
-          </span>
-        </div>
-        {layer === 'headquarters' && (
-          <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
-            <span>Verified city pins</span>
+          <div className="mt-3 flex items-center justify-between border-t border-gray-200 pt-2 text-xs text-gray-500">
+            <span>Unknown / unlocated</span>
             <span className="font-medium text-gray-800">
-              {verifiedCompanyCount}
+              {unlocatedCompanies.length}
             </span>
           </div>
-        )}
-        {layer === 'manufacturing' && (
-          <p className="mt-2 text-xs leading-relaxed text-gray-500">
-            Manufacturing coverage is sparse and remains separate from
-            headquarters.
-          </p>
-        )}
+          {layer === 'headquarters' && (
+            <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+              <span>Verified city pins</span>
+              <span className="font-medium text-gray-800">
+                {verifiedCompanyCount}
+              </span>
+            </div>
+          )}
+          {layer === 'manufacturing' && (
+            <p className="mt-2 text-xs leading-relaxed text-gray-500">
+              Manufacturing coverage is sparse and remains separate from
+              headquarters.
+            </p>
+          )}
+
+          {data?.available && (
+            <WorldFilterPanel
+              catalog={filterCatalog}
+              filters={filters}
+              matchCount={filteredCompanies.length}
+              totalCount={data.companies.length}
+              onChange={changeFilters}
+            />
+          )}
+        </div>
       </div>
 
-      <div className="absolute left-4 top-32 z-20 flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white/95 shadow-sm">
+      <div className="glass-panel absolute left-4 top-32 z-20 flex flex-col overflow-hidden">
         <Button
           type="button"
           variant="ghost"
@@ -374,7 +477,11 @@ export function WorldExplorer({
                   : undefined;
                 const count = aggregate?.companies.length ?? 0;
                 const isSelected = activeCountryIso === countryIso;
-                const centroid = geoCentroid(geography);
+                const geographyCentroid = geoCentroid(geography) as [number, number];
+                const centroid = countryBubbleCoordinates(
+                  countryIso,
+                  geographyCentroid,
+                );
                 const bubbleRadius = getCountryBubbleRadius(count, maximumCount);
                 const companyLabel = count === 1 ? 'company' : 'companies';
 
@@ -521,7 +628,7 @@ export function WorldExplorer({
         </ZoomableGroup>
       </ComposableMap>
 
-      <div className="absolute bottom-5 left-5 z-20 rounded-lg border border-gray-200 bg-white/95 p-3 shadow-sm">
+      <div className="glass-panel absolute bottom-5 left-5 z-20 p-3">
         <p className="mb-2 text-xs font-medium text-gray-700">Companies</p>
         <div className="flex items-center gap-1">
           {MAP_COLORS.map((color) => (
@@ -572,7 +679,25 @@ export function WorldExplorer({
         </div>
       )}
 
-      {selectedAggregate && data?.available && (
+      {selectedReactor && data?.available && (
+        <div className="absolute bottom-20 left-4 right-4 top-4 z-30 md:bottom-4 md:left-auto md:w-96">
+          <ReactorMapDrawer
+            nodeId={selectedReactor.nodeId}
+            label={selectedReactor.label}
+            topic={topic}
+            techTree={techTree}
+            companies={data.companies}
+            mappings={data.mappings}
+            fromCountryName={selectedReactor.fromCountryName}
+            onClose={onClearReactor}
+            onBackToCountry={onBackFromReactor}
+            onShowCompany={onShowCompany}
+            onOpenInTechTree={onShowTechnology}
+          />
+        </div>
+      )}
+
+      {!selectedReactor && selectedAggregate && data?.available && (
         <div className="absolute bottom-20 left-4 right-4 top-4 z-30 md:bottom-4 md:left-auto md:w-96">
           <CountryMapDrawer
             aggregate={selectedAggregate}
@@ -583,6 +708,7 @@ export function WorldExplorer({
             onClose={closeDrawer}
             onShowCompany={onShowCompany}
             onShowTechnology={onShowTechnology}
+            onShowReactor={onShowReactor}
           />
         </div>
       )}

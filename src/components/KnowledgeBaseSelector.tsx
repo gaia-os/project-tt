@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { TopicKey, titleizeLabel } from '@/lib/topicConfig';
+import React from 'react';
+import { TopicKey, labelForTopic, titleizeLabel } from '@/lib/topicConfig';
+import { CustomTree } from '@/lib/customTrees';
+import { useTopics } from '@/hooks/useTopics';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -14,30 +19,44 @@ import { Database } from 'lucide-react';
 interface KnowledgeBaseSelectorProps {
   topic: TopicKey;
   onTopicChange: (value: TopicKey) => void;
+  /** Saved custom trees, offered next to the topics (technology view). */
+  customTrees?: CustomTree[];
+  activeCustomTreeId?: string | null;
+  onOpenCustomTree?: (tree: CustomTree) => void;
 }
 
-interface TopicSummary {
-  id: string;
-  label: string;
-}
+const TREE_VALUE_PREFIX = 'tree:';
 
 export const KnowledgeBaseSelector: React.FC<KnowledgeBaseSelectorProps> = ({
   topic,
   onTopicChange,
+  customTrees = [],
+  activeCustomTreeId = null,
+  onOpenCustomTree,
 }) => {
-  const [topics, setTopics] = useState<TopicSummary[]>([]);
-
-  useEffect(() => {
-    fetch('/investment-tech-tree/api/topics')
-      .then((res) => res.json())
-      .then(setTopics)
-      .catch(() => setTopics([]));
-  }, []);
+  const { topics } = useTopics();
 
   // Ensure the active topic is always selectable even before the list loads.
   const items = topics.length
     ? topics
     : [{ id: topic, label: titleizeLabel(topic) }];
+
+  const showTrees = !!onOpenCustomTree && customTrees.length > 0;
+  const activeTree = activeCustomTreeId
+    ? customTrees.find((tree) => tree.id === activeCustomTreeId)
+    : undefined;
+  const value = activeTree ? `${TREE_VALUE_PREFIX}${activeTree.id}` : topic;
+
+  const handleChange = (next: string) => {
+    if (next.startsWith(TREE_VALUE_PREFIX)) {
+      const tree = customTrees.find(
+        (candidate) => candidate.id === next.slice(TREE_VALUE_PREFIX.length),
+      );
+      if (tree) onOpenCustomTree?.(tree);
+      return;
+    }
+    onTopicChange(next as TopicKey);
+  };
 
   return (
     <div className="absolute top-6 left-4 z-10">
@@ -50,20 +69,43 @@ export const KnowledgeBaseSelector: React.FC<KnowledgeBaseSelectorProps> = ({
             SELECT TECH TREE
           </h3>
         </div>
-        <Select value={topic} onValueChange={(value) => onTopicChange(value)}>
-          <SelectTrigger className="w-full h-10 bg-white border-gray-300 hover:border-gray-500 focus:ring-2 focus:ring-gray-400 transition-all shadow-sm font-medium">
+        <Select value={value} onValueChange={handleChange}>
+          <SelectTrigger className="w-full max-w-[16rem] h-10 bg-white border-gray-300 hover:border-gray-500 focus:ring-2 focus:ring-gray-400 transition-all shadow-sm font-medium">
             <SelectValue placeholder="Select tech tree" />
           </SelectTrigger>
           <SelectContent>
-            {items.map((topicItem) => (
-              <SelectItem
-                key={topicItem.id}
-                value={topicItem.id}
-                className="font-medium hover:bg-gray-100 cursor-pointer"
-              >
-                {topicItem.label}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              {showTrees && <SelectLabel>Tech trees</SelectLabel>}
+              {items.map((topicItem) => (
+                <SelectItem
+                  key={topicItem.id}
+                  value={topicItem.id}
+                  className="font-medium hover:bg-gray-100 cursor-pointer"
+                >
+                  {topicItem.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+            {showTrees && (
+              <>
+                <SelectSeparator />
+                <SelectGroup>
+                  <SelectLabel>My trees</SelectLabel>
+                  {customTrees.map((tree) => (
+                    <SelectItem
+                      key={tree.id}
+                      value={`${TREE_VALUE_PREFIX}${tree.id}`}
+                      className="cursor-pointer hover:bg-gray-100"
+                    >
+                      {tree.name}
+                      <span className="ml-1.5 text-xs text-gray-500">
+                        · {labelForTopic(topics, tree.topic)}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </>
+            )}
           </SelectContent>
         </Select>
       </div>

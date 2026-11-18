@@ -42,6 +42,7 @@ const COMPANY_MAPPING_PROJECTION = {
   confidence: 1,
   method: 1,
   reasoning: 1,
+  roles: 1,
 } as const;
 
 function nullableString(value: unknown): string | null {
@@ -100,6 +101,7 @@ function toCompanyTechnologyMapping(document: Document): CompanyTechnologyMappin
   const companyId = String(document.company_id);
   const techTreeNodeId = String(document.tech_tree_node_id);
 
+  const roles = stringArray(document.roles);
   return {
     id: nullableString(document.id) ?? `${companyId}__${techTreeNodeId}`,
     company_id: companyId,
@@ -108,6 +110,7 @@ function toCompanyTechnologyMapping(document: Document): CompanyTechnologyMappin
     confidence: nullableNumber(document.confidence),
     method: nullableString(document.method),
     reasoning: nullableString(document.reasoning),
+    ...(roles.length ? { roles } : {}),
   };
 }
 

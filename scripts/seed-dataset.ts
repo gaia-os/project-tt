@@ -37,7 +37,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { Binary, Document, MongoClient } from 'mongodb';
+import { Binary, Document, MongoClient, ObjectId } from 'mongodb';
 import { parse as parseYaml } from 'yaml';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
@@ -822,7 +822,7 @@ async function main() {
   try {
     const db = client.db(DB_NAME);
     await db.collection('meta').deleteMany({});
-    await db.collection('meta').insertOne({ _id: 'meta', id: DATASET, ...datasetMeta, seeded_at: new Date().toISOString() });
+    await db.collection('meta').insertOne({ _id: 'meta' as unknown as ObjectId, id: DATASET, ...datasetMeta, seeded_at: new Date().toISOString() });
     const writes: [string, Document[], Document][] = [
       ['nodes', nodeDocs, { id: 1 }],
       ['edges', edgeDocs, { id: 1 }],

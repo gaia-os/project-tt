@@ -7,13 +7,13 @@ import { getTopic } from '@/lib/topics.server';
 // DELETE - Delete an edge
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const denied = requireAdmin(request);
   if (denied) return denied;
 
   try {
-    const edgeId = params.id;
+    const { id: edgeId } = await params;
 
     // Get topic from query parameters
     const topic = request.nextUrl.searchParams.get('topic') as TopicKey;

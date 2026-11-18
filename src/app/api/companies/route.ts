@@ -41,12 +41,18 @@ export async function GET(request: NextRequest) {
       const edge = edges.find((e) => e.company_id === company.id);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _id, ...companyWithoutId } = company;
+      const relationRoles = Array.isArray(edge?.roles)
+        ? edge.roles.filter(
+            (role): role is string => typeof role === 'string' && !!role.trim(),
+          )
+        : [];
       return {
         ...companyWithoutId,
         is_primary: edge?.is_primary ?? false,
         relation_confidence: edge?.confidence ?? null,
         relation_method: edge?.method ?? null,
         relation_reasoning: edge?.reasoning ?? null,
+        relation_roles: relationRoles,
       };
     });
 

@@ -4,12 +4,25 @@ import { useEffect, useState } from 'react';
 import { CompanyViewResponse } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 
-export function useCompanyView(topic: TopicKey) {
+interface UseCompanyViewOptions {
+  /** Skip the request until a view that needs company data is opened. */
+  enabled?: boolean;
+}
+
+export function useCompanyView(
+  topic: TopicKey,
+  { enabled = true }: UseCompanyViewOptions = {},
+) {
   const [data, setData] = useState<CompanyViewResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!enabled) {
+      setIsLoading(false);
+      return;
+    }
+
     const controller = new AbortController();
 
     async function loadCompanyView() {
@@ -43,7 +56,7 @@ export function useCompanyView(topic: TopicKey) {
 
     void loadCompanyView();
     return () => controller.abort();
-  }, [topic]);
+  }, [topic, enabled]);
 
   return { data, isLoading, error };
 }

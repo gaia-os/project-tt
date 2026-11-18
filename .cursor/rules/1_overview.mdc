@@ -60,6 +60,22 @@ Each node includes TRL tracking, descriptions, and category classification.
 - XSS protection via DOMPurify for AI responses
 - Context includes full tech tree data for informed responses
 
+## First Visit and Guided Pathways
+
+- **Welcome flow** (`src/components/onboarding/`): on a first bare visit,
+  transparent sector and technology cards let the user pick a deployment
+  concept. Skip opens the full map; completion is stored in localStorage
+  (`tt-onboarding-v1`).
+- **Guided pathway** (`src/lib/pathway.ts`, `usePathwayMode`, `PathwayGuide`):
+  lays out only the concept's upstream prerequisites, staged by longest-path
+  level, and steps through them on the tree. Falls back to the connected view
+  when a concept has no prerequisites.
+- **URL state** (`useExplorerUrlState`): `topic`, `view`, `focus`, `pathway`,
+  `step` (plus optional `panel` / `tech`). Write with the hook's `updateUrl`,
+  never with component-local state.
+- Role labels are humanised via `src/lib/nodeRoles.ts` (never show raw enums
+  like `ReactorConcept` in UI).
+
 ## Node Interaction Features
 
 The application provides intuitive node interaction through always-visible action icons:
@@ -70,6 +86,7 @@ The application provides intuitive node interaction through always-visible actio
 - **GroupSelector Behavior**:
   - Shows normal grouping options when no node is selected or when showing node details
   - Shows only a reset button when connected nodes are being displayed
+  - Shows only "Exit pathway" and "Choose another" while a guided pathway is active
   - Reset button returns to full graph view and clears selection
 - **Filtering Logic**:
   - "Show Details" maintains current graph view (connected nodes or full view) with node details

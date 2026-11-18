@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { Network } from 'lucide-react';
-import { CompanyInfo, CompanySummary } from '@/lib/types';
+import {
+  CompanyInfo,
+  CompanySummary,
+  CompanyTechnologyMapping,
+  TechTree,
+} from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import CompanyDetails from './CompanyDetails';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -11,6 +16,8 @@ import { Button } from '@/components/ui/button';
 interface CompanySelectionDetailsProps {
   company: CompanySummary | CompanyInfo;
   topic: TopicKey;
+  mappings?: CompanyTechnologyMapping[];
+  techTree?: TechTree | null;
   onShowInCompanyGraph?: (company: CompanySummary | CompanyInfo) => void;
   onShowTechnology: (technologyId: string) => void;
   embedded?: boolean;
@@ -19,6 +26,8 @@ interface CompanySelectionDetailsProps {
 export function CompanySelectionDetails({
   company,
   topic,
+  mappings = [],
+  techTree = null,
   onShowInCompanyGraph,
   onShowTechnology,
   embedded = false,
@@ -101,7 +110,13 @@ export function CompanySelectionDetails({
             <LoadingSpinner />
           </div>
         ) : (
-          <CompanyDetails company={displayedCompany} topic={topic} />
+          <CompanyDetails
+            company={displayedCompany}
+            topic={topic}
+            mappings={mappings}
+            techTree={techTree}
+            onSelectDesign={onShowTechnology}
+          />
         )}
       </div>
     </div>

@@ -58,16 +58,21 @@ export const NodeActions: React.FC<NodeActionsProps> = ({
           onClick={handleShowLiterature}
           title={
             literatureExpanded
-              ? 'Hide Literature'
-              : `Show Literature${literatureCount ? ` (${literatureCount} papers)` : ''}`
+              ? 'Hide literature'
+              : `Show literature${literatureCount ? ` (${literatureCount} papers)` : ''}`
+          }
+          aria-label={
+            literatureExpanded
+              ? 'Hide literature'
+              : `Show literature${literatureCount ? ` (${literatureCount} papers)` : ''}`
           }
         >
-          {/* Book icon */}
           <svg
             className="h-3 w-3 text-indigo-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden
           >
             <path
               strokeLinecap="round"
@@ -88,14 +93,17 @@ export const NodeActions: React.FC<NodeActionsProps> = ({
               : 'bg-white border-gray-200 hover:bg-gray-50'
           }`}
           onClick={handleShowCompanies}
-          title={companiesExpanded ? 'Hide Linked Companies' : 'Show Linked Companies'}
+          title={companiesExpanded ? 'Hide linked companies' : 'Show linked companies'}
+          aria-label={
+            companiesExpanded ? 'Hide linked companies' : 'Show linked companies'
+          }
         >
-          {/* Building / company icon */}
           <svg
             className="h-3 w-3 text-gray-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden
           >
             <path
               strokeLinecap="round"
@@ -111,13 +119,15 @@ export const NodeActions: React.FC<NodeActionsProps> = ({
         size="sm"
         className="h-6 w-6 p-0 bg-white border border-gray-200 shadow-sm hover:bg-gray-50"
         onClick={handleShowDetails}
-        title="Show Node Details"
+        title="Show node details"
+        aria-label="Show node details"
       >
         <svg
           className="h-3 w-3 text-gray-600"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden
         >
           <path
             strokeLinecap="round"
@@ -132,13 +142,15 @@ export const NodeActions: React.FC<NodeActionsProps> = ({
         size="sm"
         className="h-6 w-6 p-0 bg-white border border-gray-200 shadow-sm hover:bg-gray-50"
         onClick={handleShowConnected}
-        title="Show Connected Nodes Only"
+        title="Show connected nodes only"
+        aria-label="Show connected nodes only"
       >
         <svg
           className="h-3 w-3 text-gray-600"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          aria-hidden
         >
           <path
             strokeLinecap="round"

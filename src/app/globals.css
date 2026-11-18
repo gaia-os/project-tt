@@ -30,7 +30,10 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem
+    --radius: 1rem;
+    --sheet-bg: rgba(255, 255, 255, 0.72);
+    --sheet-border: rgba(255, 255, 255, 0.55);
+    --sheet-shadow: 0 24px 80px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04);
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -65,6 +68,98 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+}
+
+@layer components {
+  .glass-sheet {
+    background: var(--sheet-bg);
+    border: 1px solid var(--sheet-border);
+    box-shadow: var(--sheet-shadow);
+    @apply rounded-3xl backdrop-blur-2xl;
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    @apply rounded-2xl shadow-sm backdrop-blur-xl;
+  }
+
+  .choice-row {
+    @apply flex w-full items-center gap-4 rounded-2xl border border-transparent bg-white/50 px-4 py-3.5 text-left transition duration-300 ease-out;
+    @apply hover:border-black/5 hover:bg-white/90 hover:shadow-sm;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20;
+  }
+
+  /* First-run foyer: soft wash so the live tree remains the visual anchor. */
+  .welcome-veil {
+    background:
+      linear-gradient(
+        105deg,
+        rgba(248, 250, 252, 0.94) 0%,
+        rgba(248, 250, 252, 0.88) 38%,
+        rgba(241, 245, 249, 0.55) 62%,
+        rgba(226, 232, 240, 0.28) 100%
+      );
+    backdrop-filter: blur(10px) saturate(1.05);
+    @apply data-[state=open]:animate-in data-[state=open]:fade-in-0;
+  }
+
+  .welcome-ambient {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 55% 45% at 12% 18%, rgba(14, 165, 233, 0.08), transparent 70%),
+      radial-gradient(ellipse 40% 35% at 78% 72%, rgba(16, 185, 129, 0.07), transparent 65%),
+      radial-gradient(ellipse 30% 25% at 55% 12%, rgba(148, 163, 184, 0.12), transparent 60%);
+    animation: welcome-drift 18s ease-in-out infinite alternate;
+  }
+}
+
+/*
+ * Tech tree level of detail (data-lod is set from the zoom level). Zoomed
+ * out, node buttons are too small to hit and labels are sub-pixel noise, so
+ * nodes fall back to role-tinted blocks that keep the tree's shape readable.
+ */
+.react-flow[data-lod='mid'] .tt-node-actions,
+.react-flow[data-lod='far'] .tt-node-actions {
+  display: none;
+}
+
+.react-flow[data-lod='far'] .tt-node-label {
+  visibility: hidden;
+}
+
+.react-flow[data-lod='far'] .react-flow__node-default {
+  background: color-mix(in srgb, var(--tt-role) 32%, white);
+}
+
+/* A fold or unfold is being laid out; the morph follows. */
+[data-relayout='pending'] .react-flow__pane,
+[data-relayout='pending'] .react-flow__node {
+  cursor: progress;
+}
+
+@keyframes welcome-drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.85;
+  }
+  to {
+    transform: translate3d(-1.5%, 1%, 0) scale(1.04);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

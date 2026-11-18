@@ -1,22 +1,41 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Send, Loader2, Trash2, Upload } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Send, Loader2, Trash2, Upload, Crosshair } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import { ChatMessage, ChatHistory, KgPaperDossier } from '@/lib/types';
-import { TopicKey } from '@/lib/topicConfig';
+import { ChatMessage, KgPaperDossier } from '@/lib/types';
+import { labelForTopic, TopicKey } from '@/lib/topicConfig';
 import PaperDetails from './PaperDetails';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useTechTree } from '@/hooks/useTechTree';
-import { chatContextTree } from '@/lib/smrFilters';
+import { useTopics } from '@/hooks/useTopics';
+import {
+  ChatScope,
+  buildChatPayload,
+  describeScopeSize,
+  resolveChatScope,
+} from '@/lib/chatContext';
+import {
+  deleteThread,
+  loadScroll,
+  loadThread,
+  saveScroll,
+  saveThread,
+} from '@/lib/chatThreadStorage';
 
 type ChatMode = 'instant' | 'thinking';
 
 interface ChatProps {
   topic: TopicKey;
+  /**
+   * What the assistant talks about: a pathway, a custom tree, a narrowed
+   * view or the whole tree. Each has its own conversation. Without it the
+   * chat covers the whole topic tree.
+   */
+  scope?: ChatScope | null;
 }
 
 // Paper-id citations like [IAEA-CN-28-H-10] emitted by the kg-service,
@@ -31,9 +50,73 @@ function linkCitations(html: string): string {
   });
 }
 
-const Chat: React.FC<ChatProps> = ({ topic }) => {
+const SUGGESTIONS: Record<'topic' | 'pathway' | 'custom' | 'view', [string, string][]> = {
+  topic: [
+    ['Explanation of Tech Tree', 'What is this Tech Tree about?'],
+    ['Highest Impact', 'What are the enabling technologies with the highest impact?'],
+    ['Highest TRL Technologies', 'Which technologies have the highest TRL?'],
+    ['Investment Opportunities', 'What are the most promising investments?'],
+  ],
+  pathway: [
+    ['Bottleneck', 'What is the main bottleneck on this path, and why?'],
+    ['Riskiest step', 'Which step of this path is the riskiest?'],
+    ['Plain summary', 'Summarise this path in plain terms.'],
+    ['What to fund', 'Where would investment speed this path up most?'],
+  ],
+  custom: [
+    ['Summary', 'Summarise this tree.'],
+    ['Gaps', 'What important prerequisites are missing from this selection?'],
+    ['Least mature', 'Which of these technologies are the least mature?'],
+    ['Investment', 'Where should investment in this tree go first?'],
+  ],
+  view: [
+    ['What am I seeing', 'Summarise the nodes I am looking at.'],
+    ['Least mature', 'Which of these are the least mature?'],
+    ['How they connect', 'How do these nodes depend on each other?'],
+    ['Investment', 'Which of these are the most promising investments?'],
+  ],
+};
+
+interface ThreadState {
+  key: string;
+  messages: ChatMessage[];
+}
+
+const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
   const { techTree } = useTechTree(topic);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { topics } = useTopics();
+  const topicLabel = labelForTopic(topics, topic);
+  // "Use whole tree" for one particular scope; resets when the scope changes.
+  const [wholeTreeFor, setWholeTreeFor] = useState<string | null>(null);
+  const scopeId = scope ? `${scope.threadKey}|${scope.refinement?.label ?? ''}` : null;
+  const wholeTree = useMemo(
+    () =>
+      techTree
+        ? resolveChatScope({
+            topic,
+            topicLabel,
+            techTree,
+            draft: null,
+            pathway: null,
+            custom: null,
+            view: null,
+          })
+        : null,
+    [topic, topicLabel, techTree],
+  );
+  const usingWholeTree = !scope || (scopeId !== null && wholeTreeFor === scopeId);
+  const activeScope = usingWholeTree ? wholeTree : scope;
+  const threadKey = activeScope?.threadKey ?? topic;
+
+  const [thread, setThread] = useState<ThreadState>(() => ({
+    key: threadKey,
+    messages: loadThread(threadKey),
+  }));
+  const threadKeyRef = useRef(thread.key);
+  // Set when a thread is loaded, so loading it does not count as a change.
+  const loadedRef = useRef<ChatMessage[] | null>(thread.messages);
+  const messages = thread.messages;
+
   const [input, setInput] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,58 +133,48 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
   const MAX_REQUESTS_PER_HOUR = 20;
   const MIN_REQUEST_INTERVAL = 3000;
 
+  // Each context has its own conversation: switching loads it.
   useEffect(() => {
-    setMessages([]);
-    try {
-      const storageKey = `tech-tree-chat-history-${topic}`;
-      const savedHistory = localStorage.getItem(storageKey);
-      if (savedHistory) {
-        const history: ChatHistory = JSON.parse(savedHistory);
-        setMessages(history.messages);
-        setTimeout(() => {
-          const savedScrollPosition = localStorage.getItem(
-            `tech-tree-chat-scroll-${topic}`,
-          );
-          if (savedScrollPosition && messagesContainerRef.current) {
-            messagesContainerRef.current.scrollTop = parseInt(
-              savedScrollPosition,
-              10,
-            );
-          }
-        }, 100);
-      }
+    if (threadKeyRef.current === threadKey) return;
+    const loaded = loadThread(threadKey);
+    threadKeyRef.current = threadKey;
+    loadedRef.current = loaded;
+    setThread({ key: threadKey, messages: loaded });
+  }, [threadKey]);
 
+  useEffect(() => {
+    const savedScrollPosition = loadScroll(thread.key);
+    const timer = window.setTimeout(() => {
+      const container = messagesContainerRef.current;
+      if (!container) return;
+      container.scrollTop =
+        savedScrollPosition ?? (thread.messages.length ? container.scrollHeight : 0);
+    }, 100);
+    return () => window.clearTimeout(timer);
+    // Only when another conversation is shown.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [thread.key]);
+
+  useEffect(() => {
+    if (thread.messages === loadedRef.current) return;
+    saveThread(thread.key, thread.messages);
+  }, [thread]);
+
+  useEffect(() => {
+    try {
       const savedRequestCount = localStorage.getItem('tech-tree-request-count');
-      const savedLastRequestTime = localStorage.getItem(
-        'tech-tree-last-request-time',
-      );
+      const savedLastRequestTime = localStorage.getItem('tech-tree-last-request-time');
       if (savedRequestCount) setRequestCount(parseInt(savedRequestCount, 10));
-      if (savedLastRequestTime)
-        setLastRequestTime(parseInt(savedLastRequestTime, 10));
+      if (savedLastRequestTime) setLastRequestTime(parseInt(savedLastRequestTime, 10));
     } catch (error) {
       console.error('Error loading chat history:', error);
     }
-  }, [topic]);
-
-  useEffect(() => {
-    if (messages.length > 0) {
-      const history: ChatHistory = { messages, lastUpdated: Date.now() };
-      try {
-        const storageKey = `tech-tree-chat-history-${topic}`;
-        localStorage.setItem(storageKey, JSON.stringify(history));
-      } catch (error) {
-        console.error('Error saving chat history:', error);
-      }
-    }
-  }, [messages, topic]);
+  }, []);
 
   useEffect(() => {
     try {
       localStorage.setItem('tech-tree-request-count', requestCount.toString());
-      localStorage.setItem(
-        'tech-tree-last-request-time',
-        lastRequestTime.toString(),
-      );
+      localStorage.setItem('tech-tree-last-request-time', lastRequestTime.toString());
     } catch (error) {
       console.error('Error saving rate limiting data:', error);
     }
@@ -115,6 +188,24 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
       }
     }
   }, [messages]);
+
+  /**
+   * Changes a conversation. A reply that is still streaming when the
+   * visitor switches context keeps going to the conversation it belongs to:
+   * into state while that one is shown, else into storage when `persist`.
+   */
+  const updateThread = useCallback(
+    (key: string, update: (messages: ChatMessage[]) => ChatMessage[], persist = true) => {
+      if (threadKeyRef.current === key) {
+        setThread((current) =>
+          current.key === key ? { key, messages: update(current.messages) } : current,
+        );
+      } else if (persist) {
+        saveThread(key, update(loadThread(key)));
+      }
+    },
+    [],
+  );
 
   const checkRateLimit = (): boolean => {
     const now = Date.now();
@@ -150,6 +241,7 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() && !file) return;
+    const key = thread.key;
 
     if (!checkRateLimit()) {
       const errorMessage: ChatMessage = {
@@ -160,7 +252,7 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
           : `Please wait at least ${MIN_REQUEST_INTERVAL / 1000} seconds between requests.`,
         timestamp: Date.now(),
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      updateThread(key, (prev) => [...prev, errorMessage]);
       return;
     }
 
@@ -169,9 +261,13 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
       type: 'user',
       content: input.trim() + (file ? ` [File: ${file.name}]` : ''),
       timestamp: Date.now(),
+      ...(activeScope?.refinement
+        ? { context: { label: `${activeScope.refinement.label} · ${describeScopeSize(activeScope)}` } }
+        : {}),
     };
+    const history = messages;
 
-    setMessages((prev) => [...prev, userMessage]);
+    updateThread(key, (prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
     setUploadStatus(file ? 'Processing PDF document...' : '');
@@ -181,6 +277,29 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
 
     // Draft assistant message, filled progressively by the NDJSON stream.
     const draftId = (Date.now() + 1).toString();
+    let draftText = '';
+    let tools: string[] = [];
+    let started = false;
+    const writeDraft = (persist: boolean) =>
+      updateThread(
+        key,
+        (prev) =>
+          prev.some((m) => m.id === draftId)
+            ? prev.map((m) =>
+                m.id === draftId ? { ...m, content: draftText, toolsUsed: [...tools] } : m,
+              )
+            : [
+                ...prev,
+                {
+                  id: draftId,
+                  type: 'assistant',
+                  content: draftText,
+                  toolsUsed: [...tools],
+                  timestamp: Date.now(),
+                },
+              ],
+        persist,
+      );
 
     try {
       // Convert file to base64 on the client if present
@@ -195,14 +314,19 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
         fileData = { base64, mimeType: file.type, fileName: file.name };
       }
 
+      const payload = activeScope
+        ? buildChatPayload(activeScope)
+        : { context: { nodes: [], edges: [] } };
+
       // Call server-side API route — API key never touches the browser
       const res = await fetch('/investment-tech-tree/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: userMessage.content,
-          context: chatContextTree(techTree),
-          history: messages,
+          context: payload.context,
+          ...(payload.scope ? { scope: payload.scope } : {}),
+          history,
           topic,
           fileData,
           mode,
@@ -214,20 +338,8 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
         throw new Error(err.error || 'Failed to get response');
       }
 
-      setMessages((prev) => [
-        ...prev,
-        { id: draftId, type: 'assistant', content: '', timestamp: Date.now() },
-      ]);
-      let draftText = '';
-      let tools: string[] = [];
-      const updateDraft = () =>
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === draftId
-              ? { ...m, content: draftText, toolsUsed: [...tools] }
-              : m,
-          ),
-        );
+      started = true;
+      writeDraft(false);
 
       // NDJSON stream: tool calls, progress notes, text deltas, done/error.
       const reader = res.body.getReader();
@@ -268,32 +380,19 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
           } else if (ev.type === 'error') {
             throw new Error(ev.error || 'KG service error');
           }
-          updateDraft();
+          writeDraft(false);
         }
       }
       if (!draftText) draftText = 'No response received.';
-      updateDraft();
+      writeDraft(true);
     } catch (error) {
       console.error('Error sending message:', error);
-      const errorText =
+      draftText =
         error instanceof Error
           ? `Error: ${error.message}`
           : 'Sorry, there was an error processing your request. Please try again.';
-      setMessages((prev) =>
-        prev.some((m) => m.id === draftId)
-          ? prev.map((m) =>
-              m.id === draftId ? { ...m, content: errorText } : m,
-            )
-          : [
-              ...prev,
-              {
-                id: draftId,
-                type: 'assistant',
-                content: errorText,
-                timestamp: Date.now(),
-              },
-            ],
-      );
+      if (!started) tools = [];
+      writeDraft(true);
     } finally {
       setIsLoading(false);
       setUploadStatus('');
@@ -302,18 +401,14 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
   };
 
   const clearHistory = () => {
-    setMessages([]);
-    const storageKey = `tech-tree-chat-history-${topic}`;
-    localStorage.removeItem(storageKey);
-    localStorage.removeItem(`tech-tree-chat-scroll-${topic}`);
+    deleteThread(thread.key);
+    loadedRef.current = [];
+    setThread({ key: thread.key, messages: loadedRef.current });
   };
 
   const saveScrollPosition = () => {
     if (messagesContainerRef.current) {
-      localStorage.setItem(
-        `tech-tree-chat-scroll-${topic}`,
-        messagesContainerRef.current.scrollTop.toString(),
-      );
+      saveScroll(thread.key, messagesContainerRef.current.scrollTop);
     }
   };
 
@@ -329,11 +424,35 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
     setTimeout(() => textareaRef.current?.focus(), 0);
   };
 
+  const suggestionKind: keyof typeof SUGGESTIONS = !activeScope
+    ? 'topic'
+    : activeScope.kind === 'pathway'
+      ? 'pathway'
+      : activeScope.kind === 'custom' || activeScope.kind === 'draft'
+        ? 'custom'
+        : activeScope.refinement
+          ? 'view'
+          : 'topic';
+  const isNarrowed = !!scope && (scope.kind !== 'topic' || !!scope.refinement);
+
   return (
     <div className="flex flex-col h-full bg-white">
       {/* Header */}
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-semibold">Tech Tree Chat</CardTitle>
+        <div className="min-w-0">
+          <CardTitle className="truncate text-lg font-semibold" title={activeScope?.title}>
+            {activeScope && activeScope.kind !== 'topic' ? activeScope.title : 'Tech Tree Chat'}
+          </CardTitle>
+          {activeScope && activeScope.kind !== 'topic' && (
+            <p className="text-xs text-gray-500">
+              {activeScope.kind === 'pathway'
+                ? 'Conversation about this pathway'
+                : activeScope.kind === 'draft'
+                  ? 'Conversation about the tree you are building'
+                  : 'Conversation about your tree'}
+            </p>
+          )}
+        </div>
         <div className="flex items-center space-x-2">
           {rateLimitExceeded && (
             <Badge variant="destructive" className="text-xs">
@@ -349,7 +468,7 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
               size="sm"
               onClick={clearHistory}
               className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50"
-              title="Clear Chat History"
+              title="Clear this conversation"
             >
               <Trash2 size={18} />
             </Button>
@@ -366,23 +485,13 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
         {messages.length === 0 ? (
           <Card>
             <CardContent className="text-center text-gray-500 mt-8">
-              <p className="text-lg mb-4">Ask anything about the Tech Tree:</p>
+              <p className="text-lg mb-4">
+                {suggestionKind === 'topic'
+                  ? 'Ask anything about the Tech Tree:'
+                  : `Ask about ${activeScope?.refinement?.label ?? activeScope?.title ?? 'this selection'}:`}
+              </p>
               <div className="flex flex-wrap gap-2 justify-center max-w-md mx-auto">
-                {[
-                  ['Explanation of Tech Tree', 'What is this Tech Tree about?'],
-                  [
-                    'Highest Impact',
-                    'What are the enabling technologies with the highest impact?',
-                  ],
-                  [
-                    'Highest TRL Technologies',
-                    'Which technologies have the highest TRL?',
-                  ],
-                  [
-                    'Investment Opportunities',
-                    'What are the most promising investments?',
-                  ],
-                ].map(([label, question]) => (
+                {SUGGESTIONS[suggestionKind].map(([label, question]) => (
                   <Badge
                     key={label}
                     variant="outline"
@@ -473,6 +582,12 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
                       message.type === 'user' ? 'text-slate-100' : 'text-gray-500'
                     }`}
                   >
+                    {message.context && (
+                      <span className="mr-1.5 inline-flex items-center gap-1">
+                        <Crosshair className="h-3 w-3" aria-hidden />
+                        {message.context.label} ·
+                      </span>
+                    )}
                     {new Date(message.timestamp).toLocaleTimeString('de-DE', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -505,6 +620,35 @@ const Chat: React.FC<ChatProps> = ({ topic }) => {
 
       {/* Input */}
       <div className="border-t border-gray-200 p-4">
+        {activeScope && (
+          <div
+            className={`mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md border px-3 py-1.5 text-xs ${
+              isNarrowed && !usingWholeTree
+                ? 'border-blue-200 bg-blue-50 text-blue-900'
+                : 'border-gray-200 bg-gray-50 text-gray-700'
+            }`}
+            data-testid="chat-context"
+          >
+            <Crosshair className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className="min-w-0 flex-1">
+              Talking about{' '}
+              <strong className="font-semibold">
+                {activeScope.title}
+                {activeScope.refinement ? ` › ${activeScope.refinement.label}` : ''}
+              </strong>{' '}
+              · {describeScopeSize(activeScope)}
+            </span>
+            {isNarrowed && scopeId && (
+              <button
+                type="button"
+                onClick={() => setWholeTreeFor(usingWholeTree ? null : scopeId)}
+                className="shrink-0 font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              >
+                {usingWholeTree ? `Back to ${scope?.title}` : 'Use whole tree'}
+              </button>
+            )}
+          </div>
+        )}
         {file && (
           <div className="mb-2 flex items-center gap-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
             <Upload size={14} />

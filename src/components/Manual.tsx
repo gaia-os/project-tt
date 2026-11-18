@@ -1,37 +1,65 @@
 'use client';
 
+import { Compass, Info, LayoutGrid, MousePointerClick } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export const Manual = () => {
+interface ManualProps {
+  /** Opens the guided technology picker. */
+  onChooseTechnology?: () => void;
+}
+
+export const Manual = ({ onChooseTechnology }: ManualProps) => {
   return (
-    <Card className="p-6">
+    <Card className="m-4 border-gray-200 shadow-none">
       <CardHeader>
         <CardTitle className="text-xl font-bold text-gray-800">
-          Manual
+          Getting started
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700">Select a node</h3>
-          <p className="text-gray-600">
-            Explore the selected node&apos;s properties and relationships.
-          </p>
-        </div>
+      <CardContent className="space-y-6">
+        {onChooseTechnology && (
+          <div className="rounded-lg border border-blue-100 bg-blue-50/80 p-4">
+            <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+              <Compass className="h-5 w-5 text-blue-600" aria-hidden />
+              Follow a technology
+            </h3>
+            <p className="mt-1 text-sm text-gray-600">
+              Pick a deployment concept and walk through the prerequisites,
+              milestones and enabling technologies it depends on.
+            </p>
+            <Button className="mt-3" size="sm" onClick={onChooseTechnology}>
+              Choose a technology
+            </Button>
+          </div>
+        )}
 
-        <div>
-          <h3 className="text-lg font-semibold text-gray-700">Navigation</h3>
-          <ul className="list-disc text-gray-600 space-y-1">
-            <li>
-              <strong>Zoom:</strong> Use the mouse wheel or +/- at the bottom
-              left corner.
+        <div className="space-y-3">
+          <h3 className="text-base font-semibold text-gray-800">
+            Explore the map
+          </h3>
+          <ul className="space-y-2 text-sm text-gray-600">
+            <li className="flex gap-2">
+              <Info className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden />
+              <span>
+                <strong>Info icon</strong> on a node shows its readiness,
+                description and references here.
+              </span>
             </li>
-            <li>
-              <strong>Pan:</strong> Click and drag to move the view.
+            <li className="flex gap-2">
+              <LayoutGrid className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden />
+              <span>
+                <strong>Grid icon</strong> shows only that node and its direct
+                connections.
+              </span>
             </li>
-            <li>
-              <strong>Fit View:</strong> Use the control panel button at the
-              bottom left corner to center all nodes.
+            <li className="flex gap-2">
+              <MousePointerClick className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden />
+              <span>
+                <strong>Zoom</strong> with the mouse wheel, <strong>pan</strong>{' '}
+                by dragging, and use the fit-view control to see every node.
+              </span>
             </li>
           </ul>
         </div>

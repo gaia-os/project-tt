@@ -1,4 +1,4 @@
-import { SmrEdgeData, TechTree } from '@/lib/types';
+import { DataNode, SmrEdgeData, TechTree } from '@/lib/types';
 
 export const DEFAULT_MIN_RELEVANCE = 4;
 
@@ -26,30 +26,40 @@ export function chatContextTree(techTree: TechTree | null | undefined): TechTree
 
   const nodes = techTree.nodes.flatMap((node) => {
     const smr = node.data.smr;
-    const base = {
-      label: node.data.label,
-      nodeLabel: node.data.nodeLabel,
-      category: node.data.category,
-      trl_current: node.data.trl_current,
-      description: '',
-    };
-    if (smr?.kind === 'reactor') {
-      const facts = [
-        smr.status,
-        smr.electric_mwe != null ? `${smr.electric_mwe} MWe` : null,
-        smr.coolant,
-        smr.countries.join('/'),
-        node.data.detailedDescription,
-      ].filter(Boolean);
-      return [{ id: node.id, data: { ...base, detailedDescription: facts.join('; ') } }];
-    }
-    if (smr?.kind === 'technology' && smr.relevance >= 5) {
-      return [{ id: node.id, data: base }];
+    if (smr?.kind === 'reactor' || (smr?.kind === 'technology' && smr.relevance >= 5)) {
+      return [smrChatNode(node)];
     }
     return [];
   });
 
   return { nodes, edges: [] };
+}
+
+/**
+ * One SMR node as chat context: reactors carry key facts, technologies only
+ * their name. Used for whole trees (above) and for chosen subsets, which
+ * keep every node the visitor picked.
+ */
+export function smrChatNode(node: DataNode): DataNode {
+  const smr = node.data.smr;
+  const base = {
+    label: node.data.label,
+    nodeLabel: node.data.nodeLabel,
+    category: node.data.category,
+    trl_current: node.data.trl_current,
+    description: '',
+  };
+  if (smr?.kind === 'reactor') {
+    const facts = [
+      smr.status,
+      smr.electric_mwe != null ? `${smr.electric_mwe} MWe` : null,
+      smr.coolant,
+      smr.countries.join('/'),
+      node.data.detailedDescription,
+    ].filter(Boolean);
+    return { id: node.id, data: { ...base, detailedDescription: facts.join('; ') } };
+  }
+  return { id: node.id, data: base };
 }
 
 /**

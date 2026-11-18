@@ -1,3 +1,5 @@
+import { SIMULATION_BASE_YEAR, nodeDurationYears } from '@/lib/deploymentEstimate';
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -42,7 +44,7 @@ interface SimulationOutput {
 // CONSTANTS
 // ============================================================================
 
-const CURRENT_YEAR = 2026; 
+const CURRENT_YEAR = SIMULATION_BASE_YEAR;
 const MWH_TO_TWH = 1_000_000;
 const CAPACITY_MW = 1000; // FIXED: Changed from 500 to 1000 to match Python
 const CAPACITY_FACTOR = 0.9;
@@ -237,20 +239,8 @@ class NuclearScheduler {
     }
 
     // Initialize simulation parameters
-    for (const [nodeId, node] of simNodes.entries()) {
-        let initialTime = 0;
-
-        if (node.trl_projected_5_10_years) {
-        initialTime = 7.5;
-        } else {
-        try {
-            const trlCurrent = node.trl_current || '1';
-            const trlVal = parseFloat(trlCurrent.split('-')[0].split(' ')[0]);
-            initialTime = (9 - trlVal) * 2.5;
-        } catch {
-            initialTime = 5.0;
-        }
-        }
+    for (const node of simNodes.values()) {
+        const initialTime = nodeDurationYears(node);
 
         node.initial_time = initialTime > 0 ? initialTime : 0.1;
         node.time_remaining = initialTime;

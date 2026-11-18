@@ -1,9 +1,14 @@
 'use client';
 
-import React from 'react';
-import { CompanyInfo } from '@/lib/types';
+import React, { useMemo } from 'react';
+import {
+  CompanyInfo,
+  CompanyTechnologyMapping,
+  TechTree,
+} from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { topicImageUrl } from '@/lib/smrImages';
+import { designsForCompany } from '@/lib/reactorEntities';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -17,6 +22,9 @@ interface CompanyDetailsProps {
   company: CompanyInfo;
   /** Needed to resolve `logo_image_id` against the topic's image store. */
   topic?: TopicKey;
+  mappings?: CompanyTechnologyMapping[];
+  techTree?: TechTree | null;
+  onSelectDesign?: (nodeId: string) => void;
 }
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -97,8 +105,29 @@ function MetricCard({
   );
 }
 
-const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, topic }) => {
+const CompanyDetails: React.FC<CompanyDetailsProps> = ({
+  company,
+  topic,
+  mappings = [],
+  techTree = null,
+  onSelectDesign,
+}) => {
   const logoId = typeof company.logo_image_id === 'string' ? company.logo_image_id : null;
+  const extraNodeIds = useMemo(() => {
+    const fromDevelops = Array.isArray(company.develops)
+      ? (company.develops as unknown[]).filter(
+          (value): value is string => typeof value === 'string',
+        )
+      : [];
+    const fromAll = Array.isArray(company.tech_tree_all_nodes)
+      ? company.tech_tree_all_nodes
+      : [];
+    return [...fromDevelops, ...fromAll];
+  }, [company.develops, company.tech_tree_all_nodes]);
+  const designLinks = useMemo(
+    () => designsForCompany(company.id, mappings, techTree, extraNodeIds),
+    [company.id, mappings, techTree, extraNodeIds],
+  );
   return (
     <div className="p-4 flex flex-col h-full">
       <Card className="flex flex-col h-full">
@@ -420,6 +449,56 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, topic }) => {
             }
           />
 
+          {designLinks.length > 0 && (
+            <div className="space-y-2 pb-2 border-b">
+              <h4 className="font-semibold text-sm text-gray-700">
+                Designs &amp; technologies
+              </h4>
+              <ul className="space-y-1.5">
+                {designLinks.map((design) => {
+                  const meta = [
+                    design.isReactor ? 'Reactor design' : null,
+                    design.isPrimary ? 'Primary' : null,
+                    ...design.methods,
+                    ...design.roles,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ');
+                  const body = (
+                    <>
+                      <p className="text-sm font-medium text-gray-900">
+                        {design.label}
+                      </p>
+                      <p className="font-mono text-[11px] text-gray-400">
+                        {design.nodeId}
+                      </p>
+                      {meta && (
+                        <p className="text-[11px] text-gray-500">{meta}</p>
+                      )}
+                    </>
+                  );
+                  return (
+                    <li key={design.nodeId}>
+                      {onSelectDesign ? (
+                        <button
+                          type="button"
+                          className="w-full rounded-md border border-gray-200 px-3 py-2 text-left transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          onClick={() => onSelectDesign(design.nodeId)}
+                        >
+                          {body}
+                        </button>
+                      ) : (
+                        <div className="rounded-md border border-gray-100 px-3 py-2">
+                          {body}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+
           {(company.tech_tree_primary_node ||
             company.tech_tree_primary_method ||
             company.tech_tree_primary_reasoning ||
@@ -435,7 +514,19 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, topic }) => {
                 {company.tech_tree_primary_node && (
                   <p>
                     <span className="font-medium">Primary Node:</span>{' '}
-                    {company.tech_tree_primary_node}
+                    {onSelectDesign ? (
+                      <button
+                        type="button"
+                        className="text-blue-700 hover:underline"
+                        onClick={() =>
+                          onSelectDesign(company.tech_tree_primary_node!)
+                        }
+                      >
+                        {company.tech_tree_primary_node}
+                      </button>
+                    ) : (
+                      company.tech_tree_primary_node
+                    )}
                   </p>
                 )}
                 {company.tech_tree_primary_method && (

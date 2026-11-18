@@ -2,14 +2,40 @@ import { NextRequest, NextResponse } from 'next/server';
 import { TopicKey } from '@/lib/topicConfig';
 import { getTopic } from '@/lib/topics.server';
 import { TechTree } from '@/lib/types';
+import { formatChatContext, parseChatScope } from '@/lib/chatContext';
 
 interface ChatRequestBody {
   message?: string;
   context?: TechTree;
+  /** What `context` is: a pathway, custom tree, view… Absent = whole tree. */
+  scope?: unknown;
   history?: unknown[];
   topic: TopicKey;
   fileData?: { base64: string; mimeType: string; fileName?: string };
   mode?: string;
+}
+
+/** Drops malformed nodes/edges instead of failing on them. */
+function isTreeShaped(value: unknown): value is TechTree {
+  if (!value || typeof value !== 'object') return false;
+  const tree = value as { nodes?: unknown; edges?: unknown };
+  if (!Array.isArray(tree.nodes)) return false;
+  tree.nodes = tree.nodes.filter(
+    (node) =>
+      !!node &&
+      typeof (node as { id?: unknown }).id === 'string' &&
+      !!(node as { data?: unknown }).data &&
+      typeof (node as { data: { label?: unknown } }).data.label === 'string',
+  );
+  tree.edges = Array.isArray(tree.edges)
+    ? tree.edges.filter(
+        (edge) =>
+          !!edge &&
+          typeof (edge as { source?: unknown }).source === 'string' &&
+          typeof (edge as { target?: unknown }).target === 'string',
+      )
+    : [];
+  return true;
 }
 
 // Agentic chat can take a while (multiple LLM + Cypher rounds on the KG
@@ -33,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = (await request.json()) as ChatRequestBody;
-    const { message, context, history, topic, fileData, mode } = body;
+    const { message, context, scope, history, topic, fileData, mode } = body;
 
     if (!message && !fileData) {
       return NextResponse.json({ error: 'Message or file is required' }, { status: 400 });
@@ -45,14 +71,14 @@ export async function POST(request: NextRequest) {
 
     // Condensed tech-tree context so the model knows the tree's vocabulary
     // (the KG remains the evidence source; the service appends this text).
-    const nodesContext = (context?.nodes || [])
-      .map(
-        (n) =>
-          `- ${n.data.label} [${n.id}] (category: ${n.data.category || 'n/a'}, ` +
-          `TRL ${n.data.trl_current || 'n/a'}): ${n.data.detailedDescription || n.data.description || ''}`,
-      )
-      .join('\n');
-    const contextText = `${topicConfig.systemPrompt}\n\nTECH TREE NODES:\n${nodesContext}`;
+    // A scope says the context is a selection (pathway, custom tree, view)
+    // and adds its structure; without one this is the whole-tree text.
+    const contextText = formatChatContext({
+      systemPrompt: topicConfig.systemPrompt,
+      topicLabel: topicConfig.label,
+      context: isTreeShaped(context) ? context : undefined,
+      scope: parseChatScope(scope),
+    });
 
     // PDF upload -> document verification pipeline on the service.
     // Both endpoints are streamed (NDJSON: tool/progress events, text deltas, done).

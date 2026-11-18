@@ -5,6 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Monitor, Smartphone } from 'lucide-react';
 
+export const MOBILE_WARNING_DISMISSED_EVENT = 'tt:mobile-warning-dismissed';
+
+/** True while the mobile overlay is (or is about to be) shown. */
+export function isMobileWarningPending(): boolean {
+  try {
+    return (
+      window.innerWidth < 768 &&
+      sessionStorage.getItem('mobileWarningDismissed') !== 'true'
+    );
+  } catch {
+    return false;
+  }
+}
+
 export const MobileWarning = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isDismissed, setIsDismissed] = useState(true);
@@ -29,6 +43,7 @@ export const MobileWarning = () => {
   const handleDismiss = () => {
     sessionStorage.setItem('mobileWarningDismissed', 'true');
     setIsDismissed(true);
+    window.dispatchEvent(new Event(MOBILE_WARNING_DISMISSED_EVENT));
   };
 
   if (!isMobile || isDismissed) {
