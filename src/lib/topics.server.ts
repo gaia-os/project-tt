@@ -24,6 +24,14 @@ import {
 } from '@/lib/topicConfig';
 
 const SYSTEM_DBS = new Set(['admin', 'config', 'local']);
+
+/** Databases hidden from the UI without being deleted: `EXCLUDED_TOPICS=a,b`. */
+const EXCLUDED = new Set(
+  (process.env.EXCLUDED_TOPICS ?? '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean),
+);
 const EXTRACTED_DIR = path.join(process.cwd(), 'data', 'extracted');
 const CACHE_TTL_MS = 15_000;
 
@@ -46,7 +54,7 @@ async function topicsFromMongo(): Promise<TopicConfig[]> {
   const { databases } = await client.db('admin').admin().listDatabases();
   const topics: TopicConfig[] = [];
   for (const { name } of databases) {
-    if (!name || SYSTEM_DBS.has(name)) continue;
+    if (!name || SYSTEM_DBS.has(name) || EXCLUDED.has(name)) continue;
     const db = client.db(name);
     const meta = await db.collection('meta').findOne<DatasetMeta>({});
     if (!meta) {
@@ -64,6 +72,7 @@ function topicsFromFilesystem(): TopicConfig[] {
     return fs
       .readdirSync(EXTRACTED_DIR, { withFileTypes: true })
       .filter((e) => e.isDirectory())
+      .filter((e) => !EXCLUDED.has(e.name))
       .filter((e) => fs.existsSync(path.join(EXTRACTED_DIR, e.name, 'technologies', 'graph.json')))
       .map((e) => {
         let meta: DatasetMeta | null = null;
