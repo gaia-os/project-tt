@@ -259,12 +259,22 @@ export interface InvestTechTreeGraph {
 }
 
 // Chat-related types
+/** One knowledge-graph lookup shown under an assistant answer. */
+export interface KgToolUse {
+  /** Call label, e.g. "search_chunks({\"query\":\"…\"})". */
+  call: string;
+  /** Why the agent ran this lookup — only present when the KG service is
+   * asked for reasoning (KG_REASONING_DISPLAY). */
+  reason?: string | null;
+}
+
 export interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';
   content: string;
-  /** KG tool calls the agent ran to produce this answer (e.g. "search_chunks(...)"). */
-  toolsUsed?: string[];
+  /** KG tool calls the agent ran to produce this answer (e.g. "search_chunks(...)").
+   * Plain strings for older stored threads and the verify pipeline. */
+  toolsUsed?: (string | KgToolUse)[];
   timestamp: number;
   /** What the assistant was shown when this was asked, if narrowed. */
   context?: { label: string };

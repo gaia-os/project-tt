@@ -45,6 +45,12 @@ function isTreeShaped(value: unknown): value is TechTree {
 export const maxDuration = 200;
 const KG_TIMEOUT_MS = 180_000;
 
+// KG_REASONING_DISPLAY=1 makes the kg-service ask the model for a one-line
+// reason per lookup; the chat panel then shows it under each tool call.
+const showReasons = /^(1|true|yes|on)$/i.test(
+  process.env.KG_REASONING_DISPLAY ?? '',
+);
+
 // POST {message, context, history, topic, fileData, mode} -> {response}
 // Proxies to the KG service (Neo4j + Ollama); the service does the agentic
 // loop so every tool call stays on the KG server instead of crossing the
@@ -97,6 +103,7 @@ export async function POST(request: NextRequest) {
           history: history ?? [],
           contextText,
           mode: mode === 'thinking' ? 'thinking' : 'instant',
+          reasoning: showReasons,
         };
 
     const res = await fetch(`${serviceUrl.replace(/\/$/, '')}/${endpoint}`, {

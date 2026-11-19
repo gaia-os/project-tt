@@ -15,6 +15,7 @@ Docker:       see Dockerfile.kg-service
 
 from __future__ import annotations
 
+import copy
 import json
 import os
 import re
@@ -263,6 +264,24 @@ _TOOL_FUNCS = {
     "run_cypher": lambda a: t_run_cypher(a.get("query", "")),
 }
 
+_REASON_PARAM = {
+    "type": "string",
+    "description": "One short sentence: why you are making this lookup — "
+    "what you hope to find.",
+}
+
+
+def _tools_schema(with_reason: bool) -> list[dict[str, Any]]:
+    """Tool definitions; in reasoning mode every call must carry a `reason`."""
+    if not with_reason:
+        return TOOLS
+    tools = copy.deepcopy(TOOLS)
+    for t in tools:
+        params = t["function"]["parameters"]
+        params["properties"]["reason"] = dict(_REASON_PARAM)
+        params.setdefault("required", []).append("reason")
+    return tools
+
 _SYSTEM = """You are the research assistant for a small modular reactor (SMR) technology tree.
 You answer questions using the project's knowledge graph: the SMR landscape —
 reactor designs from the IAEA SMR Technology Catalogue (2026 edition) and the
@@ -301,10 +320,19 @@ def _run_tool(name: str, args: dict) -> str:
 
 
 def _chat_events(
-    message: str, history: list[dict], context_text: str, mode: str
+    message: str,
+    history: list[dict],
+    context_text: str,
+    mode: str,
+    reasoning: bool = False,
 ):
     """Yields NDJSON event dicts: tool calls as they run, then answer deltas."""
     system = _SYSTEM + _MODE_SUFFIX.get(mode, _MODE_SUFFIX["instant"])
+    if reasoning:
+        system += (
+            "\n\nFill the `reason` argument of every tool call with one short "
+            "sentence stating what you expect this lookup to find."
+        )
     if context_text:
         system += f"\n\nCURRENT TECH-TREE CONTEXT (for orientation — the KG is the evidence source):\n{context_text}"
 
@@ -314,7 +342,8 @@ def _chat_events(
         messages.append({"role": role, "content": h.get("content", "")})
     messages.append({"role": "user", "content": message})
 
-    tools_used: list[str] = []
+    tools_used: list[Any] = []
+    tools_schema = _tools_schema(reasoning)
     # Deep-analysis mode gets a larger retrieval budget.
     max_rounds = MAX_TOOL_ROUNDS_THINKING if mode == "thinking" else MAX_TOOL_ROUNDS
     for _ in range(max_rounds):
@@ -323,7 +352,7 @@ def _chat_events(
         stream = _ollama.chat(
             model=_settings.llm_model,
             messages=messages,
-            tools=TOOLS,
+            tools=tools_schema,
             options={"num_ctx": _settings.num_ctx, "temperature": 0.3},
             stream=True,
         )
@@ -359,9 +388,16 @@ def _chat_events(
         for tc in tool_calls:
             name = tc.function.name
             args = dict(tc.function.arguments or {})
+            # `reason` is display metadata, not a tool input — keep it out of
+            # the call label and the tool invocation.
+            reason = args.pop("reason", None)
             label = f"{name}({json.dumps(args)[:120]})"
-            tools_used.append(label)
-            yield {"type": "tool", "name": label}
+            if reasoning:
+                tools_used.append({"call": label, "reason": reason})
+                yield {"type": "tool", "name": label, "reason": reason}
+            else:
+                tools_used.append(label)
+                yield {"type": "tool", "name": label}
             messages.append(
                 {"role": "tool", "name": name, "content": _run_tool(name, args)}
             )
@@ -394,10 +430,16 @@ def _ndjson(events) -> Any:
         yield (json.dumps(ev, default=str) + "\n").encode()
 
 
-def agentic_chat(message: str, history: list[dict], context_text: str, mode: str) -> dict:
+def agentic_chat(
+    message: str,
+    history: list[dict],
+    context_text: str,
+    mode: str,
+    reasoning: bool = False,
+) -> dict:
     text = ""
-    tools: list[str] = []
-    for ev in _chat_events(message, history, context_text, mode):
+    tools: list[Any] = []
+    for ev in _chat_events(message, history, context_text, mode, reasoning):
         if ev["type"] == "delta":
             text += ev["text"]
         elif ev["type"] == "done":
@@ -606,6 +648,9 @@ class ChatRequest(BaseModel):
     history: list[dict] = Field(default_factory=list)
     contextText: str = ""
     mode: str = "instant"
+    # When true, every tool call must carry a `reason` (displayed next to the
+    # lookup in the app) and done.toolsUsed becomes [{call, reason}].
+    reasoning: bool = False
 
 
 class ResolveRequest(BaseModel):
@@ -647,7 +692,9 @@ def chat(req: ChatRequest, denied=Depends(guard)):
         return denied
     if not req.message.strip():
         return JSONResponse({"error": "message is required"}, status_code=400)
-    result = agentic_chat(req.message, req.history, req.contextText, req.mode)
+    result = agentic_chat(
+        req.message, req.history, req.contextText, req.mode, req.reasoning
+    )
     return result
 
 
@@ -658,7 +705,11 @@ def chat_stream(req: ChatRequest, denied=Depends(guard)):
     if not req.message.strip():
         return JSONResponse({"error": "message is required"}, status_code=400)
     return StreamingResponse(
-        _ndjson(_chat_events(req.message, req.history, req.contextText, req.mode)),
+        _ndjson(
+            _chat_events(
+                req.message, req.history, req.contextText, req.mode, req.reasoning
+            )
+        ),
         media_type="application/x-ndjson",
     )
 

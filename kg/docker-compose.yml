@@ -127,6 +127,8 @@ services:
       VOTE_SECRET: ${VOTE_SECRET:?Set VOTE_SECRET in .env}
       # Comma-separated dataset DBs hidden from the UI without deleting them.
       EXCLUDED_TOPICS: ${EXCLUDED_TOPICS:-}
+      # "true" -> chat shows the model's one-line reason under each KG lookup
+      KG_REASONING_DISPLAY: ${KG_REASONING_DISPLAY:-}
     depends_on:
       - mongodb
       - kg-service

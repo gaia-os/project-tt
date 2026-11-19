@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Send, Loader2, Trash2, Upload, Crosshair } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import { ChatMessage, KgPaperDossier } from '@/lib/types';
+import { ChatMessage, KgPaperDossier, KgToolUse } from '@/lib/types';
 import { labelForTopic, TopicKey } from '@/lib/topicConfig';
 import PaperDetails from './PaperDetails';
 import { Button } from '@/components/ui/button';
@@ -278,7 +278,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
     // Draft assistant message, filled progressively by the NDJSON stream.
     const draftId = (Date.now() + 1).toString();
     let draftText = '';
-    let tools: string[] = [];
+    let tools: (string | KgToolUse)[] = [];
     let started = false;
     const writeDraft = (persist: boolean) =>
       updateThread(
@@ -356,10 +356,11 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
           let ev: {
             type?: string;
             name?: string;
+            reason?: string | null;
             text?: string;
             response?: string;
             error?: string;
-            toolsUsed?: string[];
+            toolsUsed?: (string | KgToolUse)[];
           };
           try {
             ev = JSON.parse(line);
@@ -367,7 +368,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
             continue;
           }
           if (ev.type === 'tool') {
-            if (ev.name) tools.push(ev.name);
+            if (ev.name) tools.push({ call: ev.name, reason: ev.reason });
             setUploadStatus('Searching the knowledge graph…');
           } else if (ev.type === 'progress') {
             if (ev.text) setUploadStatus(ev.text);
@@ -570,10 +571,23 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
                         {message.toolsUsed.length} knowledge graph lookup
                         {message.toolsUsed.length === 1 ? '' : 's'}
                       </summary>
-                      <ul className="mt-1 space-y-0.5 font-mono text-[11px] text-gray-400 pl-3">
-                        {message.toolsUsed.map((call, i) => (
-                          <li key={i} className="break-all">{call}</li>
-                        ))}
+                      <ul className="mt-1 space-y-1 font-mono text-[11px] text-gray-400 pl-3">
+                        {message.toolsUsed.map((toolUse, i) => {
+                          const label =
+                            typeof toolUse === 'string' ? toolUse : toolUse.call;
+                          const reason =
+                            typeof toolUse === 'string' ? null : toolUse.reason;
+                          return (
+                            <li key={i} className="break-all">
+                              {label}
+                              {reason ? (
+                                <span className="block pl-3 font-sans italic text-gray-500">
+                                  ↳ {reason}
+                                </span>
+                              ) : null}
+                            </li>
+                          );
+                        })}
                       </ul>
                     </details>
                   ) : null}
