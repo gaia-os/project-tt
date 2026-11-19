@@ -38,10 +38,12 @@ function isTreeShaped(value: unknown): value is TechTree {
   return true;
 }
 
-// Agentic chat can take a while (multiple LLM + Cypher rounds on the KG
-// service). On Vercel, hobby plans cap serverless duration regardless.
-export const maxDuration = 60;
-const KG_TIMEOUT_MS = 55_000;
+// Agentic chat can take a while: deep-analysis mode allows up to 25 tool
+// rounds on the KG service. maxDuration must exceed KG_TIMEOUT_MS so the
+// fetch abort fires inside the function budget and returns a clean 504
+// instead of a truncated stream.
+export const maxDuration = 200;
+const KG_TIMEOUT_MS = 180_000;
 
 // POST {message, context, history, topic, fileData, mode} -> {response}
 // Proxies to the KG service (Neo4j + Ollama); the service does the agentic

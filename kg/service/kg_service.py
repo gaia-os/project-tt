@@ -35,7 +35,8 @@ _settings = config.Settings()
 _driver = None
 _ollama: ollama.Client | None = None
 
-MAX_TOOL_ROUNDS = 8
+MAX_TOOL_ROUNDS = 10           # instant mode
+MAX_TOOL_ROUNDS_THINKING = 25  # deep-analysis mode
 MAX_ROWS = 60
 MAX_STR = 600
 MAX_TOOL_RESULT_CHARS = 12000
@@ -315,7 +316,7 @@ def _chat_events(
 
     tools_used: list[str] = []
     # Deep-analysis mode gets a larger retrieval budget.
-    max_rounds = 12 if mode == "thinking" else MAX_TOOL_ROUNDS
+    max_rounds = MAX_TOOL_ROUNDS_THINKING if mode == "thinking" else MAX_TOOL_ROUNDS
     for _ in range(max_rounds):
         # stream=True so the final answer streams token-by-token; tool calls
         # arrive in the last chunk instead of content.
@@ -365,10 +366,25 @@ def _chat_events(
                 {"role": "tool", "name": name, "content": _run_tool(name, args)}
             )
     else:
-        yield {
-            "type": "delta",
-            "text": "I ran out of retrieval steps before reaching a conclusion — please try narrowing the question.",
-        }
+        # Retrieval budget exhausted — force a final no-tools pass so the
+        # model synthesises whatever evidence it already gathered.
+        messages.append(
+            {
+                "role": "user",
+                "content": "You have reached the retrieval limit. Answer now "
+                "using the evidence already gathered above; if something is "
+                "still missing, say so briefly at the end.",
+            }
+        )
+        stream = _ollama.chat(
+            model=_settings.llm_model,
+            messages=messages,
+            options={"num_ctx": _settings.num_ctx, "temperature": 0.3},
+            stream=True,
+        )
+        for chunk in stream:
+            if chunk.message.content:
+                yield {"type": "delta", "text": chunk.message.content}
 
     yield {"type": "done", "toolsUsed": tools_used}
 
