@@ -2,10 +2,10 @@
 
 Endpoints:
   GET  /health            - liveness + backend reachability (open)
-  POST /chat              - agentic Q&A over the fusion knowledge graph
+  POST /chat              - agentic Q&A over the SMR knowledge graph
   POST /resolve           - entity resolution for a name/phrase
-  POST /expand            - papers/devices/findings around a concept
-  GET  /paper/{paper_id}  - paper dossier
+  POST /expand            - profile of a design / organisation / technology
+  GET  /entity/{name}     - entity dossier (provenance + evidence)
 
 Auth: every request except /health needs `X-API-Key: <KG_API_KEY>`.
 
@@ -29,7 +29,7 @@ from neo4j import GraphDatabase, Session
 from pydantic import BaseModel, Field
 
 import config
-from service.expansion import expand, paper_dossier, resolve_entity
+from service.expansion import entity_evidence, entity_profile, expand, resolve_entity
 
 _settings = config.Settings()
 _driver = None
@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
     _driver.close()
 
 
-app = FastAPI(title="Fusion KG Service", lifespan=lifespan)
+app = FastAPI(title="SMR KG Service", lifespan=lifespan)
 
 
 # ---------------------------------------------------------------- auth + rate limit
@@ -105,22 +105,24 @@ def t_find_entities(query: str) -> Any:
         return resolve_entity(s, query)[:5]
 
 
-def t_expand(name: str, max_papers: int = 8) -> Any:
+def t_expand(name: str) -> Any:
     with _session() as s:
         best = resolve_entity(s, name, limit=1)
         if not best:
             return {"error": f"No KG entity matches '{name}'. Try find_entities first."}
         e = best[0]
-        out = expand(s, e["name"], e["labels"], max_papers=max_papers, max_devices=5, max_findings=8)
-        return {"resolvedAs": e["name"], "labels": e["labels"], **out}
+        out = entity_profile(s, e["name"])
+        return {"resolvedAs": e["name"], "kind": e["kind"], **out}
 
 
-def t_paper_details(paper_id: str) -> Any:
+def t_entity_evidence(name: str) -> Any:
     with _session() as s:
-        d = paper_dossier(s, paper_id)
+        best = resolve_entity(s, name, limit=1)
+        if not best:
+            return {"error": f"No KG entity matches '{name}'. Try find_entities first."}
+        d = entity_evidence(s, best[0]["name"])
         if not d:
-            return {"error": f"No paper with id '{paper_id}'"}
-        d.pop("excerpts", None)  # too long for the LLM context
+            return {"error": f"No entity named '{best[0]['name']}'"}
         return d
 
 
@@ -132,10 +134,10 @@ def t_search_chunks(query: str, limit: int = 5) -> Any:
             CALL db.index.vector.queryNodes($idx, $k, $emb)
             YIELD node, score
             MATCH (node)-[:FROM_DOCUMENT]->(doc:Document)
-            OPTIONAL MATCH (p:Paper {paperId: doc.paper_id})
+            OPTIONAL MATCH (e:DocumentedEntity)-[:FROM_CHUNK]->(node)
             RETURN node.text AS text, score,
-                   doc.paper_id AS paperId,
-                   coalesce(p.title, doc.title) AS title
+                   doc.fileName AS source, doc.entityType AS sourceKind,
+                   collect(DISTINCT e.name)[..3] AS entities
             ORDER BY score DESC
             """,
             idx=_settings.vector_index_name,
@@ -168,8 +170,8 @@ TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "find_entities",
-            "description": "Look up knowledge-graph entities (fusion devices, magnetic "
-            "configurations, phenomena, papers, experiments) matching a name or concept.",
+            "description": "Look up knowledge-graph entities (SMR designs, organisations, "
+            "technologies, programmes, sites) matching a name, alias or concept.",
             "parameters": {
                 "type": "object",
                 "properties": {"query": {"type": "string", "description": "name or concept"}},
@@ -181,13 +183,15 @@ TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "expand_concept",
-            "description": "Get the papers, fusion devices and experimental findings the KG "
-            "associates with a concept, e.g. 'stellarator' or 'plasma heating'.",
+            "description": "Get the profile the KG associates with an entity: for a design "
+            "its developer, technology line, reported parameters, readiness assessment, "
+            "milestones, applications and technologies; for a technology the designs using "
+            "it, suppliers and dependencies; for an organisation its designs and role. "
+            "e.g. 'NUWARD SMR' or 'molten salt'.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "name": {"type": "string"},
-                    "max_papers": {"type": "integer", "default": 8},
                 },
                 "required": ["name"],
             },
@@ -196,13 +200,14 @@ TOOLS: list[dict[str, Any]] = [
     {
         "type": "function",
         "function": {
-            "name": "paper_details",
-            "description": "Get the full dossier (authors, conference, experiments, findings) "
-            "of one paper by its id, e.g. 'IAEA-CN-28-H-10'.",
+            "name": "entity_evidence",
+            "description": "Get the provenance and quote-level evidence for one entity: "
+            "source record, upstream document (IAEA catalogue / NEA dashboard), evidence "
+            "items with verification status, cited web sources and literature references.",
             "parameters": {
                 "type": "object",
-                "properties": {"paperId": {"type": "string"}},
-                "required": ["paperId"],
+                "properties": {"name": {"type": "string"}},
+                "required": ["name"],
             },
         },
     },
@@ -210,8 +215,8 @@ TOOLS: list[dict[str, Any]] = [
         "type": "function",
         "function": {
             "name": "search_chunks",
-            "description": "Semantic (vector) search over the text of the conference papers. "
-            "Best for open questions where the relevant entity name is unknown.",
+            "description": "Semantic (vector) search over the text of the registered source "
+            "documents. Best for open questions where the relevant entity name is unknown.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -227,14 +232,18 @@ TOOLS: list[dict[str, Any]] = [
         "function": {
             "name": "run_cypher",
             "description": "Run a READ-ONLY Cypher query (MATCH/OPTIONAL MATCH/UNWIND/WITH/RETURN "
-            "only — no writes, no CALL). Graph: (p:Paper)-[:AUTHORED_BY]->(:Person), "
-            "(:Person)-[:AFFILIATED_WITH]->(:ResearchInstitute), "
-            "(e:Experiment)-[:PERFORMED_ON]->(:FusionDevice), "
-            "(e)-[:HAS_CONFIGURATION]->(:MagneticConfiguration), "
-            "(e)-[:USES_HEATING_METHOD]->(:HeatingMethod), "
-            "(e)-[:REPORTS_FINDING]->(f:ExperimentalFinding), (f)-[:MEASURES_PARAMETER]->(:PlasmaParameter), "
-            "(p:Paper)-[:REPORTS_ON]->(entities). Entities carry extra type labels like "
-            "FusionDevice, MagneticConfiguration, OscillationOrInstability. "
+            "only — no writes, no CALL). Graph: domain entities are (:SMRDesign), "
+            "(:Organisation) (regulators also :Regulator) and (:Technology), all also "
+            "labelled :DocumentedEntity. Edges: (:Organisation)-[:DEVELOPS]->(:SMRDesign), "
+            "(d:SMRDesign)-[:BELONGS_TO_TECHNOLOGY_LINE]->(:TechnologyLine), "
+            "(d)-[:USES_TECHNOLOGY]->(t:Technology), (t)-[:DEPENDS_ON_TECHNOLOGY|HAS_BROADER_TECHNOLOGY]->(t2:Technology), "
+            "(o:Organisation)-[:SUPPLIES_TECHNOLOGY]->(t), (o)-[:HEADQUARTERED_IN]->(:Country), "
+            "(d)-[:TARGETS_APPLICATION]->(:TargetApplication), "
+            "(d)-[:HAS_READINESS_ASSESSMENT]->(:ReadinessAssessment {dimension, level, levelMax, stage}), "
+            "(d)-[:HAS_REPORTED_PARAMETER]->(:ReportedParameterValue {parameter, rawValue, unit})-[:REPORTED_IN]->(:UpstreamDocument), "
+            "(e:DocumentedEntity)-[:HAS_MILESTONE]->(:Milestone {event,status,dateText}), "
+            "(e)-[:SUPPORTED_BY_EVIDENCE]->(:EvidenceItem {claimLabel,quote,verificationStatus}), "
+            "(e)-[:DOCUMENTED_IN]->(:SourceRecord)-[:EXTRACTED_FROM]->(:UpstreamDocument). "
             "Use for counts, comparisons or structured lookups the other tools can't express.",
             "parameters": {
                 "type": "object",
@@ -247,25 +256,31 @@ TOOLS: list[dict[str, Any]] = [
 
 _TOOL_FUNCS = {
     "find_entities": lambda a: t_find_entities(a.get("query", "")),
-    "expand_concept": lambda a: t_expand(a.get("name", ""), int(a.get("max_papers", 8))),
-    "paper_details": lambda a: t_paper_details(a.get("paperId", "")),
+    "expand_concept": lambda a: t_expand(a.get("name", "")),
+    "entity_evidence": lambda a: t_entity_evidence(a.get("name", "")),
     "search_chunks": lambda a: t_search_chunks(a.get("query", ""), int(a.get("limit", 5))),
     "run_cypher": lambda a: t_run_cypher(a.get("query", "")),
 }
 
-_SYSTEM = """You are the research assistant for a fusion-energy technology tree.
-You answer questions using the project's knowledge graph: IAEA fusion conference
-proceedings (1960s–1970s) extracted into entities (devices, configurations,
-experiments, findings, parameters) linked to their source papers.
+_SYSTEM = """You are the research assistant for a small modular reactor (SMR) technology tree.
+You answer questions using the project's knowledge graph: the SMR landscape —
+reactor designs from the IAEA SMR Technology Catalogue (2026 edition) and the
+NEA SMR Dashboard (3rd edition, 2025), the organisations that develop and
+supply them, and the technologies they rely on — extracted into entities
+(designs, organisations, technologies, readiness assessments, milestones,
+reported parameters, evidence items) linked to registered source documents.
 
 Use the tools to ground every factual claim in the graph. Call them before
-answering whenever the question touches the literature. Cite evidence by paper
-id in brackets like [IAEA-CN-28-H-10]. If the graph has no relevant data, say so
-plainly instead of inventing references — coverage is limited to the ingested
-conference volumes, mostly historical.
+answering whenever the question touches SMR designs, vendors, technologies,
+readiness, economics or deployment. Cite sources in brackets — the upstream
+document ([IAEA Catalogue 2026], [NEA Dashboard 3rd ed.]) or the source file /
+web source a tool returns. If the graph has no relevant data, say so plainly
+instead of inventing references — coverage is limited to the registered
+corpus.
 
-Format answers as clean HTML only (no markdown): use <p>, <ul><li>, <h3>,
-<strong>. Keep it readable in a chat panel."""
+Format answers as clean HTML only — never markdown (**, -, ## render as
+literal characters in the chat panel). Use <p>, <ul><li>, <h3>, <strong>.
+Keep it readable in a chat panel."""
 
 _MODE_SUFFIX = {
     "instant": "\n\nBe concise and direct — short focused answers unless asked to elaborate.",
@@ -400,19 +415,21 @@ Rules:
 At most {max_claims} claims, the most significant ones."""
 
 _VERIFY_PROMPT = """\
-You verify claims from a research document against a knowledge graph of
-1960s-70s fusion conference literature. For each claim, retrieved evidence
-chunks are given (with their source paperIds).
+You verify claims from a research document against a knowledge graph of the
+SMR landscape — SMR designs, developing organisations and enabling
+technologies documented in the IAEA SMR Technology Catalogue, the NEA SMR
+Dashboard and curated source files. For each claim, retrieved evidence chunks
+are given (with their source files).
 
 Decide per claim:
 - "supported": the evidence directly supports the claim
 - "contradicted": the evidence conflicts with the claim
 - "unverifiable": the KG lacks evidence to judge it (very common — coverage is
-  limited to the ingested conference volumes; do NOT guess)
+  limited to the registered corpus; do NOT guess)
 
 Output ONLY JSON:
 {{"verdicts": [{{"id": <claim number>, "verdict": "supported|contradicted|unverifiable",
-"evidence": "<paperId or null>", "note": "<one short sentence>"}}]}}
+"evidence": "<source file or null>", "note": "<one short sentence>"}}]}}
 
 CLAIMS + EVIDENCE:
 {evidence_block}"""
@@ -496,7 +513,7 @@ def _verify_events(file_b64: str, file_name: str, question: str):
         f"CLAIM {i}: {c.get('claim')}\nEVIDENCE: "
         + (
             "; ".join(
-                f"[{r['paperId']}] {r['text'][:300]}" for r in evidence[i]
+                f"[{r.get('source') or 'unknown source'}] {r['text'][:300]}" for r in evidence[i]
             )
             or "(none found)"
         )
@@ -581,7 +598,6 @@ class ResolveRequest(BaseModel):
 
 class ExpandRequest(BaseModel):
     name: str
-    max_papers: int = 10
 
 
 class VerifyDocRequest(BaseModel):
@@ -596,9 +612,15 @@ class VerifyDocRequest(BaseModel):
 def health():
     try:
         with _session() as s:
-            papers = s.run("MATCH (p:Paper) RETURN count(p) AS c").single()["c"]
+            counts = s.run(
+                """
+                MATCH (d:SMRDesign) WITH count(d) AS designs
+                MATCH (o:Organisation) WITH designs, count(o) AS organisations
+                MATCH (t:Technology) RETURN designs, organisations, count(t) AS technologies
+                """
+            ).single()
         model_ok = _ollama is not None
-        return {"ok": True, "papers": papers, "model": _settings.llm_model, "ollama": model_ok}
+        return {"ok": True, **counts, "model": _settings.llm_model, "ollama": model_ok}
     except Exception as exc:
         return JSONResponse({"ok": False, "error": str(exc)}, status_code=503)
 
@@ -637,7 +659,7 @@ def resolve(req: ResolveRequest, denied=Depends(guard)):
 def expand_ep(req: ExpandRequest, denied=Depends(guard)):
     if denied:
         return denied
-    return t_expand(req.name, req.max_papers)
+    return t_expand(req.name)
 
 
 @app.post("/verify-document")
@@ -659,12 +681,12 @@ def verify_doc_stream(req: VerifyDocRequest, denied=Depends(guard)):
     )
 
 
-@app.get("/paper/{paper_id}")
-def paper(paper_id: str, denied=Depends(guard)):
+@app.get("/entity/{name}")
+def entity(name: str, denied=Depends(guard)):
     if denied:
         return denied
     with _session() as s:
-        d = paper_dossier(s, paper_id)
+        d = entity_evidence(s, name)
     if not d:
         return JSONResponse({"error": "not found"}, status_code=404)
     return d

@@ -62,7 +62,8 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: all
+              # count: all
+              device_ids: ['1']
               capabilities: [gpu]
     networks: [smr-kg-net]
 

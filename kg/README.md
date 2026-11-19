@@ -7,9 +7,15 @@ Neo4j + Ollama + MongoDB + kg-service** on one docker network
 on `33xxx` ports and shares the Ollama models dir.
 
 The `service/` code, `config.py`, `pyproject.toml`, `uv.lock` and
-`Dockerfile.kg-service` are a copy of the fusion repo's kg-service
-(FastAPI agentic loop over Neo4j + Ollama, `X-API-Key` auth) so this stack
-is self-contained and can diverge for the SMR graph. The app image is
+`Dockerfile.kg-service` were originally copied from the fusion repo's
+kg-service (FastAPI agentic loop over Neo4j + Ollama, `X-API-Key` auth)
+and have since been adapted to the SMR graph: entity resolution and
+expansion cover `SMRDesign` / `Organisation` / `Technology` (the
+`DocumentedEntity` subtypes), evidence is quote-level `EvidenceItem`s with
+source-record provenance (`DOCUMENTED_IN` → `SourceRecord` →
+`EXTRACTED_FROM` → `UpstreamDocument`, i.e. the IAEA SMR Technology
+Catalogue 2026 and the NEA SMR Dashboard 3rd ed.), and `search_chunks`
+still uses the `chunk_embeddings` vector index on `Chunk`. The app image is
 built from the repo-root `Dockerfile` (Next.js `output: 'standalone'`).
 
 ## Layout
@@ -20,7 +26,7 @@ kg/
   env.example            # template; real values live in .env (gitignored)
   Dockerfile.kg-service
   config.py              # kg-service settings (env-driven)
-  service/               # FastAPI service copied from fusion_kg_builder
+  service/               # FastAPI agentic chat over the SMR KG (adapted from fusion_kg_builder)
   scripts/mongo-migrate.sh
   scripts/dev-tunnel.sh
 ```

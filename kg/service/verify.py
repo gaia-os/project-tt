@@ -14,35 +14,28 @@ from typing import Any
 import ollama
 
 _PROMPT = """\
-You are filtering candidate literature links for a fusion-energy technology tree.
+You are filtering candidate knowledge-graph links for an SMR technology tree.
 
 Tech tree node: "{label}" (category: {category}){description}
 
-Candidate items extracted from a knowledge graph of 1960s-70s fusion research
-conference papers:
+Candidate items extracted from a knowledge graph of the SMR landscape (IAEA
+SMR Technology Catalogue, NEA SMR Dashboard, curated entity source files):
 
 {items}
 
-For EACH item decide whether it is genuinely relevant evidence or historical
-context for THIS node. Keep items about the node's concept, physics, or
-technology (including historical work that established its foundations).
-Drop items that are unrelated technologies, unrelated domains, or only share
-a coincidental word with the node label.
+For EACH item decide whether it is genuinely relevant evidence or context for
+THIS node. Keep items about the node's concept, technology, developer, or
+deployment. Drop items that are unrelated technologies, unrelated domains, or
+only share a coincidental word with the node label.
 
 Answer ONLY with JSON:
 {{"verdicts": [{{"id": <item number>, "keep": true|false, "reason": "short"}}]}}"""
 
 
 def _item_line(i: int, e: dict[str, Any]) -> str:
-    if e["kind"] == "paper":
-        p = e.get("paper") or {}
-        year = f" ({p['year']})" if p.get("year") else ""
-        return f"{i}. [paper] \"{p.get('title') or e['name']}\"{year}"
-    if e["kind"] == "device":
-        d = e.get("device") or {}
-        ct = f" ({d['configurationType']})" if d.get("configurationType") else ""
-        return f"{i}. [device] {e['name']}{ct}"
-    return f"{i}. [finding] \"{e.get('summary') or e['name']}\""
+    kind = e.get("kind", "entity")
+    summary = e.get("summary") or e.get("name") or ""
+    return f'{i}. [{kind}] "{summary}"'
 
 
 def verify_entities(
