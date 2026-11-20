@@ -319,12 +319,19 @@ def _run_tool(name: str, args: dict) -> str:
         return json.dumps({"error": f"{type(exc).__name__}: {exc}"})
 
 
+def _rounds_limit(override: int | None, default: int) -> int:
+    return default if override is None else max(1, min(100, int(override)))
+
+
 def _chat_events(
     message: str,
     history: list[dict],
     context_text: str,
     mode: str,
     reasoning: bool = False,
+    tools_enabled: bool = True,
+    max_instant: int | None = None,
+    max_thinking: int | None = None,
 ):
     """Yields NDJSON event dicts: tool calls as they run, then answer deltas."""
     system = _SYSTEM + _MODE_SUFFIX.get(mode, _MODE_SUFFIX["instant"])
@@ -332,6 +339,11 @@ def _chat_events(
         system += (
             "\n\nFill the `reason` argument of every tool call with one short "
             "sentence stating what you expect this lookup to find."
+        )
+    if not tools_enabled:
+        system += (
+            "\n\nKG lookups are disabled for this request — answer directly "
+            "without tools; if a fact needs the graph and you lack it, say so."
         )
     if context_text:
         system += f"\n\nCURRENT TECH-TREE CONTEXT (for orientation — the KG is the evidence source):\n{context_text}"
@@ -342,10 +354,29 @@ def _chat_events(
         messages.append({"role": role, "content": h.get("content", "")})
     messages.append({"role": "user", "content": message})
 
+    if not tools_enabled:
+        # One straight answer pass — no tools offered, nothing to look up.
+        stream = _ollama.chat(
+            model=_settings.llm_model,
+            messages=messages,
+            options={"num_ctx": _settings.num_ctx, "temperature": 0.3},
+            stream=True,
+        )
+        for chunk in stream:
+            if chunk.message.content:
+                yield {"type": "delta", "text": chunk.message.content}
+        yield {"type": "done", "toolsUsed": []}
+        return
+
     tools_used: list[Any] = []
     tools_schema = _tools_schema(reasoning)
-    # Deep-analysis mode gets a larger retrieval budget.
-    max_rounds = MAX_TOOL_ROUNDS_THINKING if mode == "thinking" else MAX_TOOL_ROUNDS
+    # Deep-analysis mode gets a larger retrieval budget; per-request overrides
+    # (from the app's KG settings dialog) are clamped to a sane range.
+    max_rounds = (
+        _rounds_limit(max_thinking, MAX_TOOL_ROUNDS_THINKING)
+        if mode == "thinking"
+        else _rounds_limit(max_instant, MAX_TOOL_ROUNDS)
+    )
     for _ in range(max_rounds):
         # stream=True so the final answer streams token-by-token; tool calls
         # arrive in the last chunk instead of content.
@@ -436,10 +467,16 @@ def agentic_chat(
     context_text: str,
     mode: str,
     reasoning: bool = False,
+    tools_enabled: bool = True,
+    max_instant: int | None = None,
+    max_thinking: int | None = None,
 ) -> dict:
     text = ""
     tools: list[Any] = []
-    for ev in _chat_events(message, history, context_text, mode, reasoning):
+    for ev in _chat_events(
+        message, history, context_text, mode, reasoning,
+        tools_enabled, max_instant, max_thinking,
+    ):
         if ev["type"] == "delta":
             text += ev["text"]
         elif ev["type"] == "done":
@@ -651,6 +688,11 @@ class ChatRequest(BaseModel):
     # When true, every tool call must carry a `reason` (displayed next to the
     # lookup in the app) and done.toolsUsed becomes [{call, reason}].
     reasoning: bool = False
+    # When false, no tools are offered — one direct answer pass.
+    toolsEnabled: bool = True
+    # Optional per-request overrides for the lookup budgets (clamped 1..100).
+    maxToolRoundsInstant: int | None = None
+    maxToolRoundsThinking: int | None = None
 
 
 class ResolveRequest(BaseModel):
@@ -693,7 +735,14 @@ def chat(req: ChatRequest, denied=Depends(guard)):
     if not req.message.strip():
         return JSONResponse({"error": "message is required"}, status_code=400)
     result = agentic_chat(
-        req.message, req.history, req.contextText, req.mode, req.reasoning
+        req.message,
+        req.history,
+        req.contextText,
+        req.mode,
+        req.reasoning,
+        req.toolsEnabled,
+        req.maxToolRoundsInstant,
+        req.maxToolRoundsThinking,
     )
     return result
 
@@ -707,7 +756,14 @@ def chat_stream(req: ChatRequest, denied=Depends(guard)):
     return StreamingResponse(
         _ndjson(
             _chat_events(
-                req.message, req.history, req.contextText, req.mode, req.reasoning
+                req.message,
+                req.history,
+                req.contextText,
+                req.mode,
+                req.reasoning,
+                req.toolsEnabled,
+                req.maxToolRoundsInstant,
+                req.maxToolRoundsThinking,
             )
         ),
         media_type="application/x-ndjson",

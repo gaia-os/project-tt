@@ -1,4 +1,4 @@
-import { ChatHistory, ChatMessage } from '@/lib/types';
+import { ChatHistory, ChatKgSettings, ChatMessage } from '@/lib/types';
 import {
   CHAT_THREAD_INDEX_KEY,
   chatHistoryStorageKey,
@@ -18,6 +18,43 @@ function storage(): Storage | null {
     return typeof window === 'undefined' ? null : window.localStorage;
   } catch {
     return null;
+  }
+}
+
+export const KG_SETTINGS_KEY = 'tech-tree-chat-kg-settings-v1';
+
+/** Server-side defaults: 10/25 match MAX_TOOL_ROUNDS(_THINKING) on the
+ * kg-service, 180s matches KG_TIMEOUT_MS in the chat route. */
+export const DEFAULT_KG_SETTINGS: ChatKgSettings = {
+  reasoning: true,
+  showLookups: true,
+  timeoutSec: 180,
+  instantLimit: 10,
+  thinkingLimit: 25,
+};
+
+/** Stored KG settings, or null when the user has never saved them. */
+export function loadKgSettings(): ChatKgSettings | null {
+  try {
+    const raw = storage()?.getItem(KG_SETTINGS_KEY);
+    if (!raw) return null;
+    const stored = JSON.parse(raw) as ChatKgSettings & { lookups?: boolean };
+    return {
+      ...DEFAULT_KG_SETTINGS,
+      ...stored,
+      // `lookups` used to gate tool use; it now only controls the display.
+      showLookups: stored.showLookups ?? stored.lookups ?? DEFAULT_KG_SETTINGS.showLookups,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function saveKgSettings(settings: ChatKgSettings): void {
+  try {
+    storage()?.setItem(KG_SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // A convenience — losing them just means defaults next time.
   }
 }
 

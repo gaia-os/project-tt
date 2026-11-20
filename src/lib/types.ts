@@ -268,6 +268,21 @@ export interface KgToolUse {
   reason?: string | null;
 }
 
+/** Per-browser KG chat behaviour, edited from the chat's gear menu and
+ * forwarded to the kg-service with each request. */
+export interface ChatKgSettings {
+  /** Ask the model for a one-line reason under each KG lookup. */
+  reasoning: boolean;
+  /** Show the expandable list of KG lookups under answers (lookups always run). */
+  showLookups: boolean;
+  /** How long the app waits on the KG service before aborting, seconds. */
+  timeoutSec: number;
+  /** Max KG lookups per answer in instant mode. */
+  instantLimit: number;
+  /** Max KG lookups per answer in deep-analysis mode. */
+  thinkingLimit: number;
+}
+
 export interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';

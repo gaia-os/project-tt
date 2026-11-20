@@ -1,15 +1,27 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Send, Loader2, Trash2, Upload, Crosshair } from 'lucide-react';
+import { Send, Loader2, Trash2, Upload, Crosshair, Settings } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import { ChatMessage, KgPaperDossier, KgToolUse } from '@/lib/types';
+import {
+  ChatKgSettings,
+  ChatMessage,
+  KgPaperDossier,
+  KgToolUse,
+} from '@/lib/types';
 import { labelForTopic, TopicKey } from '@/lib/topicConfig';
 import PaperDetails from './PaperDetails';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useTechTree } from '@/hooks/useTechTree';
 import { useTopics } from '@/hooks/useTopics';
 import {
@@ -19,9 +31,12 @@ import {
   resolveChatScope,
 } from '@/lib/chatContext';
 import {
+  DEFAULT_KG_SETTINGS,
   deleteThread,
+  loadKgSettings,
   loadScroll,
   loadThread,
+  saveKgSettings,
   saveScroll,
   saveThread,
 } from '@/lib/chatThreadStorage';
@@ -126,6 +141,10 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
   const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
   const [mode, setMode] = useState<ChatMode>('instant');
   const [citedPaper, setCitedPaper] = useState<KgPaperDossier | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [kgSettings, setKgSettings] = useState<ChatKgSettings>(
+    () => loadKgSettings() ?? DEFAULT_KG_SETTINGS,
+  );
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -179,6 +198,26 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
       console.error('Error saving rate limiting data:', error);
     }
   }, [requestCount, lastRequestTime]);
+
+  useEffect(() => {
+    saveKgSettings(kgSettings);
+  }, [kgSettings]);
+
+  // First visit (nothing stored yet): seed the reasoning toggle from the
+  // server's KG_REASONING_DISPLAY default.
+  useEffect(() => {
+    fetch('/investment-tech-tree/api/chat')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d || loadKgSettings() || typeof d.reasoningDefault !== 'boolean')
+          return;
+        setKgSettings((s) => ({ ...s, reasoning: d.reasoningDefault }));
+      })
+      .catch(() => {});
+  }, []);
+
+  const updateKgSettings = (patch: Partial<ChatKgSettings>) =>
+    setKgSettings((s) => ({ ...s, ...patch }));
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -330,6 +369,12 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
           topic,
           fileData,
           mode,
+          // Reasons cost a few extra tokens — skip when the lookup list
+          // they're shown under is hidden anyway.
+          reasoning: kgSettings.reasoning && kgSettings.showLookups,
+          timeoutMs: kgSettings.timeoutSec * 1000,
+          maxToolRoundsInstant: kgSettings.instantLimit,
+          maxToolRoundsThinking: kgSettings.thinkingLimit,
         }),
       });
 
@@ -463,6 +508,15 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
           <Badge variant="outline" className="text-xs">
             {requestCount}/{MAX_REQUESTS_PER_HOUR} requests per hour
           </Badge>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSettingsOpen(true)}
+            className="p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+            title="Knowledge graph settings"
+          >
+            <Settings size={18} />
+          </Button>
           {messages.length > 0 && (
             <Button
               variant="ghost"
@@ -565,7 +619,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
                       </div>
                     )}
                   </div>
-                  {message.toolsUsed?.length ? (
+                  {message.toolsUsed?.length && kgSettings.showLookups ? (
                     <details className="mt-2 text-xs text-gray-500">
                       <summary className="cursor-pointer hover:text-gray-700 select-none">
                         {message.toolsUsed.length} knowledge graph lookup
@@ -748,6 +802,87 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
           onClose={() => setCitedPaper(null)}
         />
       )}
+
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="max-w-sm p-5">
+          <DialogHeader>
+            <DialogTitle>Knowledge graph</DialogTitle>
+            <DialogDescription>
+              Saved on this browser and applied to every new message.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-3 space-y-4 text-sm text-gray-700">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={kgSettings.showLookups}
+                onChange={(e) =>
+                  updateKgSettings({ showLookups: e.target.checked })
+                }
+                className="h-4 w-4 accent-indigo-600"
+              />
+              <span>Show knowledge graph lookups</span>
+            </label>
+            <label
+              className={`flex items-center gap-2 ${
+                kgSettings.showLookups ? 'cursor-pointer' : 'opacity-50'
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={kgSettings.reasoning}
+                disabled={!kgSettings.showLookups}
+                onChange={(e) =>
+                  updateKgSettings({ reasoning: e.target.checked })
+                }
+                className="h-4 w-4 accent-indigo-600"
+              />
+              <span>Show the reason under each lookup</span>
+            </label>
+            <div className="space-y-3 border-t border-gray-200 pt-3">
+              <label className="flex items-center justify-between gap-3">
+                <span>Lookup timeout (seconds)</span>
+                <input
+                  type="number"
+                  min={10}
+                  max={190}
+                  value={kgSettings.timeoutSec}
+                  onChange={(e) =>
+                    updateKgSettings({ timeoutSec: Number(e.target.value) })
+                  }
+                  className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3">
+                <span>Max lookups — instant</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={kgSettings.instantLimit}
+                  onChange={(e) =>
+                    updateKgSettings({ instantLimit: Number(e.target.value) })
+                  }
+                  className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                />
+              </label>
+              <label className="flex items-center justify-between gap-3">
+                <span>Max lookups — deep analysis</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={kgSettings.thinkingLimit}
+                  onChange={(e) =>
+                    updateKgSettings({ thinkingLimit: Number(e.target.value) })
+                  }
+                  className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
+                />
+              </label>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

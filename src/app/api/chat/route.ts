@@ -13,6 +13,12 @@ interface ChatRequestBody {
   topic: TopicKey;
   fileData?: { base64: string; mimeType: string; fileName?: string };
   mode?: string;
+  // From the chat's KG settings dialog; absent -> server defaults.
+  reasoning?: boolean;
+  toolsEnabled?: boolean;
+  timeoutMs?: number;
+  maxToolRoundsInstant?: number;
+  maxToolRoundsThinking?: number;
 }
 
 /** Drops malformed nodes/edges instead of failing on them. */
@@ -47,9 +53,24 @@ const KG_TIMEOUT_MS = 180_000;
 
 // KG_REASONING_DISPLAY=1 makes the kg-service ask the model for a one-line
 // reason per lookup; the chat panel then shows it under each tool call.
+// It's the default — the chat's KG settings dialog can override per request.
 const showReasons = /^(1|true|yes|on)$/i.test(
   process.env.KG_REASONING_DISPLAY ?? '',
 );
+
+const clampInt = (v: unknown, lo: number, hi: number): number | undefined =>
+  typeof v === 'number' && Number.isFinite(v)
+    ? Math.min(hi, Math.max(lo, Math.round(v)))
+    : undefined;
+
+// GET -> the server-side defaults, so the settings dialog can seed itself
+// (e.g. the reasoning toggle from KG_REASONING_DISPLAY).
+export async function GET() {
+  return NextResponse.json({
+    reasoningDefault: showReasons,
+    timeoutMs: KG_TIMEOUT_MS,
+  });
+}
 
 // POST {message, context, history, topic, fileData, mode} -> {response}
 // Proxies to the KG service (Neo4j + Ollama); the service does the agentic
@@ -67,7 +88,20 @@ export async function POST(request: NextRequest) {
     }
 
     const body = (await request.json()) as ChatRequestBody;
-    const { message, context, scope, history, topic, fileData, mode } = body;
+    const {
+      message,
+      context,
+      scope,
+      history,
+      topic,
+      fileData,
+      mode,
+      reasoning,
+      toolsEnabled,
+      timeoutMs,
+      maxToolRoundsInstant,
+      maxToolRoundsThinking,
+    } = body;
 
     if (!message && !fileData) {
       return NextResponse.json({ error: 'Message or file is required' }, { status: 400 });
@@ -103,14 +137,19 @@ export async function POST(request: NextRequest) {
           history: history ?? [],
           contextText,
           mode: mode === 'thinking' ? 'thinking' : 'instant',
-          reasoning: showReasons,
+          reasoning: typeof reasoning === 'boolean' ? reasoning : showReasons,
+          toolsEnabled: toolsEnabled !== false,
+          maxToolRoundsInstant: clampInt(maxToolRoundsInstant, 1, 100),
+          maxToolRoundsThinking: clampInt(maxToolRoundsThinking, 1, 100),
         };
 
+    // Client-chosen timeout, clamped inside this function's duration budget.
+    const upstreamTimeout = clampInt(timeoutMs, 10_000, 190_000) ?? KG_TIMEOUT_MS;
     const res = await fetch(`${serviceUrl.replace(/\/$/, '')}/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
       body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(KG_TIMEOUT_MS),
+      signal: AbortSignal.timeout(upstreamTimeout),
     });
 
     if (!res.ok || !res.body) {
