@@ -31,6 +31,8 @@ interface TabPanelProps {
   chatScope?: ChatScope | null;
   /** Entities bolded in the newest assistant answer (KG-linked by the service). */
   onMentionsChange?: (mentions: ChatMention[]) => void;
+  /** ChatView is open: unmount this Chat so only one instance runs per thread. */
+  hideChat?: boolean;
 }
 
 type TabType = ExplorerPanel;
@@ -50,6 +52,7 @@ const TabPanel = ({
   onPanelChange,
   chatScope = null,
   onMentionsChange,
+  hideChat = false,
 }: TabPanelProps) => {
   const [activeTab, setActiveTab] = useState<TabType>(panel ?? 'details');
   const [nodeDetailsSubView, setNodeDetailsSubView] = useState<NodeDetailsSubView>('info');
@@ -163,7 +166,13 @@ const TabPanel = ({
           </TabsList>
 
           <TabsContent value="chat" className="flex-1 overflow-y-auto mt-0">
-            <Chat topic={topic} scope={chatScope} onMentionsChange={onMentionsChange} />
+            {!hideChat && (
+              <Chat
+                topic={topic}
+                scope={chatScope}
+                onMentionsChange={onMentionsChange}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="details" className="flex-1 overflow-y-auto mt-0">

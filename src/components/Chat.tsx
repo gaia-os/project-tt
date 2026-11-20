@@ -55,6 +55,8 @@ interface ChatProps {
   scope?: ChatScope | null;
   /** Entities bolded in the newest assistant answer (KG-linked by the service). */
   onMentionsChange?: (mentions: ChatMention[]) => void;
+  /** A past answer's "N on tree" chip was clicked; defaults to onMentionsChange. */
+  onShowMentions?: (mentions: ChatMention[]) => void;
 }
 
 // Paper-id citations like [IAEA-CN-28-H-10] emitted by the kg-service,
@@ -129,7 +131,12 @@ function MentionGraphButton({
   );
 }
 
-const Chat: React.FC<ChatProps> = ({ topic, scope = null, onMentionsChange }) => {
+const Chat: React.FC<ChatProps> = ({
+  topic,
+  scope = null,
+  onMentionsChange,
+  onShowMentions,
+}) => {
   const { techTree } = useTechTree(topic);
   // Shared label index for the "N on tree" chips under past answers.
   const mentionMatcher = useMemo(
@@ -755,7 +762,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null, onMentionsChange }) =>
                       <MentionGraphButton
                         mentions={message.mentions}
                         matcher={mentionMatcher}
-                        onShow={onMentionsChange}
+                        onShow={onShowMentions ?? onMentionsChange}
                       />
                     ) : null}
                   </div>

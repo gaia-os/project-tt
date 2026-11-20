@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Globe2, Network } from 'lucide-react';
+import { Building2, Globe2, MessageSquare, Network } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ExplorerViewMode } from '@/lib/types';
 
@@ -17,6 +17,7 @@ const VIEW_OPTIONS: Array<{
   { value: 'technology', label: 'Technology', icon: Network },
   { value: 'company', label: 'Company', icon: Building2 },
   { value: 'world', label: 'World', icon: Globe2 },
+  { value: 'chat', label: 'Chat', icon: MessageSquare },
 ];
 
 export function ViewModeSelector({ value, onChange }: ViewModeSelectorProps) {

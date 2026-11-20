@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import {
+  ChatMention,
   CompanySummary,
   ExplorerSelection,
   ExplorerViewMode,
   UiNode,
 } from '@/lib/types';
-import { TopicKey, TopicSummary } from '@/lib/topicConfig';
+import { TopicKey, TopicSummary, labelForTopic } from '@/lib/topicConfig';
+import { ExplorerPanel } from '@/lib/explorerUrlState';
+import { resolveChatScope } from '@/lib/chatContext';
 import {
   OnboardingState,
   readOnboardingState,
@@ -20,8 +23,9 @@ import { useTopics } from '@/hooks/useTopics';
 import { useCompanyView } from '@/hooks/useCompanyView';
 import { useExplorerUrlState } from '@/hooks/useExplorerUrlState';
 import { useCustomTrees } from '@/hooks/useCustomTrees';
-import { CustomTree } from '@/lib/customTrees';
+import { CustomTree, resolveCustomTree } from '@/lib/customTrees';
 import TechTree from './TechTree';
+import Chat from './Chat';
 import { CompanyExplorer } from './CompanyExplorer';
 import { WorldExplorer } from './WorldExplorer';
 import { ViewModeSelector } from './ViewModeSelector';
@@ -94,12 +98,15 @@ function ExplorerWorkspaceContent({
   const viewMode = urlState.view;
 
   const [companyDataRequested, setCompanyDataRequested] = useState(
-    viewMode !== 'technology',
+    viewMode === 'company' || viewMode === 'world',
   );
   const { techTree } = useTechTree(topic);
   const companyView = useCompanyView(topic, {
-    enabled: companyDataRequested || viewMode !== 'technology',
+    enabled:
+      companyDataRequested || viewMode === 'company' || viewMode === 'world',
   });
+  // Lifted so ChatView can route a past answer's mentions to the tree panel.
+  const [chatMentions, setChatMentions] = useState<ChatMention[]>([]);
   const [selection, setSelection] = useState<ExplorerSelection>();
   const [companyFocusNodeId, setCompanyFocusNodeId] = useState<string | null>(
     null,
@@ -125,7 +132,9 @@ function ExplorerWorkspaceContent({
   );
 
   useEffect(() => {
-    if (viewMode !== 'technology') setCompanyDataRequested(true);
+    if (viewMode === 'company' || viewMode === 'world') {
+      setCompanyDataRequested(true);
+    }
   }, [viewMode]);
 
   useEffect(() => {
@@ -240,6 +249,49 @@ function ExplorerWorkspaceContent({
     updateUrl({ view: nextView });
   };
 
+  const handlePanelChange = useCallback(
+    (nextPanel: ExplorerPanel) => updateUrl({ panel: nextPanel }),
+    [updateUrl],
+  );
+
+  const handleRequestChatView = useCallback(
+    () => updateUrl({ view: 'chat' }),
+    [updateUrl],
+  );
+
+  // A past answer's "N on tree" chip in ChatView jumps to the tree's pop-up.
+  const handleChatViewShowMentions = useCallback(
+    (mentions: ChatMention[]) => {
+      setChatMentions(mentions);
+      if (mentions.length) updateUrl({ view: 'technology' });
+    },
+    [updateUrl],
+  );
+
+  /**
+   * ChatView's conversation: the open custom tree's, else the whole topic's —
+   * the same threads the side-panel chat uses, so history is shared.
+   */
+  const chatViewScope = useMemo(() => {
+    if (!techTree) return null;
+    return resolveChatScope({
+      topic,
+      topicLabel: labelForTopic(topics, topic),
+      techTree,
+      draft: null,
+      pathway: null,
+      custom: customTree
+        ? {
+            id: customTree.id,
+            name: customTree.name,
+            notes: customTree.notes,
+            tree: resolveCustomTree(techTree, customTree).tree,
+          }
+        : null,
+      view: null,
+    });
+  }, [topic, topics, techTree, customTree]);
+
   const handleFocusChange = useCallback(
     (nodeId: string | null) => updateUrl({ focus: nodeId }),
     [updateUrl],
@@ -347,6 +399,12 @@ function ExplorerWorkspaceContent({
             onPathwayStepChange={handlePathwayStepChange}
             onExitPathway={handleExitPathway}
             onChooseTechnology={openTechnologyPicker}
+            panel={urlState.panel}
+            onPanelChange={handlePanelChange}
+            onRequestChatView={handleRequestChatView}
+            chatViewActive={viewMode === 'chat'}
+            chatMentions={chatMentions}
+            onChatMentionsChange={setChatMentions}
             customTreeId={urlState.tree}
             onOpenCustomTree={handleOpenCustomTree}
             onCloseCustomTree={handleCloseCustomTree}
@@ -437,6 +495,19 @@ function ExplorerWorkspaceContent({
           onShowTechnology={showTechnology}
         />
       </div>
+
+      {viewMode === 'chat' && (
+        <div className="h-full w-full bg-gray-100">
+          <div className="mx-auto h-full w-full max-w-4xl bg-white shadow-lg">
+            <Chat
+              topic={topic}
+              scope={chatViewScope}
+              onMentionsChange={setChatMentions}
+              onShowMentions={handleChatViewShowMentions}
+            />
+          </div>
+        </div>
+      )}
 
       {welcomeStep && !mobileWarningPending && (
         <WelcomeFlow

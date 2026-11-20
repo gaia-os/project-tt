@@ -137,6 +137,13 @@ interface TechTreeProps {
   onOpenCustomTree?: (tree: CustomTree) => void;
   /** Back to the whole topic tree. */
   onCloseCustomTree?: () => void;
+  /** The full-screen ChatView is open: the side-panel chat unmounts. */
+  chatViewActive?: boolean;
+  /** Whole-tree chat tab selected; the workspace may switch to ChatView. */
+  onRequestChatView?: () => void;
+  /** Controlled mention state (defaults to internal). */
+  chatMentions?: ChatMention[];
+  onChatMentionsChange?: (mentions: ChatMention[]) => void;
 }
 
 const FIT_VIEW_OPTIONS = { padding: 0.5, maxZoom: 1.25 };
@@ -221,6 +228,10 @@ const TechTree: React.FC<TechTreeProps> = ({
   customTreeId = null,
   onOpenCustomTree,
   onCloseCustomTree,
+  chatViewActive = false,
+  onRequestChatView,
+  chatMentions: chatMentionsProp,
+  onChatMentionsChange,
 }) => {
   const {
     techTree,
@@ -261,7 +272,12 @@ const TechTree: React.FC<TechTreeProps> = ({
   const [paperDossier, setPaperDossier] = useState<KgPaperDossier | null>(null);
   const [showReview, setShowReview] = useState(false);
   // Entities bolded in the newest chat answer (emitted by the kg-service).
-  const [chatMentions, setChatMentions] = useState<ChatMention[]>([]);
+  // Liftable so ChatView can route a past answer's mentions to this panel.
+  const [internalChatMentions, setInternalChatMentions] = useState<
+    ChatMention[]
+  >([]);
+  const chatMentions = chatMentionsProp ?? internalChatMentions;
+  const setChatMentions = onChatMentionsChange ?? setInternalChatMentions;
   const [showLitEdgeLabels, setShowLitEdgeLabels] = useState(false);
   const [litVotes, setLitVotes] = useState<Map<string, VoteCounts>>(new Map());
   // 'overview': lit nodes on top of the full tree; 'focused': only parent + lit nodes
@@ -1851,6 +1867,22 @@ const TechTree: React.FC<TechTreeProps> = ({
     filterLabel,
   ]);
 
+  // Whole-tree chats move to ChatView; scoped chats (pathway, custom tree,
+  // connected view, builder) stay in the side panel next to their context.
+  const handlePanelChange = useCallback(
+    (next: 'details' | 'chat' | 'simulations') => {
+      if (
+        next === 'chat' &&
+        chatScope?.kind === 'topic' &&
+        !chatScope.refinement
+      ) {
+        onRequestChatView?.();
+      }
+      onPanelChange?.(next);
+    },
+    [chatScope, onPanelChange, onRequestChatView],
+  );
+
   // Entities the newest chat answer mentions, matched to nodes on this tree.
   const mentionMatch = useMemo(
     () =>
@@ -2358,9 +2390,10 @@ const TechTree: React.FC<TechTreeProps> = ({
             onShowChatRef={(fn) => { showChatTabRef.current = fn; }}
             onChooseTechnology={onChooseTechnology}
             panel={panel}
-            onPanelChange={onPanelChange}
+            onPanelChange={handlePanelChange}
             chatScope={chatScope}
             onMentionsChange={setChatMentions}
+            hideChat={chatViewActive}
           />
         )}
       </div>

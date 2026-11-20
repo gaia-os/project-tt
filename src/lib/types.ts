@@ -112,7 +112,13 @@ export interface SmrReactorDetails {
     deployment: string[];
     applications: string[];
   };
-  specs: { key: string; label: string; value: string; source: string; conflict: string | null }[];
+  specs: {
+    key: string;
+    label: string;
+    value: string;
+    source: string;
+    conflict: string | null;
+  }[];
   assessment: {
     dimension: string;
     label: string;
@@ -123,9 +129,16 @@ export interface SmrReactorDetails {
     multiple_jurisdictions: boolean;
     text: string | null;
   }[];
-  milestones: { year: string | null; milestone: string; status: string | null }[];
+  milestones: {
+    year: string | null;
+    milestone: string;
+    status: string | null;
+  }[];
   financing: { section: string; text: string; usd: number | null }[];
-  sections: { title: string; blocks: { heading: string | null; text: string }[] }[];
+  sections: {
+    title: string;
+    blocks: { heading: string | null; text: string }[];
+  }[];
   images: SmrImageRef[];
   regulators: SmrNodeRef[];
   organisations: SmrNodeRef[];
@@ -162,7 +175,12 @@ export interface SmrTechnologyDetails {
   broader: (SmrNodeRef & { provenance: string[] })[];
   narrower: SmrNodeRef[];
   enables: {
-    reactors: (SmrNodeRef & { verified: boolean; role: string | null; quote: string | null; document: string | null })[];
+    reactors: (SmrNodeRef & {
+      verified: boolean;
+      role: string | null;
+      quote: string | null;
+      document: string | null;
+    })[];
     technologies: (SmrNodeRef & { provenance: string[] })[];
   };
   enabled_by: (SmrNodeRef & {
@@ -474,7 +492,12 @@ export interface KgExperiment {
   voteKey?: string;
   name?: string | null;
   device?: string | null;
-  heatingMethods?: { name?: string | null; frequency?: string | null; power?: string | null; pulseDuration?: string | null }[];
+  heatingMethods?: {
+    name?: string | null;
+    frequency?: string | null;
+    power?: string | null;
+    pulseDuration?: string | null;
+  }[];
   findings?: (string | null)[];
   measurements?: KgMeasurement[];
   scalabilityClaims?: { statement?: string | null; limit?: string | null }[];
@@ -488,7 +511,12 @@ export interface KgPaperDossier {
   authors?: string[];
   presenters?: string[];
   institute?: { name?: string | null; city?: string | null } | null;
-  conference?: { name?: string | null; year?: number | null; location?: string | null; session?: string | null } | null;
+  conference?: {
+    name?: string | null;
+    year?: number | null;
+    location?: string | null;
+    session?: string | null;
+  } | null;
   studyKind?: string | null;
   originalLanguage?: string | null;
   numPages?: number | null;
@@ -503,7 +531,12 @@ export interface LiteratureNodeData {
   parentNodeId: string;
 }
 
-export const EXPLORER_VIEW_MODES = ['technology', 'company', 'world'] as const;
+export const EXPLORER_VIEW_MODES = [
+  'technology',
+  'company',
+  'world',
+  'chat',
+] as const;
 
 export type ExplorerViewMode = (typeof EXPLORER_VIEW_MODES)[number];
 
