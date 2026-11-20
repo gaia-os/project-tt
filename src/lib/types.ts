@@ -296,6 +296,8 @@ export interface ChatMention {
   kind?: string;
   /** Resolver score 0-1: 1.0 exact, 0.9 alias, 0.85 acronym, 0.5 word-boundary. */
   score?: number;
+  /** 'tool' when the name came from KG lookups the answer cites, not bold text. */
+  via?: 'tool';
 }
 
 export interface ChatMessage {

@@ -637,7 +637,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null, onMentionsChange }) =>
                                 'tr', 'td', 'th', 'code', 'pre', 'br', 'a',
                                 'span',
                               ],
-                              ALLOWED_ATTR: ['class', 'href', 'target', 'rel', 'data-paperid'],
+                              ALLOWED_ATTR: ['class', 'href', 'target', 'rel', 'data-paperid', 'data-entity'],
                             },
                           ),
                         }}

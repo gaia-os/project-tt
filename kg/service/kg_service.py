@@ -307,7 +307,14 @@ corpus.
 
 Format answers as clean HTML only — never markdown (**, -, ## render as
 literal characters in the chat panel). Use <p>, <ul><li>, <h3>, <strong>.
-Keep it readable in a chat panel."""
+Keep it readable in a chat panel.
+
+Tag every named entity you mention — reactor designs, organisations,
+technologies, programmes, sites — as <strong data-entity="NAME">…</strong>
+where NAME is the entity's exact name as the tools returned it (resolvedAs /
+name fields). Tag nothing else: no categories, technology lines, readiness
+levels, numbers or emphasis. Example:
+<strong data-entity="BWRX-300">BWRX-300</strong>."""
 
 _MODE_SUFFIX = {
     "instant": "\n\nBe concise and direct — short focused answers unless asked to elaborate.",
@@ -316,25 +323,71 @@ _MODE_SUFFIX = {
 }
 
 
-def _run_tool(name: str, args: dict) -> str:
+def _run_tool_payload(name: str, args: dict) -> Any:
+    """Structured tool result — _tool_result truncates, so harvest from this."""
     try:
         fn = _TOOL_FUNCS.get(name)
         if not fn:
-            return json.dumps({"error": f"unknown tool {name}"})
-        return _tool_result(fn(args))
+            return {"error": f"unknown tool {name}"}
+        return fn(args)
     except Exception as exc:  # feed errors back to the model instead of dying
-        return json.dumps({"error": f"{type(exc).__name__}: {exc}"})
+        return {"error": f"{type(exc).__name__}: {exc}"}
+
+
+def _run_tool(name: str, args: dict) -> str:
+    return _tool_result(_run_tool_payload(name, args))
+
+
+# ---------------------------------------------------------------- tool-result harvest
+#
+# The entity names a lookup already resolved (`resolvedAs`, `name` fields,
+# entity lists in profiles) are canonical KG names — a second, more reliable
+# mention source than the model's bolding. Harvested generously, then kept
+# only when the name actually appears in the answer.
+
+_NAME_VALUE_KEYS = {"name", "resolvedas"}
+_ENTITY_LIST_KEYS = {
+    "developers",
+    "suppliers",
+    "vendors",
+    "technologies",
+    "designs",
+    "organisations",
+    "organizations",
+    "countries",
+    "applications",
+    "technologylines",
+    "relateddesigns",
+    "entities",
+}
+
+
+def _harvest_names(value: Any, out: set[str]) -> None:
+    if isinstance(value, dict):
+        for key, item in value.items():
+            lk = str(key).lower()
+            if lk in _NAME_VALUE_KEYS and isinstance(item, str):
+                out.add(item)
+            elif lk in _ENTITY_LIST_KEYS and isinstance(item, list):
+                out.update(x for x in item if isinstance(x, str))
+            _harvest_names(item, out)
+    elif isinstance(value, list):
+        for item in value:
+            _harvest_names(item, out)
 
 
 # ---------------------------------------------------------------- answer mentions
 #
-# The system prompt tells the model to bold named entities (<strong>). Those
-# spans are harvested from the final answer and linked to KG entities with the
-# same resolver the tools use, so the app can show which tree nodes an answer
-# talks about. Spans that resolve to nothing still go out — the app can match
-# them against the on-screen tree itself.
+# The system prompt tells the model to tag named entities as
+# <strong data-entity="canonical name">. Those spans are harvested from the
+# final answer and linked to KG entities with the same resolver the tools
+# use, so the app can show which tree nodes an answer talks about. Spans
+# without the attribute fall back to resolving the span text; spans that
+# resolve to nothing still go out — the app can match them against the
+# on-screen tree itself.
 
-_BOLD_SPAN = re.compile(r"<(?:strong|b)\b[^>]*>(.*?)</(?:strong|b)\s*>", re.I | re.S)
+_BOLD_SPAN = re.compile(r"<(?:strong|b)\b([^>]*)>(.*?)</(?:strong|b)\s*>", re.I | re.S)
+_DATA_ENTITY = re.compile(r'data-entity\s*=\s*["\']([^"\']+)["\']', re.I)
 _MD_BOLD_SPAN = re.compile(r"\*\*(.+?)\*\*")
 _ANY_TAG = re.compile(r"<[^>]+>")
 # Bolded numbers/punctuation ("TRL 9", "+12%") are not entity candidates.
@@ -342,42 +395,99 @@ _NON_ENTITY = re.compile(r"[\d\s.,%:;()+\-–—/'’&]+")
 _MAX_MENTIONS = 20
 
 
-def _answer_mentions(answer_html: str) -> list[dict[str, Any]]:
-    spans: list[str] = []
+def _clean_mention(raw: str) -> str:
+    text = normalize_label(html.unescape(_ANY_TAG.sub(" ", raw)))
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _norm_for_search(text: str) -> str:
+    text = re.sub(r"[®™©]", "", text.lower())
+    return re.sub(r"[^a-z0-9]+", " ", text).strip()
+
+
+def _in_answer(name: str, answer_norm: str) -> bool:
+    """Is `name` (canonical) actually written in the answer? Tolerates the
+    short forms prose uses: word-boundary first token ("NuScale" of "NuScale
+    Power Module") or a two-token prefix ("ritm 200m" of "ritm 200m n s")."""
+    n = _norm_for_search(name)
+    if len(n) < 3:
+        return False
+    if n in answer_norm:
+        return True
+    words = n.split()
+    if len(words) >= 2 and " ".join(words[:2]) in answer_norm:
+        return True
+    return bool(
+        words
+        and len(words[0]) >= 4
+        and re.search(r"\b" + re.escape(words[0]) + r"\b", answer_norm)
+    )
+
+
+def _answer_mentions(
+    answer_html: str, consulted: set[str] | None = None
+) -> list[dict[str, Any]]:
+    # (visible span text, canonical-name hint from data-entity)
+    spans: list[tuple[str, str | None]] = []
     seen: set[str] = set()
 
-    def _add(raw: str) -> None:
-        text = normalize_label(html.unescape(_ANY_TAG.sub(" ", raw)))
-        text = re.sub(r"\s+", " ", text).strip()
-        if not 3 <= len(text) <= 80 or _NON_ENTITY.fullmatch(text):
+    def _add(raw_attrs: str, raw_text: str) -> None:
+        text = _clean_mention(raw_text)
+        hint_match = _DATA_ENTITY.search(raw_attrs or "")
+        hint = _clean_mention(hint_match.group(1)) if hint_match else ""
+        if not hint and not (3 <= len(text) <= 80 and not _NON_ENTITY.fullmatch(text)):
             return
-        key = text.lower()
+        key = (hint or text).lower()
         if key not in seen:
             seen.add(key)
-            spans.append(text)
+            spans.append((text, hint or None))
 
     for match in _BOLD_SPAN.finditer(answer_html):
-        _add(match.group(1))
+        _add(match.group(1), match.group(2))
     if not spans:
         # Markdown bold slipped through despite the HTML-only instruction.
         for match in _MD_BOLD_SPAN.finditer(answer_html):
-            _add(match.group(1))
-    if not spans:
-        return []
+            _add("", match.group(1))
 
     spans = spans[:_MAX_MENTIONS]
+    answer_norm = _norm_for_search(answer_html)
     try:
         with _session() as s:
-            return [
-                {"text": text, **entity}
-                for text in spans
-                # fuzzy=False skips the word-boundary regex scan — the
-                # weakest match tier and the costliest query per span.
-                for entity in (resolve_entity(s, text, limit=1, fuzzy=False) or [{}],)
-            ]
+            out: list[dict[str, Any]] = []
+            emitted: set[str] = set()
+            for text, hint in spans:
+                # A data-entity hint should already be the canonical name —
+                # fuzzy tolerates near-misses; bare spans keep it cheap.
+                best = resolve_entity(s, hint or text, limit=1, fuzzy=hint is not None)
+                entity = best[0] if best else {}
+                if entity.get("name"):
+                    emitted.add(entity["name"].lower())
+                emitted.add(text.lower())
+                out.append({"text": text, **entity})
+
+            # Entities the lookups resolved and the answer actually names.
+            extras: list[tuple[int, dict[str, Any]]] = []
+            for name in consulted or ():
+                if name.lower() in emitted or not _in_answer(name, answer_norm):
+                    continue
+                best = resolve_entity(s, name, limit=1, fuzzy=False)
+                entity = best[0] if best else {}
+                if entity.get("name"):
+                    emitted.add(entity["name"].lower())
+                pos = answer_norm.find(_norm_for_search(name).split()[0] or name)
+                extras.append((pos, {"text": name, "via": "tool", **entity}))
+            extras.sort(key=lambda e: e[0])
+            out.extend(item for _pos, item in extras[:_MAX_MENTIONS])
+            return out
     except Exception:
-        # Mention linking decorates the answer — never break the stream over it.
-        return [{"text": text} for text in spans]
+        # Mention linking decorates the answer — never break the stream over
+        # it. Harvested names still help: the app can label-match them.
+        fallback = [{"text": text} for text, _hint in spans]
+        seen_texts = {text.lower() for text, _hint in spans}
+        for name in consulted or ():
+            if name.lower() not in seen_texts and _in_answer(name, answer_norm):
+                fallback.append({"text": name, "via": "tool"})
+        return fallback
 
 
 def _rounds_limit(override: int | None, default: int) -> int:
@@ -440,6 +550,7 @@ def _chat_events(
 
     tools_used: list[Any] = []
     answer_parts: list[str] = []
+    consulted: set[str] = set()
     tools_schema = _tools_schema(reasoning)
     # Deep-analysis mode gets a larger retrieval budget; per-request overrides
     # (from the app's KG settings dialog) are clamped to a sane range.
@@ -501,8 +612,10 @@ def _chat_events(
             else:
                 tools_used.append(label)
                 yield {"type": "tool", "name": label}
+            payload = _run_tool_payload(name, args)
+            _harvest_names(payload, consulted)
             messages.append(
-                {"role": "tool", "name": name, "content": _run_tool(name, args)}
+                {"role": "tool", "name": name, "content": _tool_result(payload)}
             )
     else:
         # Retrieval budget exhausted — force a final no-tools pass so the
@@ -531,7 +644,10 @@ def _chat_events(
         "toolsUsed": tools_used,
         "suggestions": _followups(message, "".join(answer_parts), history),
     }
-    yield {"type": "entities", "items": _answer_mentions("".join(answer_parts))}
+    yield {
+        "type": "entities",
+        "items": _answer_mentions("".join(answer_parts), consulted),
+    }
 
 
 def _ndjson(events) -> Any:

@@ -39,9 +39,18 @@ export function matchMentionsToTree(
   const nodes: DataNode[] = [];
   const unmatched: ChatMention[] = [];
   for (const mention of mentions) {
-    const node =
-      (mention.name ? byLabel.get(normalize(mention.name)) : undefined) ??
-      byLabel.get(normalize(mention.text));
+    // Composite spans like "ACP100/Linglong One" or "RITM-200M/N/S" rarely
+    // match a single label — try each part as well.
+    const candidates = [
+      mention.name,
+      mention.text,
+      ...mention.text.split('/'),
+    ]
+      .filter((part): part is string => !!part && part.trim().length >= 3)
+      .map(normalize);
+    const node = candidates
+      .map((candidate) => byLabel.get(candidate))
+      .find((match): match is DataNode => !!match);
     if (node) {
       if (!seen.has(node.id)) {
         seen.add(node.id);
