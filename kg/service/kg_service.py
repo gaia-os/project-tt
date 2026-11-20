@@ -362,13 +362,20 @@ def _chat_events(
             options={"num_ctx": _settings.num_ctx, "temperature": 0.3},
             stream=True,
         )
+        answer = ""
         for chunk in stream:
             if chunk.message.content:
+                answer += chunk.message.content
                 yield {"type": "delta", "text": chunk.message.content}
-        yield {"type": "done", "toolsUsed": []}
+        yield {
+            "type": "done",
+            "toolsUsed": [],
+            "suggestions": _followups(message, answer, history),
+        }
         return
 
     tools_used: list[Any] = []
+    answer_parts: list[str] = []
     tools_schema = _tools_schema(reasoning)
     # Deep-analysis mode gets a larger retrieval budget; per-request overrides
     # (from the app's KG settings dialog) are clamped to a sane range.
@@ -393,6 +400,7 @@ def _chat_events(
             m = chunk.message
             if m.content:
                 content_parts.append(m.content)
+                answer_parts.append(m.content)
                 yield {"type": "delta", "text": m.content}
             if getattr(m, "tool_calls", None):
                 tool_calls = m.tool_calls
@@ -451,9 +459,14 @@ def _chat_events(
         )
         for chunk in stream:
             if chunk.message.content:
+                answer_parts.append(chunk.message.content)
                 yield {"type": "delta", "text": chunk.message.content}
 
-    yield {"type": "done", "toolsUsed": tools_used}
+    yield {
+        "type": "done",
+        "toolsUsed": tools_used,
+        "suggestions": _followups(message, "".join(answer_parts), history),
+    }
 
 
 def _ndjson(events) -> Any:
@@ -473,6 +486,7 @@ def agentic_chat(
 ) -> dict:
     text = ""
     tools: list[Any] = []
+    suggestions: list[str] = []
     for ev in _chat_events(
         message, history, context_text, mode, reasoning,
         tools_enabled, max_instant, max_thinking,
@@ -481,7 +495,8 @@ def agentic_chat(
             text += ev["text"]
         elif ev["type"] == "done":
             tools = ev["toolsUsed"]
-    return {"response": text, "toolsUsed": tools}
+            suggestions = ev.get("suggestions", [])
+    return {"response": text, "toolsUsed": tools, "suggestions": suggestions}
 
 
 # ---------------------------------------------------------------- document verification
@@ -551,6 +566,52 @@ def _llm_json(prompt: str, num_ctx: int = 14000) -> dict:
         return json.loads(resp.message.content or "{}")
     except json.JSONDecodeError:
         return {}
+
+
+_FOLLOWUP_PROMPT = """\
+Suggest {n} short follow-up questions the user could ask next, based on this
+exchange about the SMR technology tree. They must be answerable from a
+knowledge graph of SMR designs, organisations and technologies — concrete,
+under 12 words each, no explanations, don't repeat what was already asked.
+Output ONLY JSON: {{"suggestions": ["...", "..."]}}
+{history}
+USER ASKED: {question}
+ASSISTANT ANSWERED: {answer}"""
+
+
+def _followups(
+    question: str, answer: str, history: list[dict] | None = None, n: int = 3
+) -> list[str]:
+    """Follow-up question chips shown under each answer; [] on any failure."""
+    if not answer.strip():
+        return []
+    lines = [
+        f"{'User' if h.get('type') == 'user' else 'Assistant'}: "
+        f"{str(h.get('content', ''))[:200]}"
+        for h in (history or [])[-6:]
+    ]
+    history_text = (
+        "\nEARLIER IN THE CONVERSATION (don't re-suggest these topics):\n"
+        + "\n".join(lines)
+        if lines
+        else ""
+    )
+    try:
+        d = _llm_json(
+            _FOLLOWUP_PROMPT.format(
+                n=n,
+                history=history_text,
+                question=question[:500],
+                answer=answer[:2000],
+            ),
+            num_ctx=8192,
+        )
+        out = d.get("suggestions")
+        if not isinstance(out, list):
+            return []
+        return [s.strip() for s in out if isinstance(s, str) and s.strip()][:n]
+    except Exception:
+        return []
 
 
 def _verify_events(file_b64: str, file_name: str, question: str):

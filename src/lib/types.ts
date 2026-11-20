@@ -290,6 +290,8 @@ export interface ChatMessage {
   /** KG tool calls the agent ran to produce this answer (e.g. "search_chunks(...)").
    * Plain strings for older stored threads and the verify pipeline. */
   toolsUsed?: (string | KgToolUse)[];
+  /** Follow-up questions proposed by the service after this answer. */
+  suggestions?: string[];
   timestamp: number;
   /** What the assistant was shown when this was asked, if narrowed. */
   context?: { label: string };

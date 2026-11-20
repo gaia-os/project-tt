@@ -318,6 +318,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
     const draftId = (Date.now() + 1).toString();
     let draftText = '';
     let tools: (string | KgToolUse)[] = [];
+    let suggestions: string[] = [];
     let started = false;
     const writeDraft = (persist: boolean) =>
       updateThread(
@@ -325,7 +326,14 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
         (prev) =>
           prev.some((m) => m.id === draftId)
             ? prev.map((m) =>
-                m.id === draftId ? { ...m, content: draftText, toolsUsed: [...tools] } : m,
+                m.id === draftId
+                  ? {
+                      ...m,
+                      content: draftText,
+                      toolsUsed: [...tools],
+                      suggestions: [...suggestions],
+                    }
+                  : m,
               )
             : [
                 ...prev,
@@ -334,6 +342,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
                   type: 'assistant',
                   content: draftText,
                   toolsUsed: [...tools],
+                  suggestions: [...suggestions],
                   timestamp: Date.now(),
                 },
               ],
@@ -406,6 +415,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
             response?: string;
             error?: string;
             toolsUsed?: (string | KgToolUse)[];
+            suggestions?: string[];
           };
           try {
             ev = JSON.parse(line);
@@ -422,6 +432,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
             setUploadStatus('Writing answer…');
           } else if (ev.type === 'done') {
             tools = ev.toolsUsed ?? tools;
+            suggestions = ev.suggestions ?? suggestions;
             if (ev.response) draftText = ev.response;
           } else if (ev.type === 'error') {
             throw new Error(ev.error || 'KG service error');
@@ -644,6 +655,20 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
                         })}
                       </ul>
                     </details>
+                  ) : null}
+                  {message.type === 'assistant' && message.suggestions?.length ? (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {message.suggestions.map((q) => (
+                        <Badge
+                          key={q}
+                          variant="outline"
+                          className="cursor-pointer font-normal hover:bg-gray-200 transition-colors"
+                          onClick={() => handleSuggestedQuestion(q)}
+                        >
+                          {q}
+                        </Badge>
+                      ))}
+                    </div>
                   ) : null}
                   <div
                     className={`text-xs mt-2 ${
