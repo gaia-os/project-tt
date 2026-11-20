@@ -108,6 +108,11 @@ export function useCanvasWheel(container: HTMLElement | null) {
       // Our own forwarded events: let React Flow handle them.
       if (!event.isTrusted) return;
       const target = event.target instanceof Element ? event.target : null;
+      // A nested React Flow inside the canvas (e.g. the chat-mentions mini
+      // graph) owns its wheel events — it zooms itself. (`.nowheel` would
+      // also work but disables that flow's own zoom handling.)
+      const flow = target?.closest('.react-flow');
+      if (flow && flow !== container.querySelector('.react-flow')) return;
       const overGraph = !!target?.closest('.react-flow__renderer');
       if (
         overGraph

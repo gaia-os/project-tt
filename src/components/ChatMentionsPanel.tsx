@@ -20,11 +20,12 @@ import { nodeRoleLabel } from '@/lib/nodeRoles';
  * Overlay on the tech-tree canvas: the entities bolded in the latest chat
  * answer that exist on this tree, drawn as a mini graph. Edges are the
  * tree's own prerequisite links between the mentioned nodes, laid out
- * left-to-right by longest-path depth like the main layout.
+ * left-to-right by longest-path depth like the main layout — with
+ * deployment concepts pinned to the rightmost column, as on the tree.
  *
- * `nowheel` on the root keeps the canvas's wheel hook from forwarding the
- * panel's scroll events to the background graph — the mini flow zooms
- * itself instead.
+ * `nowheel` stays off the flow itself (React Flow treats it as
+ * "don't zoom here"); the canvas wheel hook leaves the nested flow alone,
+ * so scrolling over the graph zooms the mini graph, not the background.
  */
 
 const NODE_W = 176;
@@ -76,11 +77,16 @@ function MentionNode({ id, data }: NodeProps<MentionFlowNode>) {
 
 const NODE_TYPES: NodeTypes = { mention: MentionNode };
 
-/** x = longest-path depth over the induced edges, y = mention order per depth. */
+/**
+ * x = longest-path depth over the induced edges, y = mention order per
+ * depth. Reactors (deployment concepts) are pinned right of everything
+ * else, like the LAST-layer constraint in the main layout.
+ */
 function layoutMentions(
-  ids: string[],
+  nodes: { id: string; nodeLabel?: string }[],
   edges: Edge[],
 ): Map<string, { x: number; y: number }> {
+  const ids = nodes.map((node) => node.id);
   const depth = new Map<string, number>();
   const remaining = new Map<string, number>();
   const successors = new Map<string, string[]>();
@@ -112,13 +118,26 @@ function layoutMentions(
     frontier = next;
   }
 
+  const isReactor = (node: { nodeLabel?: string }) =>
+    node.nodeLabel === 'ReactorConcept';
+  const hasNonReactor = nodes.some((node) => !isReactor(node));
+  const maxNonReactorDepth = Math.max(
+    0,
+    ...nodes
+      .filter((node) => !isReactor(node))
+      .map((node) => depth.get(node.id) ?? 0),
+  );
+
   const perLevel = new Map<number, number>();
   const positions = new Map<string, { x: number; y: number }>();
-  for (const id of ids) {
-    const level = depth.get(id) ?? 0;
+  for (const node of nodes) {
+    const level =
+      isReactor(node) && hasNonReactor
+        ? Math.max(depth.get(node.id) ?? 0, maxNonReactorDepth + 1)
+        : (depth.get(node.id) ?? 0);
     const row = perLevel.get(level) ?? 0;
     perLevel.set(level, row + 1);
-    positions.set(id, {
+    positions.set(node.id, {
       x: level * (NODE_W + GAP_X),
       y: row * (NODE_H + GAP_Y),
     });
@@ -150,7 +169,7 @@ export function ChatMentionsPanel({
 }: ChatMentionsPanelProps) {
   const flowNodes = useMemo<MentionFlowNode[]>(() => {
     const positions = layoutMentions(
-      nodes.map((node) => node.id),
+      nodes.map((node) => ({ id: node.id, nodeLabel: node.data.nodeLabel })),
       edges,
     );
     return nodes.map((node) => ({
@@ -182,8 +201,8 @@ export function ChatMentionsPanel({
   );
 
   return (
-    <div className="nowheel absolute bottom-4 left-4 md:left-16 z-20 w-[26rem] max-w-[calc(100%-3rem)] overflow-hidden rounded-xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur">
-      <div className="flex items-center justify-between border-b border-gray-100 px-3 py-2">
+    <div className="absolute bottom-4 left-4 md:left-16 z-20 w-[26rem] max-w-[calc(100%-3rem)] overflow-hidden rounded-xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur">
+      <div className="nowheel flex items-center justify-between border-b border-gray-100 px-3 py-2">
         <div className="text-xs font-semibold text-gray-700">
           In this answer · {nodes.length} node{nodes.length === 1 ? '' : 's'}
         </div>
@@ -219,13 +238,13 @@ export function ChatMentionsPanel({
       </div>
 
       {unmatched.length > 0 && (
-        <div className="border-t border-gray-100 px-3 py-1.5 text-[10px] leading-snug text-gray-500">
+        <div className="nowheel border-t border-gray-100 px-3 py-1.5 text-[10px] leading-snug text-gray-500">
           In the knowledge graph, not on this tree:{' '}
           {unmatched.map((mention) => mention.name).join(', ')}
         </div>
       )}
 
-      <div className="px-3 py-1.5 text-[10px] text-gray-400">
+      <div className="nowheel px-3 py-1.5 text-[10px] text-gray-400">
         Click to highlight on the tree · ⓘ opens details.
       </div>
     </div>
