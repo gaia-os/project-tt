@@ -555,12 +555,15 @@ def _pdf_text(data: bytes) -> str:
     return "\n".join(parts)[:MAX_PDF_CHARS]
 
 
-def _llm_json(prompt: str, num_ctx: int = 14000) -> dict:
+def _llm_json(prompt: str, num_ctx: int | None = None) -> dict:
+    # Keep num_ctx identical to the chat calls — Ollama restarts the model
+    # runner when num_ctx differs between requests, which shows up as an
+    # unload/reload between the answer and the follow-up generation.
     resp = _ollama.chat(
         model=_settings.llm_model,
         messages=[{"role": "user", "content": prompt}],
         format="json",
-        options={"num_ctx": num_ctx, "temperature": 0.1},
+        options={"num_ctx": num_ctx or _settings.num_ctx, "temperature": 0.1},
     )
     try:
         return json.loads(resp.message.content or "{}")
@@ -603,8 +606,7 @@ def _followups(
                 history=history_text,
                 question=question[:500],
                 answer=answer[:2000],
-            ),
-            num_ctx=8192,
+            )
         )
         out = d.get("suggestions")
         if not isinstance(out, list):
