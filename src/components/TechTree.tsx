@@ -47,6 +47,7 @@ import {
 import { AnimatedReactFlow, FlowTransition } from './AnimatedReactFlow';
 import { ChatMention, HighlightedElements, UiNode, GroupingMode, CompanyInfo, CompanyNodeData, KgEntity, KgExpandResponse, KgPaperDossier, LiteratureNodeData, TechTree as TechTreeData } from '@/lib/types';
 import { matchMentionsToTree, mentionEdges } from '@/lib/chatMentions';
+import { ChatViewCanvas } from './ChatViewCanvas';
 import { labelForTopic, TopicKey } from '@/lib/topicConfig';
 import {
   AggregationMode,
@@ -137,7 +138,7 @@ interface TechTreeProps {
   onOpenCustomTree?: (tree: CustomTree) => void;
   /** Back to the whole topic tree. */
   onCloseCustomTree?: () => void;
-  /** The full-screen ChatView is open: the side-panel chat unmounts. */
+  /** ChatView is open: the canvas shows the answer's mention graph. */
   chatViewActive?: boolean;
   /** Whole-tree chat tab selected; the workspace may switch to ChatView. */
   onRequestChatView?: () => void;
@@ -2353,15 +2354,28 @@ const TechTree: React.FC<TechTreeProps> = ({
               />
             )}
 
-            {mentionMatch && mentionMatch.nodes.length > 0 && (
-              <ChatMentionsPanel
-                nodes={mentionMatch.nodes}
-                edges={mentionFlowEdges}
-                unmatched={mentionMatch.unmatched}
-                onSelect={handleMentionNodeSelect}
-                onShowDetails={handleShowDetails}
-                onClose={() => setChatMentions([])}
-              />
+            {chatViewActive ? (
+              <div className="absolute inset-0 z-30">
+                <ChatViewCanvas
+                  nodes={mentionMatch?.nodes ?? []}
+                  edges={mentionFlowEdges}
+                  unmatched={mentionMatch?.unmatched ?? []}
+                  onSelect={handleMentionNodeSelect}
+                  onShowDetails={handleShowDetails}
+                />
+              </div>
+            ) : (
+              mentionMatch &&
+              mentionMatch.nodes.length > 0 && (
+                <ChatMentionsPanel
+                  nodes={mentionMatch.nodes}
+                  edges={mentionFlowEdges}
+                  unmatched={mentionMatch.unmatched}
+                  onSelect={handleMentionNodeSelect}
+                  onShowDetails={handleShowDetails}
+                  onClose={() => setChatMentions([])}
+                />
+              )
             )}
           </div>
         )}
@@ -2393,7 +2407,6 @@ const TechTree: React.FC<TechTreeProps> = ({
             onPanelChange={handlePanelChange}
             chatScope={chatScope}
             onMentionsChange={setChatMentions}
-            hideChat={chatViewActive}
           />
         )}
       </div>

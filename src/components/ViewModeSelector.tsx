@@ -17,7 +17,7 @@ const VIEW_OPTIONS: Array<{
   { value: 'technology', label: 'Technology', icon: Network },
   { value: 'company', label: 'Company', icon: Building2 },
   { value: 'world', label: 'World', icon: Globe2 },
-  { value: 'chat', label: 'Chat', icon: MessageSquare },
+  { value: 'chat', label: 'ChatView', icon: MessageSquare },
 ];
 
 export function ViewModeSelector({ value, onChange }: ViewModeSelectorProps) {

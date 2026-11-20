@@ -9,9 +9,8 @@ import {
   ExplorerViewMode,
   UiNode,
 } from '@/lib/types';
-import { TopicKey, TopicSummary, labelForTopic } from '@/lib/topicConfig';
+import { TopicKey, TopicSummary } from '@/lib/topicConfig';
 import { ExplorerPanel } from '@/lib/explorerUrlState';
-import { resolveChatScope } from '@/lib/chatContext';
 import {
   OnboardingState,
   readOnboardingState,
@@ -23,9 +22,8 @@ import { useTopics } from '@/hooks/useTopics';
 import { useCompanyView } from '@/hooks/useCompanyView';
 import { useExplorerUrlState } from '@/hooks/useExplorerUrlState';
 import { useCustomTrees } from '@/hooks/useCustomTrees';
-import { CustomTree, resolveCustomTree } from '@/lib/customTrees';
+import { CustomTree } from '@/lib/customTrees';
 import TechTree from './TechTree';
-import Chat from './Chat';
 import { CompanyExplorer } from './CompanyExplorer';
 import { WorldExplorer } from './WorldExplorer';
 import { ViewModeSelector } from './ViewModeSelector';
@@ -259,39 +257,6 @@ function ExplorerWorkspaceContent({
     [updateUrl],
   );
 
-  // A past answer's "N on tree" chip in ChatView jumps to the tree's pop-up.
-  const handleChatViewShowMentions = useCallback(
-    (mentions: ChatMention[]) => {
-      setChatMentions(mentions);
-      if (mentions.length) updateUrl({ view: 'technology' });
-    },
-    [updateUrl],
-  );
-
-  /**
-   * ChatView's conversation: the open custom tree's, else the whole topic's —
-   * the same threads the side-panel chat uses, so history is shared.
-   */
-  const chatViewScope = useMemo(() => {
-    if (!techTree) return null;
-    return resolveChatScope({
-      topic,
-      topicLabel: labelForTopic(topics, topic),
-      techTree,
-      draft: null,
-      pathway: null,
-      custom: customTree
-        ? {
-            id: customTree.id,
-            name: customTree.name,
-            notes: customTree.notes,
-            tree: resolveCustomTree(techTree, customTree).tree,
-          }
-        : null,
-      view: null,
-    });
-  }, [topic, topics, techTree, customTree]);
-
   const handleFocusChange = useCallback(
     (nodeId: string | null) => updateUrl({ focus: nodeId }),
     [updateUrl],
@@ -366,7 +331,7 @@ function ExplorerWorkspaceContent({
     <div className="relative h-full w-full overflow-hidden bg-gray-100">
       <div
         className={`absolute bottom-4 z-[70] ${
-          viewMode === 'technology'
+          viewMode === 'technology' || viewMode === 'chat'
             ? 'left-1/4 -translate-x-1/2'
             : 'right-4'
         }`}
@@ -374,17 +339,19 @@ function ExplorerWorkspaceContent({
         <ViewModeSelector value={viewMode} onChange={handleViewModeChange} />
       </div>
 
-      {viewMode !== 'technology' && (
+      {viewMode !== 'technology' && viewMode !== 'chat' && (
         <KnowledgeBaseSelector
           topic={topic}
           onTopicChange={handleTopicChange}
         />
       )}
 
+      {/* ChatView keeps this mounted: the same chat stays on the right and
+          the canvas swaps to the answer's mention graph. */}
       <div
-        hidden={viewMode !== 'technology'}
-        inert={viewMode !== 'technology'}
-        aria-hidden={viewMode !== 'technology'}
+        hidden={viewMode !== 'technology' && viewMode !== 'chat'}
+        inert={viewMode !== 'technology' && viewMode !== 'chat'}
+        aria-hidden={viewMode !== 'technology' && viewMode !== 'chat'}
         className="h-full w-full"
       >
         <ReactFlowProvider>
@@ -495,19 +462,6 @@ function ExplorerWorkspaceContent({
           onShowTechnology={showTechnology}
         />
       </div>
-
-      {viewMode === 'chat' && (
-        <div className="h-full w-full bg-gray-100">
-          <div className="mx-auto h-full w-full max-w-4xl bg-white shadow-lg">
-            <Chat
-              topic={topic}
-              scope={chatViewScope}
-              onMentionsChange={setChatMentions}
-              onShowMentions={handleChatViewShowMentions}
-            />
-          </div>
-        </div>
-      )}
 
       {welcomeStep && !mobileWarningPending && (
         <WelcomeFlow
