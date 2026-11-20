@@ -96,7 +96,6 @@ import { pathwaySourceTree } from '@/lib/technologyCatalog';
 import { usePathwayMode } from '@/hooks/usePathwayMode';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { PathwayGuide } from './pathway/PathwayGuide';
-import { ChatMentionsPanel } from './ChatMentionsPanel';
 import { Button } from '@/components/ui/button';
 
 // Suppress hydration warnings for Radix UI
@@ -1868,6 +1867,15 @@ const TechTree: React.FC<TechTreeProps> = ({
     filterLabel,
   ]);
 
+  // A past answer's "N on tree" chip replays its graph in ChatView.
+  const handleShowMentions = useCallback(
+    (mentions: ChatMention[]) => {
+      setChatMentions(mentions);
+      onRequestChatView?.();
+    },
+    [setChatMentions, onRequestChatView],
+  );
+
   // Whole-tree chats move to ChatView; scoped chats (pathway, custom tree,
   // connected view, builder) stay in the side panel next to their context.
   const handlePanelChange = useCallback(
@@ -2369,16 +2377,7 @@ const TechTree: React.FC<TechTreeProps> = ({
               />
             )}
 
-            {!chatViewActive && mentionMatch && mentionMatch.nodes.length > 0 && (
-              <ChatMentionsPanel
-                nodes={mentionMatch.nodes}
-                edges={mentionFlowEdges}
-                unmatched={mentionMatch.unmatched}
-                onSelect={handleMentionNodeSelect}
-                onShowDetails={handleShowDetails}
-                onClose={() => setChatMentions([])}
-              />
-            )}
+
           </div>
         )}
       </div>
@@ -2409,6 +2408,7 @@ const TechTree: React.FC<TechTreeProps> = ({
             onPanelChange={handlePanelChange}
             chatScope={chatScope}
             onMentionsChange={setChatMentions}
+            onShowMentions={handleShowMentions}
           />
         )}
       </div>

@@ -21,7 +21,7 @@ import { nodeRoleLabel } from '@/lib/nodeRoles';
  * Shared pieces of the "entities in this answer" graph: the mention node
  * renderer, the left-to-right longest-path layout (reactors pinned to the
  * rightmost column like the main tree), and a small ReactFlow wrapper.
- * Used by the ChatMentionsPanel pop-up and the full-canvas ChatView.
+ * Used by the full-canvas ChatView.
  */
 
 export const MENTION_NODE_W = 176;
