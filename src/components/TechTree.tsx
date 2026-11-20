@@ -45,7 +45,8 @@ import {
   planLayoutTransition,
 } from '@/lib/layoutTransition';
 import { AnimatedReactFlow, FlowTransition } from './AnimatedReactFlow';
-import { HighlightedElements, UiNode, GroupingMode, CompanyInfo, CompanyNodeData, KgEntity, KgExpandResponse, KgPaperDossier, LiteratureNodeData, TechTree as TechTreeData } from '@/lib/types';
+import { ChatMention, HighlightedElements, UiNode, GroupingMode, CompanyInfo, CompanyNodeData, KgEntity, KgExpandResponse, KgPaperDossier, LiteratureNodeData, TechTree as TechTreeData } from '@/lib/types';
+import { matchMentionsToTree, mentionEdges } from '@/lib/chatMentions';
 import { labelForTopic, TopicKey } from '@/lib/topicConfig';
 import {
   AggregationMode,
@@ -94,6 +95,7 @@ import { pathwaySourceTree } from '@/lib/technologyCatalog';
 import { usePathwayMode } from '@/hooks/usePathwayMode';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { PathwayGuide } from './pathway/PathwayGuide';
+import { ChatMentionsPanel } from './ChatMentionsPanel';
 import { Button } from '@/components/ui/button';
 
 // Suppress hydration warnings for Radix UI
@@ -258,6 +260,8 @@ const TechTree: React.FC<TechTreeProps> = ({
   const [expandedLiteratureNodeIds, setExpandedLiteratureNodeIds] = useState<Set<string>>(new Set());
   const [paperDossier, setPaperDossier] = useState<KgPaperDossier | null>(null);
   const [showReview, setShowReview] = useState(false);
+  // Entities bolded in the newest chat answer (emitted by the kg-service).
+  const [chatMentions, setChatMentions] = useState<ChatMention[]>([]);
   const [showLitEdgeLabels, setShowLitEdgeLabels] = useState(false);
   const [litVotes, setLitVotes] = useState<Map<string, VoteCounts>>(new Map());
   // 'overview': lit nodes on top of the full tree; 'focused': only parent + lit nodes
@@ -1838,6 +1842,22 @@ const TechTree: React.FC<TechTreeProps> = ({
     filterLabel,
   ]);
 
+  // Entities the newest chat answer mentions, matched to nodes on this tree.
+  const mentionMatch = useMemo(
+    () =>
+      techTree && chatMentions.length
+        ? matchMentionsToTree(chatMentions, techTree)
+        : null,
+    [chatMentions, techTree],
+  );
+  const mentionFlowEdges = useMemo(
+    () =>
+      mentionMatch && techTree
+        ? mentionEdges(mentionMatch.nodes, techTree.edges)
+        : [],
+    [mentionMatch, techTree],
+  );
+
   const handleGroupingModeChange = useCallback(
     (mode: GroupingMode) => {
       setGroupingMode(mode);
@@ -2291,6 +2311,16 @@ const TechTree: React.FC<TechTreeProps> = ({
                 onCancel={handleBuilderCancel}
               />
             )}
+
+            {mentionMatch && mentionMatch.nodes.length > 0 && (
+              <ChatMentionsPanel
+                nodes={mentionMatch.nodes}
+                edges={mentionFlowEdges}
+                unmatched={mentionMatch.unmatched}
+                onSelect={handleSimulationNodeSelect}
+                onClose={() => setChatMentions([])}
+              />
+            )}
           </div>
         )}
       </div>
@@ -2320,6 +2350,7 @@ const TechTree: React.FC<TechTreeProps> = ({
             panel={panel}
             onPanelChange={onPanelChange}
             chatScope={chatScope}
+            onMentionsChange={setChatMentions}
           />
         )}
       </div>

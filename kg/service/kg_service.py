@@ -16,6 +16,7 @@ Docker:       see Dockerfile.kg-service
 from __future__ import annotations
 
 import copy
+import html
 import json
 import os
 import re
@@ -30,7 +31,13 @@ from neo4j import GraphDatabase, Session
 from pydantic import BaseModel, Field
 
 import config
-from service.expansion import entity_evidence, entity_profile, expand, resolve_entity
+from service.expansion import (
+    entity_evidence,
+    entity_profile,
+    expand,
+    normalize_label,
+    resolve_entity,
+)
 
 _settings = config.Settings()
 _driver = None
@@ -319,6 +326,58 @@ def _run_tool(name: str, args: dict) -> str:
         return json.dumps({"error": f"{type(exc).__name__}: {exc}"})
 
 
+# ---------------------------------------------------------------- answer mentions
+#
+# The system prompt tells the model to bold named entities (<strong>). Those
+# spans are harvested from the final answer and linked to KG entities with the
+# same resolver the tools use, so the app can show which tree nodes an answer
+# talks about. Spans that resolve to nothing still go out — the app can match
+# them against the on-screen tree itself.
+
+_BOLD_SPAN = re.compile(r"<(?:strong|b)\b[^>]*>(.*?)</(?:strong|b)\s*>", re.I | re.S)
+_MD_BOLD_SPAN = re.compile(r"\*\*(.+?)\*\*")
+_ANY_TAG = re.compile(r"<[^>]+>")
+# Bolded numbers/punctuation ("TRL 9", "+12%") are not entity candidates.
+_NON_ENTITY = re.compile(r"[\d\s.,%:;()+\-–—/'’&]+")
+_MAX_MENTIONS = 20
+
+
+def _answer_mentions(answer_html: str) -> list[dict[str, Any]]:
+    spans: list[str] = []
+    seen: set[str] = set()
+
+    def _add(raw: str) -> None:
+        text = normalize_label(html.unescape(_ANY_TAG.sub(" ", raw)))
+        text = re.sub(r"\s+", " ", text).strip()
+        if not 3 <= len(text) <= 80 or _NON_ENTITY.fullmatch(text):
+            return
+        key = text.lower()
+        if key not in seen:
+            seen.add(key)
+            spans.append(text)
+
+    for match in _BOLD_SPAN.finditer(answer_html):
+        _add(match.group(1))
+    if not spans:
+        # Markdown bold slipped through despite the HTML-only instruction.
+        for match in _MD_BOLD_SPAN.finditer(answer_html):
+            _add(match.group(1))
+    if not spans:
+        return []
+
+    spans = spans[:_MAX_MENTIONS]
+    try:
+        with _session() as s:
+            return [
+                {"text": text, **entity}
+                for text in spans
+                for entity in (resolve_entity(s, text, limit=1) or [{}],)
+            ]
+    except Exception:
+        # Mention linking decorates the answer — never break the stream over it.
+        return [{"text": text} for text in spans]
+
+
 def _rounds_limit(override: int | None, default: int) -> int:
     return default if override is None else max(1, min(100, int(override)))
 
@@ -367,6 +426,7 @@ def _chat_events(
             if chunk.message.content:
                 answer += chunk.message.content
                 yield {"type": "delta", "text": chunk.message.content}
+        yield {"type": "entities", "items": _answer_mentions(answer)}
         yield {
             "type": "done",
             "toolsUsed": [],
@@ -462,6 +522,7 @@ def _chat_events(
                 answer_parts.append(chunk.message.content)
                 yield {"type": "delta", "text": chunk.message.content}
 
+    yield {"type": "entities", "items": _answer_mentions("".join(answer_parts))}
     yield {
         "type": "done",
         "toolsUsed": tools_used,
@@ -487,16 +548,24 @@ def agentic_chat(
     text = ""
     tools: list[Any] = []
     suggestions: list[str] = []
+    entities: list[dict[str, Any]] = []
     for ev in _chat_events(
         message, history, context_text, mode, reasoning,
         tools_enabled, max_instant, max_thinking,
     ):
         if ev["type"] == "delta":
             text += ev["text"]
+        elif ev["type"] == "entities":
+            entities = ev.get("items", [])
         elif ev["type"] == "done":
             tools = ev["toolsUsed"]
             suggestions = ev.get("suggestions", [])
-    return {"response": text, "toolsUsed": tools, "suggestions": suggestions}
+    return {
+        "response": text,
+        "toolsUsed": tools,
+        "suggestions": suggestions,
+        "entities": entities,
+    }
 
 
 # ---------------------------------------------------------------- document verification

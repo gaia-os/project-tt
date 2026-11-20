@@ -5,6 +5,7 @@ import { Send, Loader2, Trash2, Upload, Crosshair, Settings } from 'lucide-react
 import DOMPurify from 'dompurify';
 import {
   ChatKgSettings,
+  ChatMention,
   ChatMessage,
   KgPaperDossier,
   KgToolUse,
@@ -51,6 +52,8 @@ interface ChatProps {
    * chat covers the whole topic tree.
    */
   scope?: ChatScope | null;
+  /** Entities bolded in the newest assistant answer (KG-linked by the service). */
+  onMentionsChange?: (mentions: ChatMention[]) => void;
 }
 
 // Paper-id citations like [IAEA-CN-28-H-10] emitted by the kg-service,
@@ -97,7 +100,7 @@ interface ThreadState {
   messages: ChatMessage[];
 }
 
-const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
+const Chat: React.FC<ChatProps> = ({ topic, scope = null, onMentionsChange }) => {
   const { techTree } = useTechTree(topic);
   const { topics } = useTopics();
   const topicLabel = labelForTopic(topics, topic);
@@ -178,6 +181,22 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
     if (thread.messages === loadedRef.current) return;
     saveThread(thread.key, thread.messages);
   }, [thread]);
+
+  // Report which entities the newest answer mentions so the canvas can show
+  // them. Compared by value — streaming updates recreate the arrays.
+  const mentionsKeyRef = useRef('');
+  useEffect(() => {
+    if (!onMentionsChange) return;
+    const lastAssistant = [...messages]
+      .reverse()
+      .find((message) => message.type === 'assistant');
+    const next = lastAssistant?.mentions ?? [];
+    const key = JSON.stringify(next);
+    if (key !== mentionsKeyRef.current) {
+      mentionsKeyRef.current = key;
+      onMentionsChange(next);
+    }
+  }, [messages, onMentionsChange]);
 
   useEffect(() => {
     try {
@@ -319,6 +338,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
     let draftText = '';
     let tools: (string | KgToolUse)[] = [];
     let suggestions: string[] = [];
+    let mentions: ChatMention[] = [];
     let started = false;
     const writeDraft = (persist: boolean) =>
       updateThread(
@@ -332,6 +352,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
                       content: draftText,
                       toolsUsed: [...tools],
                       suggestions: [...suggestions],
+                      mentions: [...mentions],
                     }
                   : m,
               )
@@ -339,10 +360,11 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
                 ...prev,
                 {
                   id: draftId,
-                  type: 'assistant',
+                  type: 'assistant' as const,
                   content: draftText,
                   toolsUsed: [...tools],
                   suggestions: [...suggestions],
+                  mentions: [...mentions],
                   timestamp: Date.now(),
                 },
               ],
@@ -416,6 +438,7 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
             error?: string;
             toolsUsed?: (string | KgToolUse)[];
             suggestions?: string[];
+            items?: ChatMention[];
           };
           try {
             ev = JSON.parse(line);
@@ -430,6 +453,13 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null }) => {
           } else if (ev.type === 'delta') {
             draftText += ev.text ?? '';
             setUploadStatus('Writing answer…');
+          } else if (ev.type === 'entities') {
+            mentions = Array.isArray(ev.items)
+              ? ev.items.filter(
+                  (item): item is ChatMention =>
+                    !!item && typeof item.text === 'string',
+                )
+              : [];
           } else if (ev.type === 'done') {
             tools = ev.toolsUsed ?? tools;
             suggestions = ev.suggestions ?? suggestions;

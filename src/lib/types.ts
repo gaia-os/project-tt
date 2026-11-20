@@ -283,6 +283,21 @@ export interface ChatKgSettings {
   thinkingLimit: number;
 }
 
+/**
+ * A named entity the KG service harvested from bold spans in an answer and
+ * linked to the knowledge graph (`name`/`kind` present when resolved).
+ */
+export interface ChatMention {
+  /** The bolded text as written in the answer. */
+  text: string;
+  /** Canonical KG entity name, when the service resolved one. */
+  name?: string;
+  /** KG entity kind (SMRDesign, Organisation, Technology…). */
+  kind?: string;
+  /** Resolver score 0-1: 1.0 exact, 0.9 alias, 0.85 acronym, 0.5 word-boundary. */
+  score?: number;
+}
+
 export interface ChatMessage {
   id: string;
   type: 'user' | 'assistant';
@@ -292,6 +307,8 @@ export interface ChatMessage {
   toolsUsed?: (string | KgToolUse)[];
   /** Follow-up questions proposed by the service after this answer. */
   suggestions?: string[];
+  /** Entities the answer bolded, linked to the KG by the service. */
+  mentions?: ChatMention[];
   timestamp: number;
   /** What the assistant was shown when this was asked, if narrowed. */
   context?: { label: string };

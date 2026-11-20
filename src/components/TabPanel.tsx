@@ -5,7 +5,7 @@ import { MessageSquare, Info, BarChart3, ChevronLeft, ChevronRight } from 'lucid
 import NodeDetails, { NodeDetailsSubView } from './NodeDetails';
 import Chat from './Chat';
 import Simulations from './Simulations';
-import { UiNode, TechTree } from '@/lib/types';
+import { ChatMention, UiNode, TechTree } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { ExplorerPanel } from '@/lib/explorerUrlState';
 import { ChatScope } from '@/lib/chatContext';
@@ -29,6 +29,8 @@ interface TabPanelProps {
   onPanelChange?: (panel: ExplorerPanel) => void;
   /** What the chat talks about (pathway, custom tree, view…). */
   chatScope?: ChatScope | null;
+  /** Entities bolded in the newest assistant answer (KG-linked by the service). */
+  onMentionsChange?: (mentions: ChatMention[]) => void;
 }
 
 type TabType = ExplorerPanel;
@@ -47,6 +49,7 @@ const TabPanel = ({
   panel = null,
   onPanelChange,
   chatScope = null,
+  onMentionsChange,
 }: TabPanelProps) => {
   const [activeTab, setActiveTab] = useState<TabType>(panel ?? 'details');
   const [nodeDetailsSubView, setNodeDetailsSubView] = useState<NodeDetailsSubView>('info');
@@ -160,7 +163,7 @@ const TabPanel = ({
           </TabsList>
 
           <TabsContent value="chat" className="flex-1 overflow-y-auto mt-0">
-            <Chat topic={topic} scope={chatScope} />
+            <Chat topic={topic} scope={chatScope} onMentionsChange={onMentionsChange} />
           </TabsContent>
 
           <TabsContent value="details" className="flex-1 overflow-y-auto mt-0">
