@@ -52,7 +52,7 @@ export function ChatViewCanvas({
 
   if (nodes.length === 0) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-50 px-8 text-center">
+      <div className="nowheel flex h-full w-full flex-col items-center justify-center gap-2 bg-gray-50 px-8 text-center">
         <div className="text-sm font-medium text-gray-600">
           Nothing to graph yet
         </div>
@@ -76,7 +76,7 @@ export function ChatViewCanvas({
           onSelect?.(nodeId);
         }}
         onPaneClick={() => setSelectedId(null)}
-        className="bg-gray-50/60"
+        className="bg-gray-50"
       >
         <Background gap={20} size={1} color="#e5e7eb" />
         <Controls showInteractive={false} position="bottom-right" />

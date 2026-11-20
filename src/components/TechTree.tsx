@@ -2229,7 +2229,22 @@ const TechTree: React.FC<TechTreeProps> = ({
                 <ZoomDetailLevelSync />
               </AnimatedReactFlow>
             </TechTreeNodeActionsContext.Provider>
-            
+
+            {/* ChatView: the answer's mention graph replaces the canvas —
+                an opaque cover at the base layer so every later pop-up
+                (legend, pathways, builder, dialogs) stays on top. */}
+            {chatViewActive && (
+              <div className="absolute inset-0 bg-gray-50">
+                <ChatViewCanvas
+                  nodes={mentionMatch?.nodes ?? []}
+                  edges={mentionFlowEdges}
+                  unmatched={mentionMatch?.unmatched ?? []}
+                  onSelect={handleMentionNodeSelect}
+                  onShowDetails={handleShowDetails}
+                />
+              </div>
+            )}
+
             {/* Knowledge Base Selector - Positioned above Legend. A pathway
                 or the tree builder hides it and the legend so they don't
                 cover nodes. */}
@@ -2354,28 +2369,15 @@ const TechTree: React.FC<TechTreeProps> = ({
               />
             )}
 
-            {chatViewActive ? (
-              <div className="absolute inset-0 z-30">
-                <ChatViewCanvas
-                  nodes={mentionMatch?.nodes ?? []}
-                  edges={mentionFlowEdges}
-                  unmatched={mentionMatch?.unmatched ?? []}
-                  onSelect={handleMentionNodeSelect}
-                  onShowDetails={handleShowDetails}
-                />
-              </div>
-            ) : (
-              mentionMatch &&
-              mentionMatch.nodes.length > 0 && (
-                <ChatMentionsPanel
-                  nodes={mentionMatch.nodes}
-                  edges={mentionFlowEdges}
-                  unmatched={mentionMatch.unmatched}
-                  onSelect={handleMentionNodeSelect}
-                  onShowDetails={handleShowDetails}
-                  onClose={() => setChatMentions([])}
-                />
-              )
+            {!chatViewActive && mentionMatch && mentionMatch.nodes.length > 0 && (
+              <ChatMentionsPanel
+                nodes={mentionMatch.nodes}
+                edges={mentionFlowEdges}
+                unmatched={mentionMatch.unmatched}
+                onSelect={handleMentionNodeSelect}
+                onShowDetails={handleShowDetails}
+                onClose={() => setChatMentions([])}
+              />
             )}
           </div>
         )}
