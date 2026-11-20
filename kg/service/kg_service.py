@@ -371,7 +371,9 @@ def _answer_mentions(answer_html: str) -> list[dict[str, Any]]:
             return [
                 {"text": text, **entity}
                 for text in spans
-                for entity in (resolve_entity(s, text, limit=1) or [{}],)
+                # fuzzy=False skips the word-boundary regex scan — the
+                # weakest match tier and the costliest query per span.
+                for entity in (resolve_entity(s, text, limit=1, fuzzy=False) or [{}],)
             ]
     except Exception:
         # Mention linking decorates the answer — never break the stream over it.
@@ -426,12 +428,14 @@ def _chat_events(
             if chunk.message.content:
                 answer += chunk.message.content
                 yield {"type": "delta", "text": chunk.message.content}
-        yield {"type": "entities", "items": _answer_mentions(answer)}
         yield {
             "type": "done",
             "toolsUsed": [],
             "suggestions": _followups(message, answer, history),
         }
+        # After `done`: mention resolution is decoration and may be slow over
+        # a remote Neo4j — it must never delay or endanger the answer itself.
+        yield {"type": "entities", "items": _answer_mentions(answer)}
         return
 
     tools_used: list[Any] = []
@@ -522,12 +526,12 @@ def _chat_events(
                 answer_parts.append(chunk.message.content)
                 yield {"type": "delta", "text": chunk.message.content}
 
-    yield {"type": "entities", "items": _answer_mentions("".join(answer_parts))}
     yield {
         "type": "done",
         "toolsUsed": tools_used,
         "suggestions": _followups(message, "".join(answer_parts), history),
     }
+    yield {"type": "entities", "items": _answer_mentions("".join(answer_parts))}
 
 
 def _ndjson(events) -> Any:

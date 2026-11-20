@@ -82,12 +82,15 @@ def _kind(node_labels: list[str]) -> str:
     return dl[0] if dl else "Entity"
 
 
-def resolve_entity(session: Session, text: str, limit: int = 5) -> list[dict[str, Any]]:
+def resolve_entity(
+    session: Session, text: str, limit: int = 5, *, fuzzy: bool = True
+) -> list[dict[str, Any]]:
     """Match a free-text term to KG entities.
 
     Returns up to `limit` candidates: [{name, kind, labels, score}] sorted
     best-first. Scoring is heuristic — exact matches beat alias/catalogue-name
-    matches beat acronym matches beat substring matches.
+    matches beat acronym matches beat substring matches. `fuzzy=False` skips
+    the word-boundary regex tier, which scans every entity name.
     """
     q = normalize_label(text)
     if not q:
@@ -159,21 +162,23 @@ def resolve_entity(session: Session, text: str, limit: int = 5) -> list[dict[str
         _add(rec["name"], rec["labels"], 0.85)
 
     # 4. Word-boundary name match as fallback (plain CONTAINS makes "arc"
-    #    hit "search"). Java regex via =~ .
-    word_re = r"(?i).*\b" + re.escape(q.lower()) + r"\b.*"
-    for rec in session.run(
-        """
-        MATCH (n)
-        WHERE n.name IS NOT NULL AND toLower(n.name) =~ $re
-          AND any(l IN labels(n) WHERE NOT l IN $infra)
-        RETURN n.name AS name, labels(n) AS labels
-        LIMIT $limit
-        """,
-        re=word_re,
-        limit=limit,
-        infra=list(_INFRA_LABELS),
-    ):
-        _add(rec["name"], rec["labels"], 0.5)
+    #    hit "search"). Java regex via =~ . Scans every name — callers can
+    #    opt out with fuzzy=False.
+    if fuzzy:
+        word_re = r"(?i).*\b" + re.escape(q.lower()) + r"\b.*"
+        for rec in session.run(
+            """
+            MATCH (n)
+            WHERE n.name IS NOT NULL AND toLower(n.name) =~ $re
+              AND any(l IN labels(n) WHERE NOT l IN $infra)
+            RETURN n.name AS name, labels(n) AS labels
+            LIMIT $limit
+            """,
+            re=word_re,
+            limit=limit,
+            infra=list(_INFRA_LABELS),
+        ):
+            _add(rec["name"], rec["labels"], 0.5)
 
     return sorted(candidates.values(), key=lambda c: -c["score"])[:limit]
 

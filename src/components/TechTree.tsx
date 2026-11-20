@@ -1310,6 +1310,15 @@ const TechTree: React.FC<TechTreeProps> = ({
     [nodes, edges, findConnectedElements],
   );
 
+  // Clicking a chat mention only highlights it on the tree — selecting the
+  // node here would switch the side panel away from the chat tab.
+  const handleMentionNodeSelect = useCallback(
+    (nodeId: string) => {
+      setHighlightedElements(findConnectedElements(nodeId, edges));
+    },
+    [findConnectedElements, edges],
+  );
+
   const handleShowConnected = useCallback(
     (nodeId: string) => {
       const node = nodes.find((n) => n.id === nodeId);
@@ -2317,7 +2326,8 @@ const TechTree: React.FC<TechTreeProps> = ({
                 nodes={mentionMatch.nodes}
                 edges={mentionFlowEdges}
                 unmatched={mentionMatch.unmatched}
-                onSelect={handleSimulationNodeSelect}
+                onSelect={handleMentionNodeSelect}
+                onShowDetails={handleShowDetails}
                 onClose={() => setChatMentions([])}
               />
             )}

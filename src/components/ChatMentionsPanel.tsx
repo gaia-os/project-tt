@@ -11,7 +11,7 @@ import {
   ReactFlow,
   ReactFlowProvider,
 } from '@xyflow/react';
-import { X } from 'lucide-react';
+import { Info, X } from 'lucide-react';
 import { ChatMention, DataNode } from '@/lib/types';
 import { edgeMarker, roleColor } from '@/lib/elkjs';
 import { nodeRoleLabel } from '@/lib/nodeRoles';
@@ -21,6 +21,10 @@ import { nodeRoleLabel } from '@/lib/nodeRoles';
  * answer that exist on this tree, drawn as a mini graph. Edges are the
  * tree's own prerequisite links between the mentioned nodes, laid out
  * left-to-right by longest-path depth like the main layout.
+ *
+ * `nowheel` on the root keeps the canvas's wheel hook from forwarding the
+ * panel's scroll events to the background graph — the mini flow zooms
+ * itself instead.
  */
 
 const NODE_W = 176;
@@ -29,9 +33,15 @@ const GAP_X = 64;
 const GAP_Y = 20;
 const EDGE_COLOR = '#374151';
 
-type MentionFlowNode = Node<{ label: string; nodeLabel?: string }>;
+interface MentionNodeData extends Record<string, unknown> {
+  label: string;
+  nodeLabel?: string;
+  onShowDetails?: (nodeId: string) => void;
+}
 
-function MentionNode({ data }: NodeProps<MentionFlowNode>) {
+type MentionFlowNode = Node<MentionNodeData>;
+
+function MentionNode({ id, data }: NodeProps<MentionFlowNode>) {
   return (
     <div
       className="w-full h-full rounded-md border bg-white px-2.5 py-1.5 text-left shadow-sm"
@@ -46,6 +56,20 @@ function MentionNode({ data }: NodeProps<MentionFlowNode>) {
         {nodeRoleLabel(data.nodeLabel)}
       </div>
       <Handle type="source" position={Position.Right} className="opacity-0" />
+      {data.onShowDetails && (
+        <button
+          type="button"
+          className="nodrag absolute -top-2 -right-2 z-10 inline-flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 shadow-sm hover:border-blue-500 hover:text-blue-600"
+          onClick={(event) => {
+            event.stopPropagation();
+            data.onShowDetails?.(id);
+          }}
+          title="Show details"
+          aria-label={`Show details for ${data.label}`}
+        >
+          <Info size={11} />
+        </button>
+      )}
     </div>
   );
 }
@@ -109,7 +133,10 @@ interface ChatMentionsPanelProps {
   edges: Edge[];
   /** Resolved KG entities with no node on this tree. */
   unmatched: ChatMention[];
+  /** Highlights the node and its neighbours on the main tree. */
   onSelect: (nodeId: string) => void;
+  /** Opens the node's details panel (leaves the chat tab intentionally). */
+  onShowDetails: (nodeId: string) => void;
   onClose: () => void;
 }
 
@@ -118,6 +145,7 @@ export function ChatMentionsPanel({
   edges,
   unmatched,
   onSelect,
+  onShowDetails,
   onClose,
 }: ChatMentionsPanelProps) {
   const flowNodes = useMemo<MentionFlowNode[]>(() => {
@@ -136,9 +164,10 @@ export function ChatMentionsPanel({
       data: {
         label: node.data.label,
         nodeLabel: node.data.nodeLabel,
+        onShowDetails,
       },
     }));
-  }, [nodes, edges]);
+  }, [nodes, edges, onShowDetails]);
 
   const flowEdges = useMemo<Edge[]>(
     () =>
@@ -153,7 +182,7 @@ export function ChatMentionsPanel({
   );
 
   return (
-    <div className="absolute bottom-4 left-4 md:left-16 z-20 w-[19rem] overflow-hidden rounded-xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur">
+    <div className="nowheel absolute bottom-4 left-4 md:left-16 z-20 w-[26rem] max-w-[calc(100%-3rem)] overflow-hidden rounded-xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur">
       <div className="flex items-center justify-between border-b border-gray-100 px-3 py-2">
         <div className="text-xs font-semibold text-gray-700">
           In this answer · {nodes.length} node{nodes.length === 1 ? '' : 's'}
@@ -168,7 +197,7 @@ export function ChatMentionsPanel({
         </button>
       </div>
 
-      <div className="h-52">
+      <div className="h-72">
         <ReactFlowProvider>
           <ReactFlow
             nodes={flowNodes}
@@ -180,7 +209,8 @@ export function ChatMentionsPanel({
             nodesDraggable={false}
             nodesConnectable={false}
             elementsSelectable={false}
-            zoomOnScroll={false}
+            zoomOnScroll={true}
+            zoomOnDoubleClick={false}
             panOnScroll={false}
             onNodeClick={(_, node) => onSelect(node.id)}
             className="bg-gray-50/50"
@@ -196,7 +226,7 @@ export function ChatMentionsPanel({
       )}
 
       <div className="px-3 py-1.5 text-[10px] text-gray-400">
-        Click a node to highlight it on the tree.
+        Click to highlight on the tree · ⓘ opens details.
       </div>
     </div>
   );
