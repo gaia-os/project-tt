@@ -30,37 +30,46 @@ export interface MentionMatch {
   unmatched: ChatMention[];
 }
 
+export type MentionMatcher = (mentions: ChatMention[]) => MentionMatch;
+
+/** Matcher bound to one tree's label index — built once, used per message. */
+export function createMentionMatcher(tree: TechTree): MentionMatcher {
+  const byLabel = labelIndex(tree);
+  return (mentions) => {
+    const seen = new Set<string>();
+    const nodes: DataNode[] = [];
+    const unmatched: ChatMention[] = [];
+    for (const mention of mentions) {
+      // Composite spans like "ACP100/Linglong One" or "RITM-200M/N/S" rarely
+      // match a single label — try each part as well.
+      const candidates = [
+        mention.name,
+        mention.text,
+        ...mention.text.split('/'),
+      ]
+        .filter((part): part is string => !!part && part.trim().length >= 3)
+        .map(normalize);
+      const node = candidates
+        .map((candidate) => byLabel.get(candidate))
+        .find((match): match is DataNode => !!match);
+      if (node) {
+        if (!seen.has(node.id)) {
+          seen.add(node.id);
+          nodes.push(node);
+        }
+      } else if (mention.name) {
+        unmatched.push(mention);
+      }
+    }
+    return { nodes, unmatched };
+  };
+}
+
 export function matchMentionsToTree(
   mentions: ChatMention[],
   tree: TechTree,
 ): MentionMatch {
-  const byLabel = labelIndex(tree);
-  const seen = new Set<string>();
-  const nodes: DataNode[] = [];
-  const unmatched: ChatMention[] = [];
-  for (const mention of mentions) {
-    // Composite spans like "ACP100/Linglong One" or "RITM-200M/N/S" rarely
-    // match a single label — try each part as well.
-    const candidates = [
-      mention.name,
-      mention.text,
-      ...mention.text.split('/'),
-    ]
-      .filter((part): part is string => !!part && part.trim().length >= 3)
-      .map(normalize);
-    const node = candidates
-      .map((candidate) => byLabel.get(candidate))
-      .find((match): match is DataNode => !!match);
-    if (node) {
-      if (!seen.has(node.id)) {
-        seen.add(node.id);
-        nodes.push(node);
-      }
-    } else if (mention.name) {
-      unmatched.push(mention);
-    }
-  }
-  return { nodes, unmatched };
+  return createMentionMatcher(tree)(mentions);
 }
 
 /** Tree edges with both ends among the mentioned nodes (deduped). */

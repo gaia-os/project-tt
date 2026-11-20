@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Send, Loader2, Trash2, Upload, Crosshair, Settings } from 'lucide-react';
+import { Send, Loader2, Trash2, Upload, Crosshair, Settings, Network } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import {
   ChatKgSettings,
@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import { useTechTree } from '@/hooks/useTechTree';
 import { useTopics } from '@/hooks/useTopics';
+import { createMentionMatcher, MentionMatcher } from '@/lib/chatMentions';
 import {
   ChatScope,
   buildChatPayload,
@@ -100,8 +101,41 @@ interface ThreadState {
   messages: ChatMessage[];
 }
 
+/** Small button under an assistant answer: replays its mention pop-up. */
+function MentionGraphButton({
+  mentions,
+  matcher,
+  onShow,
+}: {
+  mentions: ChatMention[];
+  matcher: MentionMatcher | null;
+  onShow?: (mentions: ChatMention[]) => void;
+}) {
+  const count = matcher ? matcher(mentions).nodes.length : 0;
+  if (!count || !onShow) return null;
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        onShow(mentions);
+      }}
+      className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] text-gray-600 transition-colors hover:border-blue-400 hover:text-blue-600"
+      title="Show these entities on the tree"
+    >
+      <Network className="h-3 w-3" aria-hidden />
+      {count} on tree
+    </button>
+  );
+}
+
 const Chat: React.FC<ChatProps> = ({ topic, scope = null, onMentionsChange }) => {
   const { techTree } = useTechTree(topic);
+  // Shared label index for the "N on tree" chips under past answers.
+  const mentionMatcher = useMemo(
+    () => (techTree ? createMentionMatcher(techTree) : null),
+    [techTree],
+  );
   const { topics } = useTopics();
   const topicLabel = labelForTopic(topics, topic);
   // "Use whole tree" for one particular scope; resets when the scope changes.
@@ -701,20 +735,29 @@ const Chat: React.FC<ChatProps> = ({ topic, scope = null, onMentionsChange }) =>
                     </div>
                   ) : null}
                   <div
-                    className={`text-xs mt-2 ${
+                    className={`text-xs mt-2 flex items-center justify-between gap-2 ${
                       message.type === 'user' ? 'text-slate-100' : 'text-gray-500'
                     }`}
                   >
-                    {message.context && (
-                      <span className="mr-1.5 inline-flex items-center gap-1">
-                        <Crosshair className="h-3 w-3" aria-hidden />
-                        {message.context.label} ·
-                      </span>
-                    )}
-                    {new Date(message.timestamp).toLocaleTimeString('de-DE', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    <span>
+                      {message.context && (
+                        <span className="mr-1.5 inline-flex items-center gap-1">
+                          <Crosshair className="h-3 w-3" aria-hidden />
+                          {message.context.label} ·
+                        </span>
+                      )}
+                      {new Date(message.timestamp).toLocaleTimeString('de-DE', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                    {message.type === 'assistant' && message.mentions?.length ? (
+                      <MentionGraphButton
+                        mentions={message.mentions}
+                        matcher={mentionMatcher}
+                        onShow={onMentionsChange}
+                      />
+                    ) : null}
                   </div>
                 </CardContent>
               </Card>
