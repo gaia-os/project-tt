@@ -272,3 +272,6 @@ kg/neo4j/data/
 
 #==========================
 merge_fails.txt
+
+*.csv*
+*.html*
