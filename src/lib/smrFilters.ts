@@ -1,3 +1,4 @@
+import { Edge } from '@xyflow/react';
 import { DataNode, SmrEdgeData, TechTree } from '@/lib/types';
 
 export const DEFAULT_MIN_RELEVANCE = 4;
@@ -62,6 +63,11 @@ export function smrChatNode(node: DataNode): DataNode {
   return { id: node.id, data: base };
 }
 
+/** Whether an edge passes the "source/literature-backed relations only" filter. */
+export function passesProvenanceFilter(edge: Edge, sourceBackedOnly: boolean): boolean {
+  return !sourceBackedOnly || (edge.data as SmrEdgeData | undefined)?.source_backed !== false;
+}
+
 /**
  * Reduce a (large) SMR tech tree to a renderable subgraph. Reactors are never
  * dropped by the relevance threshold; technologies without a rating count as 0.
@@ -78,7 +84,7 @@ export function filterSmrTechTree(techTree: TechTree, filters: SmrTreeFilters): 
 
   let edges = techTree.edges.filter((edge) => {
     if (!keptIds.has(edge.source) || !keptIds.has(edge.target)) return false;
-    return !filters.sourceBackedOnly || (edge.data as SmrEdgeData | undefined)?.source_backed !== false;
+    return passesProvenanceFilter(edge, filters.sourceBackedOnly);
   });
 
   if (filters.category !== 'All') {

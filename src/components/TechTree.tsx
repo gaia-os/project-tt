@@ -91,7 +91,7 @@ import EditInterface from './EditInterface';
 import { useTechTree } from '@/hooks/useTechTree';
 import { useTopics } from '@/hooks/useTopics';
 import { setAdminPassword, verifyAdminPassword } from '@/lib/adminClient';
-import { filterSmrTechTree, isSmrTree } from '@/lib/smrFilters';
+import { filterSmrTechTree, isSmrTree, passesProvenanceFilter } from '@/lib/smrFilters';
 import { pathwaySourceTree } from '@/lib/technologyCatalog';
 import { usePathwayMode } from '@/hooks/usePathwayMode';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -1914,9 +1914,14 @@ const TechTree: React.FC<TechTreeProps> = ({
   const mentionFlowEdges = useMemo(
     () =>
       mentionMatch && techTree
-        ? mentionEdges(mentionMatch.nodes, techTree.edges)
+        ? mentionEdges(
+            mentionMatch.nodes,
+            techTree.edges.filter((edge) =>
+              passesProvenanceFilter(edge, smrTree && sourceBackedOnly),
+            ),
+          )
         : [],
-    [mentionMatch, techTree],
+    [mentionMatch, techTree, smrTree, sourceBackedOnly],
   );
 
   const handleGroupingModeChange = useCallback(

@@ -18,7 +18,9 @@ Nodes (one-to-one, run A's id becomes the canonical id):
     written to ``<out>/review-candidates.csv``.
     Copy the rows you accept into ``approved-matches.csv`` and re-run.
 
-Edges: only (source, target, type) triples present in BOTH runs. Run A's
+Edges: only (source, target, type) triples present in BOTH runs. An edge is
+source/literature-backed only if both runs back it; otherwise it is tagged
+``llm_inferred`` (each run's own tags are kept in ``provenance_by_run``). Run A's
 ENABLES graph is acyclic, so the result is too (checked, the script aborts
 otherwise).
 
@@ -29,6 +31,9 @@ dropped together with their edges; ``--keep-dead-ends`` keeps them.
 Technology markdown is regenerated from run A's file so that every relation
 list in it (used in reactors, enabled by, enables, broader, narrower) contains
 exactly the merged edges. Reactor and organisation markdown is copied from A.
+Deployment research already in the output folder (frontmatter ``deployment``
+and the ``## Deployment`` body section, e.g. added by deep research after a
+merge) is carried over and wins over run A's; ``--discard-deployment`` drops it.
 
 Usage:
     python scripts/merge_graphs.py data/extracted/smr data/extracted/smr-qwen38-next-flash \
@@ -231,6 +236,22 @@ def union_lists(a: list | None, b: list | None) -> list:
     return out
 
 
+BACKING_PROVENANCE = ("source", "literature")
+
+
+def merged_provenance(a: list | None, b: list | None) -> list:
+    """Union of both runs' provenance, but an edge only stays source/literature-backed
+    when BOTH runs back it; otherwise the backing tags are dropped and it counts as
+    LLM-inferred (the seeder derives ``source_backed`` from these tags)."""
+    def backed(p: list | None) -> bool:
+        return any(tag in BACKING_PROVENANCE for tag in p or [])
+
+    merged = union_lists(a, b)
+    if backed(a) and backed(b):
+        return merged
+    return union_lists([tag for tag in merged if tag not in BACKING_PROVENANCE], ["llm_inferred"])
+
+
 def mean(a, b):
     values = [v for v in (a, b) if isinstance(v, (int, float))]
     return round(sum(values) / len(values), 4) if values else None
@@ -279,6 +300,35 @@ def reach_stats(edges: list[dict], reactor_ids: set[str]) -> dict[str, dict]:
     return stats
 
 
+DEPLOYMENT_SECTION_RE = re.compile(r"^## Deployment\n.*?(?=^## |\Z)", re.M | re.S)
+
+
+def existing_deployments(out: Path) -> dict[str, tuple[dict, str | None]]:
+    """Deployment research already in the output's technology files, by node id:
+    (frontmatter ``deployment`` block, ``## Deployment`` body section or None).
+    Read before the folder is rebuilt so research added after a merge survives."""
+    found = {}
+    for path in (out / "technologies").glob("*.md"):
+        parsed = read_md(path)
+        if not parsed or not parsed[0].get("id") or not parsed[0].get("deployment"):
+            continue
+        fm, body = parsed
+        section = DEPLOYMENT_SECTION_RE.search(body)
+        found[fm["id"]] = (fm["deployment"], section.group(0) if section else None)
+    return found
+
+
+def with_deployment_section(body: str, section: str) -> str:
+    """Replace the body's ``## Deployment`` section, or insert it before ``## Taxonomy``
+    (where the generator puts it), or append it."""
+    if DEPLOYMENT_SECTION_RE.search(body):
+        return DEPLOYMENT_SECTION_RE.sub(lambda _: section, body, count=1)
+    taxonomy = re.search(r"^## Taxonomy\n", body, re.M)
+    if taxonomy:
+        return body[:taxonomy.start()] + section + body[taxonomy.start():]
+    return body.rstrip("\n") + "\n\n" + section.rstrip("\n") + "\n"
+
+
 def rebuild_out_dir(out: Path, sources: tuple[Path, Path]) -> None:
     if out.resolve() in {s.resolve() for s in sources}:
         sys.exit("--out must not be one of the input folders")
@@ -310,6 +360,8 @@ def main() -> None:
                     help="name similarity above which unmatched pairs are listed for review")
     ap.add_argument("--keep-dead-ends", action="store_true",
                     help="keep shared technologies that do not lead to any reactor")
+    ap.add_argument("--discard-deployment", action="store_true",
+                    help="do not carry over deployment research already in the output folder")
     args = ap.parse_args()
 
     name_a, name_b = args.run_a.name, args.run_b.name
@@ -368,9 +420,13 @@ def main() -> None:
         ea, eb = edges_a[key], edges_b[key]
         edge = dict(ea)
         edge["verified"] = bool(ea.get("verified") or eb.get("verified"))
-        for field in ("provenance", "documents", "citations", "roles"):
+        for field in ("documents", "citations", "roles"):
             if ea.get(field) is not None or eb.get(field) is not None:
                 edge[field] = union_lists(ea.get(field), eb.get(field))
+        if ea.get("provenance") is not None or eb.get("provenance") is not None:
+            edge["provenance"] = merged_provenance(ea.get("provenance"), eb.get("provenance"))
+            edge["provenance_by_run"] = {name_a: ea.get("provenance") or [],
+                                         name_b: eb.get("provenance") or []}
         edge["relation_type"] = ea.get("relation_type") or eb.get("relation_type")
         merged_edges.append(edge)
 
@@ -406,6 +462,8 @@ def main() -> None:
 
     # ---- write dataset folder ----------------------------------------------
     out = args.out
+    preserved = {} if args.discard_deployment else existing_deployments(out)
+    carried_deployments = 0
     rebuild_out_dir(out, (args.run_a, args.run_b))
     (out / "technologies" / "graph.json").write_text(
         json.dumps({"nodes": merged_nodes, "edges": merged_edges}, indent=2))
@@ -416,8 +474,13 @@ def main() -> None:
     merged_importance = {n["id"]: n.get("importance") for n in merged_nodes}
 
     def keep(entries, key_of, make_missing, wanted):
-        """Entries of a frontmatter relation list that are merged edges, plus any edge it lacks."""
-        entries = [x for x in (entries or []) if key_of(x.get("id")) in edge_set]
+        """Entries of a frontmatter relation list that are merged edges, plus any edge it lacks.
+        Kept entries take the merged edge's provenance, so details match the tree filter."""
+        entries = [
+            {**x, "provenance": edge_set[key_of(x["id"])].get("provenance") or []}
+            if "provenance" in x else x
+            for x in (entries or []) if key_of(x.get("id")) in edge_set
+        ]
         have = {x["id"] for x in entries}
         return entries + [make_missing(i, edge_set[key_of(i)]) for i in sorted(wanted - have)]
 
@@ -454,6 +517,11 @@ def main() -> None:
             lambda i, e: {"id": i, "name": names[i]},
             {s for s, typ in incoming if typ == "BROADER"})
         fm["importance"] = merged_importance[ia]
+        if ia in preserved:
+            fm["deployment"], section = preserved[ia]
+            if section:
+                body = with_deployment_section(body, section)
+            carried_deployments += 1
         dep = fm.get("deployment")
         if isinstance(dep, dict):
             for s in dep.get("suppliers") or []:
@@ -597,6 +665,8 @@ def main() -> None:
     print(f"technologies not leading to any reactor: {len(dead_ends)}"
           f"{' (kept)' if args.keep_dead_ends else ' (dropped)'}")
     print(f"for review: {len(review)} possible matches -> {out}/review-candidates.csv")
+    print(f"deployment research carried over from the previous output: {carried_deployments}"
+          f"{' (discarded on request)' if args.discard_deployment else ''}")
     if dropped_refs:
         print(f"dangling references removed: {dict(dropped_refs)}")
     if missing_md:
