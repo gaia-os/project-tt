@@ -1289,18 +1289,23 @@ const TechTree: React.FC<TechTreeProps> = ({
     [nodes, edges, findConnectedElements, selectedNode],
   );
 
+  // A drawn node, or (when search, filters or folding hide it) the node from
+  // the full tree, so links to hidden nodes still resolve.
+  const findNodeForDetails = useCallback(
+    (nodeId: string): UiNode | undefined => {
+      const drawn = nodes.find((n) => n.id === nodeId);
+      if (drawn) return drawn;
+      const dataNode = nodeById.get(nodeId);
+      return dataNode
+        ? ({ ...dataNode, position: { x: 0, y: 0 } } as UiNode)
+        : undefined;
+    },
+    [nodes, nodeById],
+  );
+
   const handleShowDetails = useCallback(
     (nodeId: string) => {
-      // A chat mention can name a node the current view filters or folds
-      // away; fall back to the full tree so details always open.
-      const node =
-        nodes.find((n) => n.id === nodeId) ??
-        (() => {
-          const dataNode = nodeById.get(nodeId);
-          return dataNode
-            ? ({ ...dataNode, position: { x: 0, y: 0 } } as UiNode)
-            : undefined;
-        })();
+      const node = findNodeForDetails(nodeId);
       if (node) {
         setSelectedNode(() => ({ ...node }));
         const connected = findConnectedElements(nodeId, edges);
@@ -1319,7 +1324,7 @@ const TechTree: React.FC<TechTreeProps> = ({
         if (!pathwayActive) onFocusChange?.(nodeId);
       }
     },
-    [nodes, nodeById, edges, findConnectedElements, onFocusChange, pathwayActive],
+    [findNodeForDetails, edges, findConnectedElements, onFocusChange, pathwayActive],
   );
 
   // Called from the simulation panel when a top-N row is clicked.
@@ -1327,14 +1332,14 @@ const TechTree: React.FC<TechTreeProps> = ({
   // but does NOT switch the tab to "details".
   const handleSimulationNodeSelect = useCallback(
     (nodeId: string) => {
-      const node = nodes.find((n) => n.id === nodeId);
+      const node = findNodeForDetails(nodeId);
       if (node) {
         setSelectedNode(() => ({ ...node }));
         const connected = findConnectedElements(nodeId, edges);
         setHighlightedElements(connected);
       }
     },
-    [nodes, edges, findConnectedElements],
+    [findNodeForDetails, edges, findConnectedElements],
   );
 
   // Clicking a chat mention only highlights it on the tree — selecting the
@@ -2424,6 +2429,7 @@ const TechTree: React.FC<TechTreeProps> = ({
             onTogglePanel={() => setIsPanelExpanded(!isPanelExpanded)}
             topic={topic}
             onNodeSelect={handleSimulationNodeSelect}
+            onShowNodeDetails={handleShowDetails}
             onShowNodeDetailsRef={(fn) => { showNodeDetailsTabRef.current = fn; }}
             onShowCompaniesViewRef={(fn) => { showCompaniesSubViewRef.current = fn; }}
             onShowChatRef={(fn) => { showChatTabRef.current = fn; }}

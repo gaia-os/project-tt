@@ -19,6 +19,8 @@ interface TabPanelProps {
   onTogglePanel: () => void;
   topic: TopicKey;
   onNodeSelect?: (nodeId: string) => void;
+  /** Links inside node details (enabled by, enables…): open that node's details. */
+  onShowNodeDetails?: (nodeId: string) => void;
   onShowNodeDetailsRef?: (fn: () => void) => void;
   onShowCompaniesViewRef?: (fn: () => void) => void;
   onShowChatRef?: (fn: () => void) => void;
@@ -44,6 +46,7 @@ const TabPanel = ({
   onTogglePanel,
   topic,
   onNodeSelect,
+  onShowNodeDetails,
   onShowNodeDetailsRef,
   onShowCompaniesViewRef,
   onShowChatRef,
@@ -180,7 +183,7 @@ const TabPanel = ({
               topic={topic}
               activeSubView={nodeDetailsSubView}
               onSubViewChange={setNodeDetailsSubView}
-              onSelectNode={onNodeSelect}
+              onSelectNode={onShowNodeDetails ?? onNodeSelect}
               onChooseTechnology={onChooseTechnology}
             />
           </TabsContent>
