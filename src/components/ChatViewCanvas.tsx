@@ -11,9 +11,8 @@ import {
 
 /*
  * ChatView's canvas: the entities mentioned in a chat answer, drawn as a
- * graph over the whole left pane — the same mini graph the pop-up shows,
- * full size. Clicking a node selects it (and lights its direct
- * neighbours); ⓘ opens the details tab on the right.
+ * graph over the whole left pane. Clicking a node selects it, lights its
+ * direct neighbours and opens the details tab on the right.
  */
 
 interface ChatViewCanvasProps {
@@ -74,6 +73,7 @@ export function ChatViewCanvas({
         onNodeClick={(nodeId) => {
           setSelectedId(nodeId);
           onSelect?.(nodeId);
+          onShowDetails(nodeId);
         }}
         onPaneClick={() => setSelectedId(null)}
         className="bg-gray-50"

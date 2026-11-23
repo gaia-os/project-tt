@@ -1289,7 +1289,16 @@ const TechTree: React.FC<TechTreeProps> = ({
 
   const handleShowDetails = useCallback(
     (nodeId: string) => {
-      const node = nodes.find((n) => n.id === nodeId);
+      // A chat mention can name a node the current view filters or folds
+      // away; fall back to the full tree so details always open.
+      const node =
+        nodes.find((n) => n.id === nodeId) ??
+        (() => {
+          const dataNode = nodeById.get(nodeId);
+          return dataNode
+            ? ({ ...dataNode, position: { x: 0, y: 0 } } as UiNode)
+            : undefined;
+        })();
       if (node) {
         setSelectedNode(() => ({ ...node }));
         const connected = findConnectedElements(nodeId, edges);
@@ -1308,7 +1317,7 @@ const TechTree: React.FC<TechTreeProps> = ({
         if (!pathwayActive) onFocusChange?.(nodeId);
       }
     },
-    [nodes, edges, findConnectedElements, onFocusChange, pathwayActive],
+    [nodes, nodeById, edges, findConnectedElements, onFocusChange, pathwayActive],
   );
 
   // Called from the simulation panel when a top-N row is clicked.
