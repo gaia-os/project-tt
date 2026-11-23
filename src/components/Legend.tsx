@@ -12,7 +12,7 @@ interface LegendProps {
 export const Legend = ({ showAggregates = false }: LegendProps) => {
   return (
     <Card
-      className="absolute top-[160px] left-4"
+      className="w-fit"
       style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
     >
       <CardHeader className="pb-2">

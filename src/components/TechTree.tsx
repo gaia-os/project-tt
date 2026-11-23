@@ -97,6 +97,7 @@ import { usePathwayMode } from '@/hooks/usePathwayMode';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 import { PathwayGuide } from './pathway/PathwayGuide';
 import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
 
 // Suppress hydration warnings for Radix UI
 if (typeof window !== 'undefined') {
@@ -257,8 +258,8 @@ const TechTree: React.FC<TechTreeProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
   const [isPanelExpanded, setIsPanelExpanded] = useState(true);
-  const [showLegend, setShowLegend] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
+  // Gear toggle: hides the tech tree selector and legend by default.
+  const [showTreeControls, setShowTreeControls] = useState(false);
 
   // Company overlay state
   const [companyNodes, setCompanyNodes] = useState<UiNode[]>([]);
@@ -2151,10 +2152,6 @@ const TechTree: React.FC<TechTreeProps> = ({
           onLitViewModeChange={setLitViewMode}
           showLitEdgeLabels={showLitEdgeLabels}
           onToggleLitEdgeLabels={setShowLitEdgeLabels}
-          showLegend={showLegend}
-          showOptions={showOptions}
-          onToggleLegend={() => setShowLegend(!showLegend)}
-          onToggleOptions={() => setShowOptions(!showOptions)}
           selectedCategory={selectedCategory}
           categories={uniqueCategories}
           onCategoryChange={setSelectedCategory}
@@ -2262,17 +2259,37 @@ const TechTree: React.FC<TechTreeProps> = ({
               </div>
             )}
 
-            {/* Knowledge Base Selector - Positioned above Legend. A pathway
-                or the tree builder hides it and the legend so they don't
-                cover nodes. */}
+            {/* Gear toggle top-left: reveals the tech tree selector and the
+                legend. A pathway or the tree builder hides them so they
+                don't cover nodes. */}
             {!pathwayActive && !isBuilding && (
-              <KnowledgeBaseSelector
-                topic={topic}
-                onTopicChange={onTopicChange}
-                customTrees={customTrees}
-                activeCustomTreeId={activeCustomTree?.id ?? null}
-                onOpenCustomTree={onOpenCustomTree}
-              />
+              <>
+                <Button
+                  variant={showTreeControls ? 'default' : 'outline'}
+                  size="icon"
+                  onClick={() => setShowTreeControls((open) => !open)}
+                  aria-label="Toggle tech tree selector and legend"
+                  aria-expanded={showTreeControls}
+                  title="Tech tree & legend"
+                  className="absolute top-4 left-4 z-20"
+                >
+                  <Settings aria-hidden />
+                </Button>
+                {showTreeControls && (
+                  <div className="absolute top-16 left-4 z-10 flex max-h-[calc(100%-5rem)] flex-col items-start gap-3 overflow-y-auto">
+                    <KnowledgeBaseSelector
+                      topic={topic}
+                      onTopicChange={onTopicChange}
+                      customTrees={customTrees}
+                      activeCustomTreeId={activeCustomTree?.id ?? null}
+                      onOpenCustomTree={onOpenCustomTree}
+                    />
+                    <Legend
+                      showAggregates={aggregationMode !== 'none' || foldedBranchCount > 0}
+                    />
+                  </div>
+                )}
+              </>
             )}
 
             {missingTreeNotice && (
@@ -2332,14 +2349,6 @@ const TechTree: React.FC<TechTreeProps> = ({
               />
             )}
             
-            {/* Legend */}
-            {!pathwayActive && !isBuilding && (
-              <div className={`${showLegend ? 'block' : 'hidden'} md:block`}>
-                <Legend
-                  showAggregates={aggregationMode !== 'none' || foldedBranchCount > 0}
-                />
-              </div>
-            )}
 
             {pathwayMode && onPathwayStepChange && (
               <PathwayGuide

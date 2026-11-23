@@ -340,10 +340,12 @@ function ExplorerWorkspaceContent({
       </div>
 
       {viewMode !== 'technology' && viewMode !== 'chat' && (
-        <KnowledgeBaseSelector
-          topic={topic}
-          onTopicChange={handleTopicChange}
-        />
+        <div className="absolute top-6 left-4 z-10">
+          <KnowledgeBaseSelector
+            topic={topic}
+            onTopicChange={handleTopicChange}
+          />
+        </div>
       )}
 
       {/* ChatView keeps this mounted: the same chat stays on the right and

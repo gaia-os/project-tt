@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { NODE_LABELS, GroupingMode, NodeLabel, UiNode } from '@/lib/types';
 import { nodeRoleLabel } from '@/lib/nodeRoles';
 import {
@@ -17,8 +17,6 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import {
-  Menu,
-  Eye,
   Compass,
   X,
   Columns3,
@@ -26,6 +24,7 @@ import {
   Pencil,
   MessageSquare,
   BookmarkPlus,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 interface GroupSelectorProps {
@@ -49,10 +48,6 @@ interface GroupSelectorProps {
   onLitViewModeChange?: (mode: 'overview' | 'focused') => void;
   showLitEdgeLabels?: boolean;
   onToggleLitEdgeLabels?: (show: boolean) => void;
-  showLegend: boolean;
-  showOptions: boolean;
-  onToggleLegend: () => void;
-  onToggleOptions: () => void;
   selectedCategory: string;
   categories: string[];
   onCategoryChange: (category: string) => void;
@@ -118,10 +113,6 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
   onLitViewModeChange,
   showLitEdgeLabels,
   onToggleLitEdgeLabels,
-  showLegend,
-  showOptions,
-  onToggleLegend,
-  onToggleOptions,
   selectedCategory,
   categories,
   onCategoryChange,
@@ -157,9 +148,10 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
   };
 
   const shouldShowReset = showingConnectedNodes;
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   return (
-    <div className="absolute top-4 left-4 md:left-auto md:right-4 z-10">
+    <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
       {pathwayActive ? (
         <div className="flex flex-col gap-2 p-3 bg-white border border-gray-200 rounded-lg shadow-sm bg-opacity-90">
           <Button variant="outline" size="sm" onClick={onExitPathway}>
@@ -187,32 +179,18 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
         </div>
       ) : (
         <>
-          {/* Mobile: Show toggle buttons */}
-          <div className="md:hidden flex gap-2 mb-2">
-            <Button
-              variant={showLegend ? 'default' : 'outline'}
-              size="sm"
-              onClick={onToggleLegend}
-              className="flex items-center gap-2"
-            >
-              <Eye size={16} />
-              Show Legend
-            </Button>
-            <Button
-              variant={showOptions ? 'default' : 'outline'}
-              size="sm"
-              onClick={onToggleOptions}
-              className="flex items-center gap-2"
-            >
-              <Menu size={16} />
-              More Options
-            </Button>
-          </div>
-
-          {/* Desktop: Always show, Mobile: Show based on toggle */}
-          <div className={`p-3 bg-white border border-gray-200 rounded-lg shadow-sm bg-opacity-80 space-y-3 ${
-            showOptions ? 'block' : 'hidden md:block'
-          }`}>
+          <Button
+            variant={optionsOpen ? 'default' : 'outline'}
+            size="icon"
+            onClick={() => setOptionsOpen((open) => !open)}
+            aria-label="Toggle tree options"
+            aria-expanded={optionsOpen}
+            title="Tree options"
+          >
+            <SlidersHorizontal aria-hidden />
+          </Button>
+          {optionsOpen && (
+          <div className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm bg-opacity-80 space-y-3 max-w-[calc(100vw-2rem)]">
             {activeTree && !isBuilding && (
               <div className="rounded-md border border-blue-200 bg-blue-50/70 px-3 py-2">
                 <div className="flex items-start justify-between gap-2">
@@ -545,6 +523,7 @@ export const GroupSelector: React.FC<GroupSelectorProps> = ({
               </div>
             )}
           </div>
+          )}
         </>
       )}
     </div>

@@ -59,7 +59,7 @@ export const KnowledgeBaseSelector: React.FC<KnowledgeBaseSelectorProps> = ({
   };
 
   return (
-    <div className="absolute top-6 left-4 z-10">
+    <div>
       <div className="bg-white border-2 border-gray-300 rounded-xl shadow-lg p-4 backdrop-blur-sm bg-opacity-90 w-fit">
         <div className="flex items-center gap-3 mb-2">
           <div className="bg-gray-800 p-2 rounded-lg">
