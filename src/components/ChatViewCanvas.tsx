@@ -82,12 +82,12 @@ export function ChatViewCanvas({
         <Controls showInteractive={false} position="bottom-right" />
       </MentionFlow>
 
-      <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-lg border border-gray-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm">
+      <div className="pointer-events-none absolute left-4 top-16 z-10 rounded-lg border border-gray-200 bg-white/95 px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm">
         In this answer · {nodes.length} node{nodes.length === 1 ? '' : 's'}
       </div>
 
       {unmatched.length > 0 && (
-        <div className="pointer-events-none absolute bottom-4 left-4 z-10 max-w-md rounded-lg border border-gray-200 bg-white/95 px-3 py-1.5 text-[10px] leading-snug text-gray-500 shadow-sm">
+        <div className="pointer-events-none absolute bottom-20 left-4 z-10 max-w-md rounded-lg border border-gray-200 bg-white/95 px-3 py-1.5 text-[10px] leading-snug text-gray-500 shadow-sm">
           In the knowledge graph, not on this tree:{' '}
           {unmatched.map((mention) => mention.name).join(', ')}
         </div>
