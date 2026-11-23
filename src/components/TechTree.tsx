@@ -91,7 +91,7 @@ import EditInterface from './EditInterface';
 import { useTechTree } from '@/hooks/useTechTree';
 import { useTopics } from '@/hooks/useTopics';
 import { setAdminPassword, verifyAdminPassword } from '@/lib/adminClient';
-import { DEFAULT_MIN_RELEVANCE, filterSmrTechTree, isSmrTree } from '@/lib/smrFilters';
+import { filterSmrTechTree, isSmrTree } from '@/lib/smrFilters';
 import { pathwaySourceTree } from '@/lib/technologyCatalog';
 import { usePathwayMode } from '@/hooks/usePathwayMode';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -316,8 +316,9 @@ const TechTree: React.FC<TechTreeProps> = ({
 
   // SMR-style trees (large, relevance-rated, provenance-tagged edges)
   const smrTree = useMemo(() => isSmrTree(techTree), [techTree]);
-  const [minRelevance, setMinRelevance] = useState<number>(DEFAULT_MIN_RELEVANCE);
-  const [sourceBackedOnly, setSourceBackedOnly] = useState<boolean>(false);
+  // Detail slider defaults to "all" (no relevance filtering).
+  const [minRelevance, setMinRelevance] = useState<number>(0);
+  const [sourceBackedOnly, setSourceBackedOnly] = useState<boolean>(true);
   const revealedFocusKeyRef = useRef<number | undefined>(undefined);
   const revealedHiddenFocusRef = useRef<string | null>(null);
   const appliedFocusRef = useRef<string | null>(null);
