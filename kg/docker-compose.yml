@@ -14,12 +14,11 @@
 #             reaches it over smr-kg-net; 33335 is loopback-only for
 #             scripts/tunnels)
 #
-# Published ports (host):
+# Published ports (host) — ALL bound to 127.0.0.1 (loopback only):
 #   33333 -> Neo4j Browser, 33334 -> bolt, 33332 -> Ollama,
-#   33337 -> app (the only public-facing port)
-#   33335 -> MongoDB, 33336 -> kg-service — both on 127.0.0.1 only:
-#            reachable via SSH forward / tunnel on the host, NOT the LAN.
-#            Drop the "127.0.0.1:" prefix only if LAN access is ever needed.
+#   33335 -> MongoDB, 33336 -> kg-service, 33337 -> app.
+#   Reachable via SSH forward / VPN tunnel on the host, NOT the LAN.
+#   Drop the "127.0.0.1:" prefix only if LAN access is ever needed.
 #
 # NOTE — Ollama shares the models dir /mnt/data2/ollama_fusion_tt with the
 # fusion-kg stack's ollama. Concurrent reads are fine, but don't run
@@ -38,8 +37,8 @@ services:
     container_name: neo4j_smr_tt
     image: neo4j:5
     ports:
-      - "${NEO4J_HTTP_PORT:-33333}:7474"
-      - "${NEO4J_BOLT_PORT:-33334}:7687"
+      - "127.0.0.1:${NEO4J_HTTP_PORT:-33333}:7474"
+      - "127.0.0.1:${NEO4J_BOLT_PORT:-33334}:7687"
     environment:
       NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-password}
       # APOC is required by the entity resolution step (apoc.refactor.mergeNodes)
@@ -54,7 +53,7 @@ services:
     container_name: ollama_fusion_smr
     image: ollama/ollama:0.40.16
     ports:
-      - "${OLLAMA_PUBLISHED_PORT:-33332}:11434"
+      - "127.0.0.1:${OLLAMA_PUBLISHED_PORT:-33332}:11434"
     volumes:
       - /mnt/data2/ollama_fusion_tt:/root/.ollama
     deploy:
@@ -117,7 +116,7 @@ services:
     container_name: app_smr_tt
     restart: unless-stopped
     ports:
-      - "${APP_PORT:-33337}:3000"
+      - "127.0.0.1:${APP_PORT:-33337}:3000"
     environment:
       # Internal container ports — unaffected by the host port mapping.
       MONGODB_URI: mongodb://${MONGO_USER:-mongo}:${MONGO_PASSWORD}@mongodb:27017/?authSource=admin
