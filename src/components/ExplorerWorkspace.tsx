@@ -106,8 +106,9 @@ function ExplorerWorkspaceContent({
   const companyView = useCompanyView(topic, {
     enabled: companyDataRequested || needsCompanyData,
   });
-  // The Company view's unfiltered directory: ChatView only lists companies
-  // that have a card there.
+  // The Company view's unfiltered directory ("All links", so suppliers with
+  // only non-primary mappings count): ChatView only lists companies that
+  // have a card there.
   const chatCompanies = useMemo<ChatCompanies | undefined>(
     () =>
       companyView.data?.available && techTree
@@ -116,7 +117,7 @@ function ExplorerWorkspaceContent({
               companyView.data.companies,
               companyView.data.mappings,
               techTree,
-              { searchTerm: '', region: 'All', category: 'All', primaryOnly: true },
+              { searchTerm: '', region: 'All', category: 'All', primaryOnly: false },
               'name',
             ),
             mappings: companyView.data.mappings,

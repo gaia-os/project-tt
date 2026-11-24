@@ -79,7 +79,7 @@ export function createMentionMatcher(tree: TechTree): MentionMatcher {
 }
 
 const COMPANY_SUFFIX =
-  /\s+(inc|incorporated|ltd|limited|llc|plc|corp|corporation|co|company|gmbh|ag|sa|nv|bv)$/;
+  /\s+(inc|incorporated|ltd|limited|llc|plc|corp|corporation|co|company|gmbh|ag|sa|nv|bv|jsc|pjsc|ojsc|sas|spa|kk|pty)$/;
 
 /** Name keys for a company: normalized, and without a legal-form suffix. */
 const companyKeys = (text: string): string[] => {
