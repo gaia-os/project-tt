@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, ArrowRight, Compass } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Compass, LucideIcon } from 'lucide-react';
 import { LABEL_COLORS, UiNode, CompanyInfo } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { nodeRoleLabel } from '@/lib/nodeRoles';
-import { NodeHistoryControls } from '@/hooks/useNodeHistory';
+import { NodeHistoryControls, NodeHistoryItem } from '@/hooks/useNodeHistory';
 import { Manual } from './Manual';
 import CompanyDetails from './CompanyDetails';
 import { SmrNodeDetails } from './SmrNodeDetails';
@@ -18,6 +18,12 @@ import {
 } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,6 +57,97 @@ const formatTextWithBreaks = (text: string): string => {
     formattedParagraphs.push(sentences.slice(i, i + 3).join(' '));
   }
   return formattedParagraphs.join('\n\n');
+};
+
+const HISTORY_LONG_PRESS_MS = 450;
+
+/** A back/forward arrow that jumps one step on click, or opens the full
+ *  list of jump targets in that direction after a long press. */
+const HistoryNavButton = ({
+  icon: Icon,
+  direction,
+  items,
+  onJump,
+}: {
+  icon: LucideIcon;
+  direction: 'back' | 'forward';
+  items: NodeHistoryItem[];
+  onJump: (delta: number) => void;
+}) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suppressClick = useRef(false);
+  const clearPressTimer = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+  };
+
+  const nearest = items[0];
+  const label =
+    direction === 'back'
+      ? nearest
+        ? `Back to ${nearest.label}`
+        : 'Back'
+      : nearest
+        ? `Forward to ${nearest.label}`
+        : 'Forward';
+
+  return (
+    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          disabled={items.length === 0}
+          title={`${label} (hold for history)`}
+          aria-label={label}
+          onPointerDown={(e) => {
+            if (e.button !== 0) return;
+            // Keep the Radix trigger from opening the menu on press-down; it
+            // should only open after a long press (or via keyboard).
+            e.preventDefault();
+            suppressClick.current = false;
+            clearPressTimer();
+            pressTimer.current = setTimeout(() => {
+              pressTimer.current = null;
+              suppressClick.current = true;
+              setMenuOpen(true);
+            }, HISTORY_LONG_PRESS_MS);
+          }}
+          onPointerUp={clearPressTimer}
+          onPointerCancel={clearPressTimer}
+          onPointerLeave={clearPressTimer}
+          onClick={() => {
+            if (suppressClick.current) {
+              suppressClick.current = false;
+              return;
+            }
+            if (menuOpen) {
+              setMenuOpen(false);
+              return;
+            }
+            if (nearest) onJump(nearest.delta);
+          }}
+        >
+          <Icon className="h-4 w-4" aria-hidden />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="max-h-72 overflow-y-auto max-w-72">
+        {items.map((item) => (
+          <DropdownMenuItem
+            key={`${item.delta}:${item.id}`}
+            className="truncate"
+            onSelect={() => onJump(item.delta)}
+          >
+            {item.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 };
 
 const getProbabilityColor = (probabilityText: string): string => {
@@ -173,28 +270,18 @@ const NodeDetails = ({
           <div className="flex items-end gap-2 min-w-0">
             {history && (history.back || history.forward) && (
               <div className="flex shrink-0 items-center gap-1">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7"
-                  disabled={!history.back}
-                  onClick={history.goBack}
-                  title={history.back ? `Back to ${history.back.label}` : 'Back'}
-                  aria-label={history.back ? `Back to ${history.back.label}` : 'Back'}
-                >
-                  <ArrowLeft className="h-4 w-4" aria-hidden />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-7 w-7"
-                  disabled={!history.forward}
-                  onClick={history.goForward}
-                  title={history.forward ? `Forward to ${history.forward.label}` : 'Forward'}
-                  aria-label={history.forward ? `Forward to ${history.forward.label}` : 'Forward'}
-                >
-                  <ArrowRight className="h-4 w-4" aria-hidden />
-                </Button>
+                <HistoryNavButton
+                  icon={ArrowLeft}
+                  direction="back"
+                  items={history.backItems}
+                  onJump={history.jumpTo}
+                />
+                <HistoryNavButton
+                  icon={ArrowRight}
+                  direction="forward"
+                  items={history.forwardItems}
+                  onJump={history.jumpTo}
+                />
               </div>
             )}
             <CardTitle className="text-lg font-bold">{selectedNode.data.label}</CardTitle>

@@ -6,11 +6,20 @@ import {
   nodeHistoryTarget,
 } from '@/lib/nodeHistory';
 
+export interface NodeHistoryItem extends NodeHistoryEntry {
+  /** Steps from the current node, negative for back, positive for forward. */
+  delta: number;
+}
+
 export interface NodeHistoryControls {
   back?: NodeHistoryEntry;
   forward?: NodeHistoryEntry;
+  /** Jump targets, nearest first. */
+  backItems: NodeHistoryItem[];
+  forwardItems: NodeHistoryItem[];
   goBack: () => void;
   goForward: () => void;
+  jumpTo: (delta: number) => void;
 }
 
 /**
@@ -38,22 +47,33 @@ export function useNodeHistory(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentId]);
 
-  const back = nodeHistoryTarget(state, -1);
-  const forward = nodeHistoryTarget(state, 1);
+  const backItems = state.entries
+    .slice(0, state.index)
+    .reverse()
+    .map((e, i): NodeHistoryItem => ({ ...e, delta: -(i + 1) }));
+  const forwardItems = state.entries
+    .slice(state.index + 1)
+    .map((e, i): NodeHistoryItem => ({ ...e, delta: i + 1 }));
+  const back = backItems[0];
+  const forward = forwardItems[0];
 
-  const go = useCallback(
-    (delta: number, target?: NodeHistoryEntry) => {
+  const jumpTo = useCallback(
+    (delta: number) => {
+      const target = nodeHistoryTarget(state, delta);
       if (!target || !onNavigate) return;
       dispatch({ type: 'go', delta });
       onNavigate(target.id);
     },
-    [onNavigate],
+    [state, onNavigate],
   );
 
   return {
     back: onNavigate ? back : undefined,
     forward: onNavigate ? forward : undefined,
-    goBack: () => go(-1, back),
-    goForward: () => go(1, forward),
+    backItems: onNavigate ? backItems : [],
+    forwardItems: onNavigate ? forwardItems : [],
+    goBack: () => jumpTo(-1),
+    goForward: () => jumpTo(1),
+    jumpTo,
   };
 }
