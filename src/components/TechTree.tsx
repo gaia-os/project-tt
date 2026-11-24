@@ -1326,14 +1326,20 @@ const TechTree: React.FC<TechTreeProps> = ({
       if (!drawn || !canvas) return;
       const bounds = getNodesBounds([drawn]);
       const { width, height } = canvas.getBoundingClientRect();
-      const zoom = Math.max(getViewport().zoom, 1.1);
+      const viewport = getViewport();
+      const zoom = Math.max(viewport.zoom, 1.1);
       const panelOpen = isPanelExpanded && window.innerWidth >= 768;
       const targetX = panelOpen ? width * 0.25 : width * 0.5;
       const cx = bounds.x + bounds.width / 2;
       const cy = bounds.y + bounds.height / 2;
+      // Pan distance in flow coordinates; longer hops get a longer glide.
+      const fromX = (targetX - viewport.x) / viewport.zoom;
+      const fromY = (height / 2 - viewport.y) / viewport.zoom;
+      const distance = Math.hypot(cx - fromX, cy - fromY);
+      const duration = reducedMotion ? 0 : Math.min(800 + distance * 0.3, 2500);
       setViewport(
         { x: targetX - cx * zoom, y: height / 2 - cy * zoom, zoom },
-        { duration: reducedMotion ? 0 : 650, interpolate: 'smooth' },
+        { duration, interpolate: 'smooth' },
       );
     },
     [nodes, getNodesBounds, getViewport, setViewport, isPanelExpanded, reducedMotion],
