@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageSquare, Info, BarChart3, ChevronLeft, ChevronRight } from 'lucide-react';
 import NodeDetails, { NodeDetailsSubView } from './NodeDetails';
 import Chat from './Chat';
@@ -22,7 +22,7 @@ interface TabPanelProps {
   topic: TopicKey;
   onNodeSelect?: (nodeId: string) => void;
   /** Links inside node details (enabled by, enables…): open that node's details. */
-  onShowNodeDetails?: (nodeId: string) => void;
+  onShowNodeDetails?: (nodeId: string, options?: { center?: boolean }) => void;
   onShowNodeDetailsRef?: (fn: () => void) => void;
   onShowCompaniesViewRef?: (fn: () => void) => void;
   onShowChatRef?: (fn: () => void) => void;
@@ -70,10 +70,17 @@ const TabPanel = ({
   const previousNodeIdRef = useRef<string | undefined>(undefined);
   const pendingSubViewRef = useRef<NodeDetailsSubView | null>(null);
   const openNodeDetails = onShowNodeDetails ?? onNodeSelect;
+  const navigateToNode = useCallback(
+    (nodeId: string) => {
+      if (onShowNodeDetails) onShowNodeDetails(nodeId, { center: true });
+      else onNodeSelect?.(nodeId);
+    },
+    [onShowNodeDetails, onNodeSelect],
+  );
   const nodeHistory = useNodeHistory(
     selectedNode ? { id: selectedNode.id, label: String(selectedNode.data.label) } : undefined,
     topic,
-    openNodeDetails,
+    openNodeDetails ? navigateToNode : undefined,
   );
 
   useEffect(() => {

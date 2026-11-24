@@ -1317,8 +1317,30 @@ const TechTree: React.FC<TechTreeProps> = ({
     [nodes, nodeById],
   );
 
-  const handleShowDetails = useCallback(
+  // Glides the canvas so a node lands in the visible area — the open details
+  // panel covers the right half on desktop. No-op for hidden nodes.
+  const centerNodeOnTree = useCallback(
     (nodeId: string) => {
+      const drawn = nodes.find((n) => n.id === nodeId);
+      const canvas = graphCanvasRef.current;
+      if (!drawn || !canvas) return;
+      const bounds = getNodesBounds([drawn]);
+      const { width, height } = canvas.getBoundingClientRect();
+      const zoom = Math.max(getViewport().zoom, 1.1);
+      const panelOpen = isPanelExpanded && window.innerWidth >= 768;
+      const targetX = panelOpen ? width * 0.25 : width * 0.5;
+      const cx = bounds.x + bounds.width / 2;
+      const cy = bounds.y + bounds.height / 2;
+      setViewport(
+        { x: targetX - cx * zoom, y: height / 2 - cy * zoom, zoom },
+        { duration: reducedMotion ? 0 : 400 },
+      );
+    },
+    [nodes, getNodesBounds, getViewport, setViewport, isPanelExpanded, reducedMotion],
+  );
+
+  const handleShowDetails = useCallback(
+    (nodeId: string, options?: { center?: boolean }) => {
       const node = findNodeForDetails(nodeId);
       if (node) {
         setSelectedNode(() => ({ ...node }));
@@ -1336,9 +1358,10 @@ const TechTree: React.FC<TechTreeProps> = ({
         }
         // The pathway step owns the URL while a pathway is active.
         if (!pathwayActive) onFocusChange?.(nodeId);
+        if (options?.center) centerNodeOnTree(nodeId);
       }
     },
-    [findNodeForDetails, edges, findConnectedElements, onFocusChange, pathwayActive],
+    [findNodeForDetails, edges, findConnectedElements, onFocusChange, pathwayActive, centerNodeOnTree],
   );
 
   // Called from the simulation panel when a top-N row is clicked.
