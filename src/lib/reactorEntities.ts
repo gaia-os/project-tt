@@ -80,7 +80,7 @@ export function isReactorNode(node: DataNode | undefined): boolean {
   return node.data.nodeLabel === 'ReactorConcept';
 }
 
-function normalizeRoleGroup(raw: string | null | undefined): SupplyChainRoleGroup {
+export function normalizeRoleGroup(raw: string | null | undefined): SupplyChainRoleGroup {
   const value = (raw ?? '').toLowerCase().replace(/[_-]+/g, ' ').trim();
   if (!value) return 'other';
   if (/(develop|vendor|design authority|owner)/.test(value)) return 'developer';

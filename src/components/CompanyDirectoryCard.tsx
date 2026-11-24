@@ -2,12 +2,19 @@
 
 import { ChevronRight, MapPin } from 'lucide-react';
 import { CompanySummary } from '@/lib/types';
+import {
+  COMPANY_ROLE_LABELS,
+  COMPANY_ROLE_STYLES,
+  CompanyRole,
+} from '@/lib/companyRoles';
 import { Badge } from '@/components/ui/badge';
 
 interface CompanyDirectoryCardProps {
   company: CompanySummary;
   technologyCount: number;
   isSelected?: boolean;
+  /** Colours the card by the company's role (ChatView). */
+  role?: CompanyRole;
   onClick: () => void;
 }
 
@@ -16,8 +23,10 @@ export function CompanyDirectoryCard({
   company,
   technologyCount,
   isSelected = false,
+  role,
   onClick,
 }: CompanyDirectoryCardProps) {
+  const roleStyle = role ? COMPANY_ROLE_STYLES[role] : null;
   return (
     <button
       id={`company-row-${company.id}`}
@@ -26,7 +35,7 @@ export function CompanyDirectoryCard({
         isSelected
           ? 'border-blue-500 bg-blue-50'
           : 'border-gray-200 bg-white hover:bg-gray-50'
-      }`}
+      } ${roleStyle ? `border-l-4 ${roleStyle.accent}` : ''}`}
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-2">
@@ -35,6 +44,13 @@ export function CompanyDirectoryCard({
             {company.canonical_name}
           </p>
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-gray-500">
+            {role && roleStyle && (
+              <span
+                className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${roleStyle.chip}`}
+              >
+                {COMPANY_ROLE_LABELS[role]}
+              </span>
+            )}
             {company.country_iso && (
               <span className="flex items-center gap-1">
                 <MapPin className="h-3 w-3" />

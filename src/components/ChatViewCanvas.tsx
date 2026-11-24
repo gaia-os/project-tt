@@ -13,6 +13,12 @@ import {
 import { TopicKey } from '@/lib/topicConfig';
 import { CompanyDirectoryEntry } from '@/lib/companyGraph';
 import {
+  COMPANY_ROLE_LABELS,
+  COMPANY_ROLE_ORDER,
+  COMPANY_ROLE_STYLES,
+  companyRole,
+} from '@/lib/companyRoles';
+import {
   MentionFlow,
   buildMentionFlowEdges,
   buildMentionFlowNodes,
@@ -88,6 +94,16 @@ export function ChatViewCanvas({
     () => buildMentionFlowEdges(edges, selectedId),
     [edges, selectedId],
   );
+  const companyRoles = useMemo(
+    () =>
+      new Map(
+        companies.map((entry) => [entry.company.id, companyRole(entry.mappings)]),
+      ),
+    [companies],
+  );
+  const legendRoles = COMPANY_ROLE_ORDER.filter((role) =>
+    [...companyRoles.values()].includes(role),
+  );
 
   if (nodes.length === 0 && companies.length === 0) {
     return (
@@ -116,6 +132,20 @@ export function ChatViewCanvas({
               {companies.length}{' '}
               {companies.length === 1 ? 'company' : 'companies'}
             </p>
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+              {legendRoles.map((role) => (
+                <span
+                  key={role}
+                  className="flex items-center gap-1 text-[10px] text-gray-600"
+                >
+                  <span
+                    className={`h-2 w-2 rounded-full ${COMPANY_ROLE_STYLES[role].dot}`}
+                    aria-hidden
+                  />
+                  {COMPANY_ROLE_LABELS[role]}
+                </span>
+              ))}
+            </div>
           </div>
           <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-2">
             {companies.map(({ company, technologyCount }) => (
@@ -124,6 +154,7 @@ export function ChatViewCanvas({
                 company={company}
                 technologyCount={technologyCount}
                 isSelected={modalCompany?.id === company.id}
+                role={companyRoles.get(company.id)}
                 onClick={() => openCompany(company)}
               />
             ))}
