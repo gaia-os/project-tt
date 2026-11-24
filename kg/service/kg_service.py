@@ -69,8 +69,40 @@ async def lifespan(app: FastAPI):
     )
     _driver.verify_connectivity()
     _ollama = ollama.Client(host=_settings.ollama_url)
+    # A rebuilt container can find a different model still resident from the
+    # previous run — offload it so only the startup default is ever loaded.
+    _unload_except(_active_model)
     yield
     _driver.close()
+
+
+def _resident_models() -> list[str]:
+    """Model names currently loaded in Ollama ([] when `ps` fails)."""
+    try:
+        return [
+            name
+            for m in _ollama.ps().models
+            if (name := getattr(m, "model", "") or getattr(m, "name", ""))
+        ]
+    except Exception:
+        return []
+
+
+def _unload_model(name: str) -> None:
+    try:
+        _ollama.generate(model=name, keep_alive=0)
+    except Exception:
+        pass  # not resident or already removed — nothing to unload
+
+
+def _unload_except(keep: str, also: str | None = None) -> None:
+    """Offloads every resident model except `keep`; `also` is unloaded too
+    even when `ps` can't see it (failsafe for the tracked active model)."""
+    names = {m for m in _resident_models() if m != keep}
+    if also and also != keep:
+        names.add(also)
+    for name in names:
+        _unload_model(name)
 
 
 app = FastAPI(title="SMR KG Service", lifespan=lifespan)
@@ -1064,21 +1096,22 @@ def switch_llm_model(req: ModelSwitchRequest, denied=Depends(guard)):
         )
     with _model_lock:
         previous = _active_model
-        if target == previous:
-            return {"current": _active_model, "previous": previous, "switched": False}
         try:
-            # keep_alive=0 offloads the old model before loading the new one.
-            _ollama.generate(model=previous, keep_alive=0)
-            # keep_alive=-1 keeps the new model resident.
-            _ollama.generate(
-                model=target,
-                keep_alive=-1,
-                options={"num_ctx": _settings.num_ctx},
-            )
+            # Offload anything resident that isn't the target — a rebuilt
+            # container can leave a different model running than the tracked
+            # _active_model, and two residents would compete for VRAM.
+            _unload_except(target, also=previous)
+            if target != previous:
+                # keep_alive=-1 keeps the new model resident.
+                _ollama.generate(
+                    model=target,
+                    keep_alive=-1,
+                    options={"num_ctx": _settings.num_ctx},
+                )
         except Exception as exc:
             return JSONResponse({"error": f"Model switch failed: {exc}"}, status_code=502)
         _active_model = target
-        return {"current": _active_model, "previous": previous, "switched": True}
+        return {"current": _active_model, "previous": previous, "switched": target != previous}
 
 
 @app.post("/resolve")
