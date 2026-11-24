@@ -9,6 +9,7 @@ import { ChatMention, UiNode, TechTree } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { ExplorerPanel } from '@/lib/explorerUrlState';
 import { ChatScope } from '@/lib/chatContext';
+import { useNodeHistory } from '@/hooks/useNodeHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 
@@ -64,6 +65,12 @@ const TabPanel = ({
   const [nodeDetailsSubView, setNodeDetailsSubView] = useState<NodeDetailsSubView>('info');
   const previousNodeIdRef = useRef<string | undefined>(undefined);
   const pendingSubViewRef = useRef<NodeDetailsSubView | null>(null);
+  const openNodeDetails = onShowNodeDetails ?? onNodeSelect;
+  const nodeHistory = useNodeHistory(
+    selectedNode ? { id: selectedNode.id, label: String(selectedNode.data.label) } : undefined,
+    topic,
+    openNodeDetails,
+  );
 
   useEffect(() => {
     setActiveTab(panel ?? 'details');
@@ -186,7 +193,8 @@ const TabPanel = ({
               topic={topic}
               activeSubView={nodeDetailsSubView}
               onSubViewChange={setNodeDetailsSubView}
-              onSelectNode={onShowNodeDetails ?? onNodeSelect}
+              onSelectNode={openNodeDetails}
+              history={nodeHistory}
               onChooseTechnology={onChooseTechnology}
               onShowPathway={onShowPathway}
             />

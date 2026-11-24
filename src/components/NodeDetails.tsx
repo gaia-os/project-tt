@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Compass } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Compass } from 'lucide-react';
 import { LABEL_COLORS, UiNode, CompanyInfo } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { nodeRoleLabel } from '@/lib/nodeRoles';
+import { NodeHistoryControls } from '@/hooks/useNodeHistory';
 import { Manual } from './Manual';
 import CompanyDetails from './CompanyDetails';
 import { SmrNodeDetails } from './SmrNodeDetails';
@@ -33,6 +34,8 @@ type NodeDetailsProps = {
   onChooseTechnology?: () => void;
   /** Opens the guided pathway; the button shows on reactor concepts only. */
   onShowPathway?: (nodeId: string) => void;
+  /** Back/forward through previously viewed nodes. */
+  history?: NodeHistoryControls;
 };
 
 interface InfactAnalysis {
@@ -69,6 +72,7 @@ const NodeDetails = ({
   onSelectNode,
   onChooseTechnology,
   onShowPathway,
+  history,
 }: NodeDetailsProps) => {
   const [showInfactModal, setShowInfactModal] = useState(false);
   const [companies, setCompanies] = useState<CompanyInfo[]>([]);
@@ -166,7 +170,35 @@ const NodeDetails = ({
 
       <Card className="flex flex-col h-full">
         <CardHeader className="flex flex-row items-end justify-between space-y-0 pb-3 gap-4 border-b-2">
-          <CardTitle className="text-lg font-bold">{selectedNode.data.label}</CardTitle>
+          <div className="flex items-end gap-2 min-w-0">
+            {history && (history.back || history.forward) && (
+              <div className="flex shrink-0 items-center gap-1">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  disabled={!history.back}
+                  onClick={history.goBack}
+                  title={history.back ? `Back to ${history.back.label}` : 'Back'}
+                  aria-label={history.back ? `Back to ${history.back.label}` : 'Back'}
+                >
+                  <ArrowLeft className="h-4 w-4" aria-hidden />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7"
+                  disabled={!history.forward}
+                  onClick={history.goForward}
+                  title={history.forward ? `Forward to ${history.forward.label}` : 'Forward'}
+                  aria-label={history.forward ? `Forward to ${history.forward.label}` : 'Forward'}
+                >
+                  <ArrowRight className="h-4 w-4" aria-hidden />
+                </Button>
+              </div>
+            )}
+            <CardTitle className="text-lg font-bold">{selectedNode.data.label}</CardTitle>
+          </div>
           <Badge
             variant="secondary"
             className={`bg-${LABEL_COLORS[selectedNode.data.nodeLabel]}`}
