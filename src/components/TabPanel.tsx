@@ -26,6 +26,8 @@ interface TabPanelProps {
   onShowChatRef?: (fn: () => void) => void;
   /** Reopens the welcome flow from the empty details panel. */
   onChooseTechnology?: () => void;
+  /** "Show Pathway" on a reactor's details; absent while that pathway is open. */
+  onShowPathway?: (nodeId: string) => void;
   /** URL `panel` value; null means details. */
   panel?: ExplorerPanel | null;
   onPanelChange?: (panel: ExplorerPanel) => void;
@@ -51,6 +53,7 @@ const TabPanel = ({
   onShowCompaniesViewRef,
   onShowChatRef,
   onChooseTechnology,
+  onShowPathway,
   panel = null,
   onPanelChange,
   chatScope = null,
@@ -185,6 +188,7 @@ const TabPanel = ({
               onSubViewChange={setNodeDetailsSubView}
               onSelectNode={onShowNodeDetails ?? onNodeSelect}
               onChooseTechnology={onChooseTechnology}
+              onShowPathway={onShowPathway}
             />
           </TabsContent>
 

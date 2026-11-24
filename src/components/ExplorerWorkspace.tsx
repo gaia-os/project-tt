@@ -378,6 +378,7 @@ function ExplorerWorkspaceContent({
             onPathwayStepChange={handlePathwayStepChange}
             onExitPathway={handleExitPathway}
             onChooseTechnology={openTechnologyPicker}
+            onShowPathway={(nodeId) => handleChooseTechnology(topic, nodeId)}
             panel={urlState.panel}
             onPanelChange={handlePanelChange}
             onRequestChatView={handleRequestChatView}

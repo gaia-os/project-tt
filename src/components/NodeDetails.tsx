@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Compass } from 'lucide-react';
 import { LABEL_COLORS, UiNode, CompanyInfo } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { nodeRoleLabel } from '@/lib/nodeRoles';
@@ -30,6 +31,8 @@ type NodeDetailsProps = {
   onSubViewChange: (v: NodeDetailsSubView) => void;
   onSelectNode?: (nodeId: string) => void;
   onChooseTechnology?: () => void;
+  /** Opens the guided pathway; the button shows on reactor concepts only. */
+  onShowPathway?: (nodeId: string) => void;
 };
 
 interface InfactAnalysis {
@@ -65,6 +68,7 @@ const NodeDetails = ({
   onSubViewChange,
   onSelectNode,
   onChooseTechnology,
+  onShowPathway,
 }: NodeDetailsProps) => {
   const [showInfactModal, setShowInfactModal] = useState(false);
   const [companies, setCompanies] = useState<CompanyInfo[]>([]);
@@ -170,6 +174,21 @@ const NodeDetails = ({
             {nodeRoleLabel(selectedNode.data.nodeLabel)}
           </Badge>
         </CardHeader>
+
+        {onShowPathway && selectedNode.data.nodeLabel === 'ReactorConcept' && (
+          <div className="mx-4 mt-3">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onShowPathway(selectedNode.id)}
+              title={`Step through the prerequisites of ${selectedNode.data.label}`}
+              className="gap-1.5"
+            >
+              <Compass className="h-4 w-4" aria-hidden />
+              Show Pathway
+            </Button>
+          </div>
+        )}
 
         {/* Sub-navigation */}
         <Tabs

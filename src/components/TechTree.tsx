@@ -129,6 +129,8 @@ interface TechTreeProps {
   onExitPathway?: (focusNodeId?: string) => void;
   /** Opens the technology picker. */
   onChooseTechnology?: () => void;
+  /** Starts the guided pathway for a reactor concept. */
+  onShowPathway?: (nodeId: string) => void;
   /** SMR relation filters, lifted so the technology picker can follow them. */
   minRelevance: number;
   onMinRelevanceChange: (value: number) => void;
@@ -229,6 +231,7 @@ const TechTree: React.FC<TechTreeProps> = ({
   onPathwayStepChange,
   onExitPathway,
   onChooseTechnology,
+  onShowPathway,
   minRelevance,
   onMinRelevanceChange: setMinRelevance,
   sourceBackedOnly,
@@ -2443,6 +2446,9 @@ const TechTree: React.FC<TechTreeProps> = ({
             onShowCompaniesViewRef={(fn) => { showCompaniesSubViewRef.current = fn; }}
             onShowChatRef={(fn) => { showChatTabRef.current = fn; }}
             onChooseTechnology={onChooseTechnology}
+            onShowPathway={
+              selectedNode?.id === pathwayTargetId ? undefined : onShowPathway
+            }
             panel={panel}
             onPanelChange={handlePanelChange}
             chatScope={chatScope}
