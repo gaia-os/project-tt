@@ -189,6 +189,10 @@ const Chat: React.FC<ChatProps> = ({
   const [kgSettings, setKgSettings] = useState<ChatKgSettings>(
     () => loadKgSettings() ?? DEFAULT_KG_SETTINGS,
   );
+  const [llmModels, setLlmModels] = useState<string[]>([]);
+  const [currentModel, setCurrentModel] = useState('');
+  const [switchingModel, setSwitchingModel] = useState(false);
+  const [modelError, setModelError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -278,6 +282,42 @@ const Chat: React.FC<ChatProps> = ({
 
   const updateKgSettings = (patch: Partial<ChatKgSettings>) =>
     setKgSettings((s) => ({ ...s, ...patch }));
+
+  // The active LLM lives on the kg-service (one container for all chats):
+  // read the selectable models and current pick when the dialog opens.
+  useEffect(() => {
+    if (!settingsOpen) return;
+    setModelError('');
+    fetch('/investment-tech-tree/api/kg/models')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!d) return;
+        setLlmModels(Array.isArray(d.models) ? d.models : []);
+        if (typeof d.current === 'string') setCurrentModel(d.current);
+      })
+      .catch(() => setModelError('Could not load the model list.'));
+  }, [settingsOpen]);
+
+  const switchModel = (model: string) => {
+    if (!model || model === currentModel || switchingModel) return;
+    setSwitchingModel(true);
+    setModelError('');
+    fetch('/investment-tech-tree/api/kg/models', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model }),
+    })
+      .then(async (res) => {
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          setModelError(d.error ?? 'Model switch failed.');
+          return;
+        }
+        if (typeof d.current === 'string') setCurrentModel(d.current);
+      })
+      .catch(() => setModelError('Model switch failed.'))
+      .finally(() => setSwitchingModel(false));
+  };
 
   useEffect(() => {
     if (messages.length > 0) {
@@ -984,6 +1024,42 @@ const Chat: React.FC<ChatProps> = ({
                   className="w-20 border border-gray-300 rounded px-2 py-1 text-sm"
                 />
               </label>
+            </div>
+            <div className="space-y-2 border-t border-gray-200 pt-3">
+              <label className="flex items-center justify-between gap-3">
+                <span>Chat model</span>
+                {llmModels.length > 0 ? (
+                  <select
+                    value={currentModel}
+                    onChange={(e) => switchModel(e.target.value)}
+                    disabled={switchingModel || !currentModel}
+                    aria-label="Chat model"
+                    className="max-w-48 truncate border border-gray-300 rounded px-2 py-1 text-sm disabled:opacity-50"
+                  >
+                    {llmModels.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className="text-xs text-gray-400">
+                    {modelError ? 'Unavailable' : 'Loading…'}
+                  </span>
+                )}
+              </label>
+              {switchingModel && (
+                <p className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <Loader2 size={12} className="animate-spin" />
+                  Switching model — offloading the current one and loading the
+                  new model. This can take a while.
+                </p>
+              )}
+              {modelError && <p className="text-xs text-red-600">{modelError}</p>}
+              <p className="text-xs text-gray-400">
+                Applies to the shared knowledge-graph service, for all
+                conversations.
+              </p>
             </div>
           </div>
         </DialogContent>

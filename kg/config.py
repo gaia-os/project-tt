@@ -10,6 +10,10 @@ def _env(key: str, default: str) -> str:
     return os.getenv(key, default)
 
 
+def _env_list(key: str) -> list[str]:
+    return [m.strip() for m in os.getenv(key, "").split(",") if m.strip()]
+
+
 @dataclass(frozen=True)
 class Settings:
     neo4j_uri: str = field(default_factory=lambda: _env("NEO4J_URI", "neo4j://localhost:7687"))
@@ -19,6 +23,7 @@ class Settings:
 
     ollama_host: str = field(default_factory=lambda: _env("OLLAMA_HOST", "localhost"))
     ollama_port: int = field(default_factory=lambda: int(_env("OLLAMA_PORT", "11434")))
+    llm_models: list[str] = field(default_factory=lambda: _env_list("OLLAMA_LLM_MODELS"))
     llm_model: str = field(default_factory=lambda: _env("OLLAMA_LLM_MODEL", "qwen3.8:27b"))
     embed_model: str = field(default_factory=lambda: _env("OLLAMA_EMBED_MODEL", "nomic-embed-text-v2-moe"))
     num_ctx: int = field(default_factory=lambda: int(_env("OLLAMA_NUM_CTX", "24576")))
@@ -30,6 +35,13 @@ class Settings:
     chunk_overlap: int = field(default_factory=lambda: int(_env("CHUNK_OVERLAP", "300")))
     vector_index_name: str = field(default_factory=lambda: _env("VECTOR_INDEX_NAME", "chunk_embeddings"))
     extract_concurrency: int = field(default_factory=lambda: int(_env("EXTRACT_CONCURRENCY", "5")))
+
+    def __post_init__(self):
+        # The startup default is always the first model in OLLAMA_LLM_MODELS;
+        # the service may switch to another listed model at runtime.
+        models = self.llm_models or [self.llm_model]
+        object.__setattr__(self, "llm_models", models)
+        object.__setattr__(self, "llm_model", models[0])
 
     @property
     def ollama_url(self) -> str:

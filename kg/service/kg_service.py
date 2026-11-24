@@ -6,6 +6,8 @@ Endpoints:
   POST /resolve           - entity resolution for a name/phrase
   POST /expand            - profile of a design / organisation / technology
   GET  /entity/{name}     - entity dossier (provenance + evidence)
+  GET  /llm/models        - selectable LLMs + currently active one
+  POST /llm/model         - switch the active LLM (offloads the old one first)
 
 Auth: every request except /health needs `X-API-Key: <KG_API_KEY>`.
 
@@ -20,6 +22,7 @@ import html
 import json
 import os
 import re
+import threading
 import time
 from contextlib import asynccontextmanager
 from typing import Any
@@ -42,6 +45,11 @@ from service.expansion import (
 _settings = config.Settings()
 _driver = None
 _ollama: ollama.Client | None = None
+
+# The LLM in use — starts on the first OLLAMA_LLM_MODELS entry and may be
+# switched at runtime via POST /llm/model.
+_active_model = _settings.llm_model
+_model_lock = threading.Lock()
 
 MAX_TOOL_ROUNDS = 10           # instant mode
 MAX_TOOL_ROUNDS_THINKING = 25  # deep-analysis mode
@@ -528,7 +536,7 @@ def _chat_events(
     if not tools_enabled:
         # One straight answer pass — no tools offered, nothing to look up.
         stream = _ollama.chat(
-            model=_settings.llm_model,
+            model=_active_model,
             messages=messages,
             options={"num_ctx": _settings.num_ctx, "temperature": 0.3},
             stream=True,
@@ -563,7 +571,7 @@ def _chat_events(
         # stream=True so the final answer streams token-by-token; tool calls
         # arrive in the last chunk instead of content.
         stream = _ollama.chat(
-            model=_settings.llm_model,
+            model=_active_model,
             messages=messages,
             tools=tools_schema,
             options={"num_ctx": _settings.num_ctx, "temperature": 0.3},
@@ -629,7 +637,7 @@ def _chat_events(
             }
         )
         stream = _ollama.chat(
-            model=_settings.llm_model,
+            model=_active_model,
             messages=messages,
             options={"num_ctx": _settings.num_ctx, "temperature": 0.3},
             stream=True,
@@ -749,7 +757,7 @@ def _llm_json(prompt: str, num_ctx: int | None = None) -> dict:
     # runner when num_ctx differs between requests, which shows up as an
     # unload/reload between the answer and the follow-up generation.
     resp = _ollama.chat(
-        model=_settings.llm_model,
+        model=_active_model,
         messages=[{"role": "user", "content": prompt}],
         format="json",
         options={"num_ctx": num_ctx or _settings.num_ctx, "temperature": 0.1},
@@ -947,6 +955,10 @@ class ChatRequest(BaseModel):
     maxToolRoundsThinking: int | None = None
 
 
+class ModelSwitchRequest(BaseModel):
+    model: str
+
+
 class ResolveRequest(BaseModel):
     query: str
 
@@ -975,7 +987,7 @@ def health():
                 """
             ).single()
         model_ok = _ollama is not None
-        return {"ok": True, **counts, "model": _settings.llm_model, "ollama": model_ok}
+        return {"ok": True, **counts, "model": _active_model, "ollama": model_ok}
     except Exception as exc:
         return JSONResponse({"ok": False, "error": str(exc)}, status_code=503)
 
@@ -1020,6 +1032,43 @@ def chat_stream(req: ChatRequest, denied=Depends(guard)):
         ),
         media_type="application/x-ndjson",
     )
+
+
+@app.get("/llm/models")
+def llm_models(denied=Depends(guard)):
+    if denied:
+        return denied
+    return {"models": _settings.llm_models, "current": _active_model}
+
+
+@app.post("/llm/model")
+def switch_llm_model(req: ModelSwitchRequest, denied=Depends(guard)):
+    global _active_model
+    if denied:
+        return denied
+    target = req.model.strip()
+    if target not in _settings.llm_models:
+        return JSONResponse(
+            {"error": f"Unknown model '{target}'", "models": _settings.llm_models},
+            status_code=400,
+        )
+    with _model_lock:
+        previous = _active_model
+        if target == previous:
+            return {"current": _active_model, "previous": previous, "switched": False}
+        try:
+            # keep_alive=0 offloads the old model before loading the new one.
+            _ollama.generate(model=previous, keep_alive=0)
+            # keep_alive=-1 keeps the new model resident.
+            _ollama.generate(
+                model=target,
+                keep_alive=-1,
+                options={"num_ctx": _settings.num_ctx},
+            )
+        except Exception as exc:
+            return JSONResponse({"error": f"Model switch failed: {exc}"}, status_code=502)
+        _active_model = target
+        return {"current": _active_model, "previous": previous, "switched": True}
 
 
 @app.post("/resolve")
