@@ -1333,7 +1333,7 @@ const TechTree: React.FC<TechTreeProps> = ({
       const cy = bounds.y + bounds.height / 2;
       setViewport(
         { x: targetX - cx * zoom, y: height / 2 - cy * zoom, zoom },
-        { duration: reducedMotion ? 0 : 400 },
+        { duration: reducedMotion ? 0 : 650, interpolate: 'smooth' },
       );
     },
     [nodes, getNodesBounds, getViewport, setViewport, isPanelExpanded, reducedMotion],
