@@ -484,6 +484,7 @@ const Chat: React.FC<ChatProps> = ({
           // Reasons cost a few extra tokens — skip when the lookup list
           // they're shown under is hidden anyway.
           reasoning: kgSettings.reasoning && kgSettings.showLookups,
+          suggestions: kgSettings.suggestions,
           timeoutMs: kgSettings.timeoutSec * 1000,
           maxToolRoundsInstant: kgSettings.instantLimit,
           maxToolRoundsThinking: kgSettings.thinkingLimit,
@@ -767,7 +768,9 @@ const Chat: React.FC<ChatProps> = ({
                       </ul>
                     </details>
                   ) : null}
-                  {message.type === 'assistant' && message.suggestions?.length ? (
+                  {kgSettings.suggestions &&
+                  message.type === 'assistant' &&
+                  message.suggestions?.length ? (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {message.suggestions.map((q) => (
                         <Badge
@@ -983,6 +986,17 @@ const Chat: React.FC<ChatProps> = ({
                 className="h-4 w-4 accent-indigo-600"
               />
               <span>Show the reason under each lookup</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={kgSettings.suggestions}
+                onChange={(e) =>
+                  updateKgSettings({ suggestions: e.target.checked })
+                }
+                className="h-4 w-4 accent-indigo-600"
+              />
+              <span>Suggest follow-up questions after each answer</span>
             </label>
             <div className="space-y-3 border-t border-gray-200 pt-3">
               <label className="flex items-center justify-between gap-3">

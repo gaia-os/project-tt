@@ -16,6 +16,7 @@ interface ChatRequestBody {
   // From the chat's KG settings dialog; absent -> server defaults.
   reasoning?: boolean;
   toolsEnabled?: boolean;
+  suggestions?: boolean;
   timeoutMs?: number;
   maxToolRoundsInstant?: number;
   maxToolRoundsThinking?: number;
@@ -98,6 +99,7 @@ export async function POST(request: NextRequest) {
       mode,
       reasoning,
       toolsEnabled,
+      suggestions,
       timeoutMs,
       maxToolRoundsInstant,
       maxToolRoundsThinking,
@@ -139,6 +141,7 @@ export async function POST(request: NextRequest) {
           mode: mode === 'thinking' ? 'thinking' : 'instant',
           reasoning: typeof reasoning === 'boolean' ? reasoning : showReasons,
           toolsEnabled: toolsEnabled !== false,
+          suggestions: suggestions !== false,
           maxToolRoundsInstant: clampInt(maxToolRoundsInstant, 1, 100),
           maxToolRoundsThinking: clampInt(maxToolRoundsThinking, 1, 100),
         };

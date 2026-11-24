@@ -511,6 +511,7 @@ def _chat_events(
     tools_enabled: bool = True,
     max_instant: int | None = None,
     max_thinking: int | None = None,
+    want_suggestions: bool = True,
 ):
     """Yields NDJSON event dicts: tool calls as they run, then answer deltas."""
     system = _SYSTEM + _MODE_SUFFIX.get(mode, _MODE_SUFFIX["instant"])
@@ -549,7 +550,9 @@ def _chat_events(
         yield {
             "type": "done",
             "toolsUsed": [],
-            "suggestions": _followups(message, answer, history),
+            "suggestions": _followups(message, answer, history)
+            if want_suggestions
+            else [],
         }
         # After `done`: mention resolution is decoration and may be slow over
         # a remote Neo4j — it must never delay or endanger the answer itself.
@@ -650,7 +653,9 @@ def _chat_events(
     yield {
         "type": "done",
         "toolsUsed": tools_used,
-        "suggestions": _followups(message, "".join(answer_parts), history),
+        "suggestions": _followups(message, "".join(answer_parts), history)
+        if want_suggestions
+        else [],
     }
     yield {
         "type": "entities",
@@ -672,6 +677,7 @@ def agentic_chat(
     tools_enabled: bool = True,
     max_instant: int | None = None,
     max_thinking: int | None = None,
+    want_suggestions: bool = True,
 ) -> dict:
     text = ""
     tools: list[Any] = []
@@ -679,7 +685,7 @@ def agentic_chat(
     entities: list[dict[str, Any]] = []
     for ev in _chat_events(
         message, history, context_text, mode, reasoning,
-        tools_enabled, max_instant, max_thinking,
+        tools_enabled, max_instant, max_thinking, want_suggestions,
     ):
         if ev["type"] == "delta":
             text += ev["text"]
@@ -950,6 +956,8 @@ class ChatRequest(BaseModel):
     reasoning: bool = False
     # When false, no tools are offered — one direct answer pass.
     toolsEnabled: bool = True
+    # When false, no follow-up questions are generated after the answer.
+    suggestions: bool = True
     # Optional per-request overrides for the lookup budgets (clamped 1..100).
     maxToolRoundsInstant: int | None = None
     maxToolRoundsThinking: int | None = None
@@ -1007,6 +1015,7 @@ def chat(req: ChatRequest, denied=Depends(guard)):
         req.toolsEnabled,
         req.maxToolRoundsInstant,
         req.maxToolRoundsThinking,
+        req.suggestions,
     )
     return result
 
@@ -1028,6 +1037,7 @@ def chat_stream(req: ChatRequest, denied=Depends(guard)):
                 req.toolsEnabled,
                 req.maxToolRoundsInstant,
                 req.maxToolRoundsThinking,
+                req.suggestions,
             )
         ),
         media_type="application/x-ndjson",

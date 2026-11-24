@@ -293,6 +293,8 @@ export interface ChatKgSettings {
   reasoning: boolean;
   /** Show the expandable list of KG lookups under answers (lookups always run). */
   showLookups: boolean;
+  /** Offer clickable follow-up questions at the bottom of each answer. */
+  suggestions: boolean;
   /** How long the app waits on the KG service before aborting, seconds. */
   timeoutSec: number;
   /** Max KG lookups per answer in instant mode. */

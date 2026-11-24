@@ -28,6 +28,7 @@ export const KG_SETTINGS_KEY = 'tech-tree-chat-kg-settings-v1';
 export const DEFAULT_KG_SETTINGS: ChatKgSettings = {
   reasoning: true,
   showLookups: true,
+  suggestions: true,
   timeoutSec: 180,
   instantLimit: 10,
   thinkingLimit: 25,
