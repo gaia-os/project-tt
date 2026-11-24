@@ -180,9 +180,6 @@ const Chat: React.FC<ChatProps> = ({
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string>('');
-  const [requestCount, setRequestCount] = useState(0);
-  const [lastRequestTime, setLastRequestTime] = useState(0);
-  const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
   const [mode, setMode] = useState<ChatMode>('instant');
   const [citedPaper, setCitedPaper] = useState<KgPaperDossier | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -196,9 +193,6 @@ const Chat: React.FC<ChatProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const MAX_REQUESTS_PER_HOUR = 20;
-  const MIN_REQUEST_INTERVAL = 3000;
 
   // Each context has its own conversation: switching loads it.
   useEffect(() => {
@@ -242,26 +236,6 @@ const Chat: React.FC<ChatProps> = ({
       onMentionsChange(next);
     }
   }, [messages, onMentionsChange]);
-
-  useEffect(() => {
-    try {
-      const savedRequestCount = localStorage.getItem('tech-tree-request-count');
-      const savedLastRequestTime = localStorage.getItem('tech-tree-last-request-time');
-      if (savedRequestCount) setRequestCount(parseInt(savedRequestCount, 10));
-      if (savedLastRequestTime) setLastRequestTime(parseInt(savedLastRequestTime, 10));
-    } catch (error) {
-      console.error('Error loading chat history:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('tech-tree-request-count', requestCount.toString());
-      localStorage.setItem('tech-tree-last-request-time', lastRequestTime.toString());
-    } catch (error) {
-      console.error('Error saving rate limiting data:', error);
-    }
-  }, [requestCount, lastRequestTime]);
 
   useEffect(() => {
     saveKgSettings(kgSettings);
@@ -346,22 +320,6 @@ const Chat: React.FC<ChatProps> = ({
     [],
   );
 
-  const checkRateLimit = (): boolean => {
-    const now = Date.now();
-    const oneHourAgo = now - 60 * 60 * 1000;
-    if (lastRequestTime < oneHourAgo) {
-      setRequestCount(0);
-      setLastRequestTime(now);
-      return true;
-    }
-    if (requestCount >= MAX_REQUESTS_PER_HOUR) {
-      setRateLimitExceeded(true);
-      return false;
-    }
-    if (now - lastRequestTime < MIN_REQUEST_INTERVAL) return false;
-    return true;
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
@@ -382,19 +340,6 @@ const Chat: React.FC<ChatProps> = ({
     if (!input.trim() && !file) return;
     const key = thread.key;
 
-    if (!checkRateLimit()) {
-      const errorMessage: ChatMessage = {
-        id: Date.now().toString(),
-        type: 'assistant',
-        content: rateLimitExceeded
-          ? `Rate limit exceeded. You can make up to ${MAX_REQUESTS_PER_HOUR} requests per hour. Please try again later.`
-          : `Please wait at least ${MIN_REQUEST_INTERVAL / 1000} seconds between requests.`,
-        timestamp: Date.now(),
-      };
-      updateThread(key, (prev) => [...prev, errorMessage]);
-      return;
-    }
-
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       type: 'user',
@@ -410,9 +355,6 @@ const Chat: React.FC<ChatProps> = ({
     setInput('');
     setIsLoading(true);
     setUploadStatus(file ? 'Processing PDF document...' : '');
-    setRequestCount((prev) => prev + 1);
-    setLastRequestTime(Date.now());
-    setRateLimitExceeded(false);
 
     // Draft assistant message, filled progressively by the NDJSON stream.
     const draftId = (Date.now() + 1).toString();
@@ -623,14 +565,6 @@ const Chat: React.FC<ChatProps> = ({
           )}
         </div>
         <div className="flex items-center space-x-2">
-          {rateLimitExceeded && (
-            <Badge variant="destructive" className="text-xs">
-              Rate Limited
-            </Badge>
-          )}
-          <Badge variant="outline" className="text-xs">
-            {requestCount}/{MAX_REQUESTS_PER_HOUR} requests per hour
-          </Badge>
           <Button
             variant="ghost"
             size="sm"
@@ -891,7 +825,7 @@ const Chat: React.FC<ChatProps> = ({
               placeholder="Ask a question or upload a PDF for analysis..."
               className="w-full resize-none pr-32 max-h-32"
               rows={1}
-              disabled={isLoading || rateLimitExceeded}
+              disabled={isLoading}
             />
             <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
               <select
@@ -928,9 +862,7 @@ const Chat: React.FC<ChatProps> = ({
               <Button
                 type="submit"
                 size="sm"
-                disabled={
-                  (!input.trim() && !file) || isLoading || rateLimitExceeded
-                }
+                disabled={(!input.trim() && !file) || isLoading}
                 className="p-1 h-8 w-8"
               >
                 <Send size={18} />
