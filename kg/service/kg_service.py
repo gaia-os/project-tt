@@ -648,7 +648,7 @@ def _chat_events(
             # `reason` is display metadata, not a tool input — keep it out of
             # the call label and the tool invocation.
             reason = args.pop("reason", None)
-            label = f"{name}({json.dumps(args)[:120]})"
+            label = f"{name}({json.dumps(args)})"
             if reasoning:
                 tools_used.append({"call": label, "reason": reason})
                 yield {"type": "tool", "name": label, "reason": reason}
