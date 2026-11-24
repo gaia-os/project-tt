@@ -1,5 +1,18 @@
 import { Edge } from '@xyflow/react';
-import { ChatMention, DataNode, TechTree } from '@/lib/types';
+import {
+  ChatMention,
+  CompanySummary,
+  CompanyTechnologyMapping,
+  DataNode,
+  TechTree,
+} from '@/lib/types';
+import type { CompanyDirectoryEntry } from '@/lib/companyGraph';
+
+/** Company cards ChatView may show, plus every mapping for their details. */
+export interface ChatCompanies {
+  entries: CompanyDirectoryEntry[];
+  mappings: CompanyTechnologyMapping[];
+}
 
 /*
  * The kg-service bolds named entities in answers and emits them (linked to
@@ -63,6 +76,56 @@ export function createMentionMatcher(tree: TechTree): MentionMatcher {
     }
     return { nodes, unmatched };
   };
+}
+
+const COMPANY_SUFFIX =
+  /\s+(inc|incorporated|ltd|limited|llc|plc|corp|corporation|co|company|gmbh|ag|sa|nv|bv)$/;
+
+/** Name keys for a company: normalized, and without a legal-form suffix. */
+const companyKeys = (text: string): string[] => {
+  const key = normalize(text);
+  const bare = key.replace(COMPANY_SUFFIX, '');
+  return bare && bare !== key ? [key, bare] : [key];
+};
+
+export interface CompanyMentionMatch<T> {
+  /** Company cards named in the answer, in order of first mention. */
+  companies: T[];
+  /** The mentions that resolved to one of `companies`. */
+  matched: Set<ChatMention>;
+}
+
+/**
+ * Companies named in an answer, limited to `entries` (the cards the Company
+ * view shows) so every match opens a real card.
+ */
+export function matchMentionsToCompanies<T extends { company: CompanySummary }>(
+  mentions: ChatMention[],
+  entries: T[],
+): CompanyMentionMatch<T> {
+  const byName = new Map<string, T>();
+  for (const entry of entries) {
+    for (const key of companyKeys(entry.company.canonical_name)) {
+      if (key && !byName.has(key)) byName.set(key, entry);
+    }
+  }
+  const seen = new Set<string>();
+  const companies: T[] = [];
+  const matched = new Set<ChatMention>();
+  for (const mention of mentions) {
+    const entry = [mention.name, mention.text, ...mention.text.split('/')]
+      .filter((part): part is string => !!part && part.trim().length >= 3)
+      .flatMap(companyKeys)
+      .map((key) => byName.get(key))
+      .find((match): match is T => !!match);
+    if (!entry) continue;
+    matched.add(mention);
+    if (!seen.has(entry.company.id)) {
+      seen.add(entry.company.id);
+      companies.push(entry);
+    }
+  }
+  return { companies, matched };
 }
 
 export function matchMentionsToTree(

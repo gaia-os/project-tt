@@ -9,7 +9,7 @@ import {
   ReactFlow,
   ReactFlowInstance,
 } from '@xyflow/react';
-import { Building2, ChevronRight, MapPin, Network, RotateCcw } from 'lucide-react';
+import { Building2, Network, RotateCcw } from 'lucide-react';
 import {
   CompanyGraphCompanyNodeData,
   CompanyGraphNode,
@@ -32,6 +32,7 @@ import {
   CompanyGraphCompanyNode,
   CompanyGraphTechnologyNode,
 } from './CompanyGraphNodes';
+import { CompanyDirectoryCard } from './CompanyDirectoryCard';
 import { CompanySelectionDetails } from './CompanySelectionDetails';
 import { LoadingSpinner } from './LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
@@ -351,53 +352,15 @@ export function CompanyExplorer({
             </div>
           ) : (
             <div className="space-y-1.5">
-              {directory.map(({ company, technologyCount }) => {
-                const isSelected = company.id === selectedCompanyId;
-                return (
-                  <button
-                    key={company.id}
-                    id={`company-row-${company.id}`}
-                    type="button"
-                    className={`w-full rounded-lg border p-3 text-left transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      isSelected
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 bg-white hover:bg-gray-50'
-                    }`}
-                    onClick={() => handleCompanySelection(company)}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-gray-900">
-                          {company.canonical_name}
-                        </p>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] text-gray-500">
-                          {company.country_iso && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {company.country_iso}
-                            </span>
-                          )}
-                          {company.trl_level != null && (
-                            <Badge variant="secondary" className="h-5 px-1.5 text-[10px]">
-                              TRL {company.trl_level}
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                      <ChevronRight className="mt-1 h-4 w-4 shrink-0 text-gray-400" />
-                    </div>
-                    <div className="mt-2 flex items-center justify-between gap-2 text-xs">
-                      <span className="truncate text-gray-600">
-                        {company.primary_approach ?? 'Approach not specified'}
-                      </span>
-                      <span className="shrink-0 text-gray-400">
-                        {technologyCount}{' '}
-                        {technologyCount === 1 ? 'technology' : 'technologies'}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+              {directory.map(({ company, technologyCount }) => (
+                <CompanyDirectoryCard
+                  key={company.id}
+                  company={company}
+                  technologyCount={technologyCount}
+                  isSelected={company.id === selectedCompanyId}
+                  onClick={() => handleCompanySelection(company)}
+                />
+              ))}
             </div>
           )}
         </div>

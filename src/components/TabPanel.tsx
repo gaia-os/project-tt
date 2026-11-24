@@ -9,6 +9,7 @@ import { ChatMention, UiNode, TechTree } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { ExplorerPanel } from '@/lib/explorerUrlState';
 import { ChatScope } from '@/lib/chatContext';
+import { CompanyDirectoryEntry } from '@/lib/companyGraph';
 import { useNodeHistory } from '@/hooks/useNodeHistory';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,8 @@ interface TabPanelProps {
   onMentionsChange?: (mentions: ChatMention[]) => void;
   /** A past answer's "N on tree" chip; opens its graph in ChatView. */
   onShowMentions?: (mentions: ChatMention[]) => void;
+  /** Company cards the "N on tree" chip also counts. */
+  chatCompanies?: CompanyDirectoryEntry[];
 }
 
 type TabType = ExplorerPanel;
@@ -60,6 +63,7 @@ const TabPanel = ({
   chatScope = null,
   onMentionsChange,
   onShowMentions,
+  chatCompanies,
 }: TabPanelProps) => {
   const [activeTab, setActiveTab] = useState<TabType>(panel ?? 'details');
   const [nodeDetailsSubView, setNodeDetailsSubView] = useState<NodeDetailsSubView>('info');
@@ -184,6 +188,7 @@ const TabPanel = ({
               scope={chatScope}
               onMentionsChange={onMentionsChange}
               onShowMentions={onShowMentions}
+              companies={chatCompanies}
             />
           </TabsContent>
 

@@ -46,7 +46,7 @@ import {
 } from '@/lib/layoutTransition';
 import { AnimatedReactFlow, FlowTransition } from './AnimatedReactFlow';
 import { ChatMention, HighlightedElements, UiNode, GroupingMode, CompanyInfo, CompanyNodeData, KgEntity, KgExpandResponse, KgPaperDossier, LiteratureNodeData, TechTree as TechTreeData } from '@/lib/types';
-import { matchMentionsToTree, mentionEdges } from '@/lib/chatMentions';
+import { ChatCompanies, matchMentionsToCompanies, matchMentionsToTree, mentionEdges } from '@/lib/chatMentions';
 import { ChatViewCanvas } from './ChatViewCanvas';
 import { labelForTopic, TopicKey } from '@/lib/topicConfig';
 import {
@@ -152,6 +152,8 @@ interface TechTreeProps {
   /** Controlled mention state (defaults to internal). */
   chatMentions?: ChatMention[];
   onChatMentionsChange?: (mentions: ChatMention[]) => void;
+  /** Company-view cards ChatView may list when an answer names them. */
+  chatCompanies?: ChatCompanies;
 }
 
 const FIT_VIEW_OPTIONS = { padding: 0.5, maxZoom: 1.25 };
@@ -245,6 +247,7 @@ const TechTree: React.FC<TechTreeProps> = ({
   onRequestChatView,
   chatMentions: chatMentionsProp,
   onChatMentionsChange,
+  chatCompanies,
 }) => {
   const {
     techTree,
@@ -1927,6 +1930,21 @@ const TechTree: React.FC<TechTreeProps> = ({
         : null,
     [chatMentions, techTree],
   );
+  const companyMentionMatch = useMemo(
+    () =>
+      chatCompanies?.entries.length && chatMentions.length
+        ? matchMentionsToCompanies(chatMentions, chatCompanies.entries)
+        : null,
+    [chatMentions, chatCompanies],
+  );
+  // Companies get their own cards; keep them out of the "not on this tree" note.
+  const unmatchedMentions = useMemo(
+    () =>
+      (mentionMatch?.unmatched ?? []).filter(
+        (mention) => !companyMentionMatch?.matched.has(mention),
+      ),
+    [mentionMatch, companyMentionMatch],
+  );
   const mentionFlowEdges = useMemo(
     () =>
       mentionMatch && techTree
@@ -2275,7 +2293,11 @@ const TechTree: React.FC<TechTreeProps> = ({
                 <ChatViewCanvas
                   nodes={mentionMatch?.nodes ?? []}
                   edges={mentionFlowEdges}
-                  unmatched={mentionMatch?.unmatched ?? []}
+                  companies={companyMentionMatch?.companies}
+                  companyMappings={chatCompanies?.mappings}
+                  topic={topic}
+                  techTree={techTree}
+                  unmatched={unmatchedMentions}
                   onSelect={handleMentionNodeSelect}
                   onShowDetails={handleShowDetails}
                 />
@@ -2454,6 +2476,7 @@ const TechTree: React.FC<TechTreeProps> = ({
             chatScope={chatScope}
             onMentionsChange={setChatMentions}
             onShowMentions={handleShowMentions}
+            chatCompanies={chatCompanies?.entries}
           />
         )}
       </div>

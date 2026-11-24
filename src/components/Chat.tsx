@@ -25,7 +25,12 @@ import {
 } from '@/components/ui/dialog';
 import { useTechTree } from '@/hooks/useTechTree';
 import { useTopics } from '@/hooks/useTopics';
-import { createMentionMatcher, MentionMatcher } from '@/lib/chatMentions';
+import {
+  createMentionMatcher,
+  matchMentionsToCompanies,
+  MentionMatcher,
+} from '@/lib/chatMentions';
+import { CompanyDirectoryEntry } from '@/lib/companyGraph';
 import {
   ChatScope,
   buildChatPayload,
@@ -57,6 +62,8 @@ interface ChatProps {
   onMentionsChange?: (mentions: ChatMention[]) => void;
   /** A past answer's "N on tree" chip was clicked; defaults to onMentionsChange. */
   onShowMentions?: (mentions: ChatMention[]) => void;
+  /** Company cards an answer may name; counted in its "N on tree" chip. */
+  companies?: CompanyDirectoryEntry[];
 }
 
 // Paper-id citations like [IAEA-CN-28-H-10] emitted by the kg-service,
@@ -107,14 +114,27 @@ interface ThreadState {
 function MentionGraphButton({
   mentions,
   matcher,
+  companies,
   onShow,
 }: {
   mentions: ChatMention[];
   matcher: MentionMatcher | null;
+  companies?: CompanyDirectoryEntry[];
   onShow?: (mentions: ChatMention[]) => void;
 }) {
-  const count = matcher ? matcher(mentions).nodes.length : 0;
-  if (!count || !onShow) return null;
+  const nodeCount = matcher ? matcher(mentions).nodes.length : 0;
+  const companyCount = companies?.length
+    ? matchMentionsToCompanies(mentions, companies).companies.length
+    : 0;
+  if ((!nodeCount && !companyCount) || !onShow) return null;
+  const label = [
+    nodeCount ? `${nodeCount} on tree` : null,
+    companyCount
+      ? `${companyCount} ${companyCount === 1 ? 'company' : 'companies'}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
   return (
     <button
       type="button"
@@ -123,10 +143,10 @@ function MentionGraphButton({
         onShow(mentions);
       }}
       className="inline-flex items-center gap-1 rounded-md border border-gray-300 bg-white px-1.5 py-0.5 text-[10px] text-gray-600 transition-colors hover:border-blue-400 hover:text-blue-600"
-      title="Show these entities on the tree"
+      title="Show these entities in ChatView"
     >
       <Network className="h-3 w-3" aria-hidden />
-      {count} on tree
+      {label}
     </button>
   );
 }
@@ -136,6 +156,7 @@ const Chat: React.FC<ChatProps> = ({
   scope = null,
   onMentionsChange,
   onShowMentions,
+  companies,
 }) => {
   const { techTree } = useTechTree(topic);
   // Shared label index for the "N on tree" chips under past answers.
@@ -739,6 +760,7 @@ const Chat: React.FC<ChatProps> = ({
                       <MentionGraphButton
                         mentions={message.mentions}
                         matcher={mentionMatcher}
+                        companies={companies}
                         onShow={onShowMentions ?? onMentionsChange}
                       />
                     ) : null}

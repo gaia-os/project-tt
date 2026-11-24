@@ -18,6 +18,8 @@ import {
 } from '@/lib/onboardingStorage';
 import { isReactorNode } from '@/lib/reactorEntities';
 import { PathwayFilters } from '@/lib/smrFilters';
+import { buildCompanyDirectory } from '@/lib/companyGraph';
+import { ChatCompanies } from '@/lib/chatMentions';
 import { useTechTree } from '@/hooks/useTechTree';
 import { useTopics } from '@/hooks/useTopics';
 import { useCompanyView } from '@/hooks/useCompanyView';
@@ -96,14 +98,32 @@ function ExplorerWorkspaceContent({
     topics[0].id;
   const viewMode = urlState.view;
 
-  const [companyDataRequested, setCompanyDataRequested] = useState(
-    viewMode === 'company' || viewMode === 'world',
-  );
+  const needsCompanyData =
+    viewMode === 'company' || viewMode === 'world' || viewMode === 'chat';
+  const [companyDataRequested, setCompanyDataRequested] =
+    useState(needsCompanyData);
   const { techTree } = useTechTree(topic);
   const companyView = useCompanyView(topic, {
-    enabled:
-      companyDataRequested || viewMode === 'company' || viewMode === 'world',
+    enabled: companyDataRequested || needsCompanyData,
   });
+  // The Company view's unfiltered directory: ChatView only lists companies
+  // that have a card there.
+  const chatCompanies = useMemo<ChatCompanies | undefined>(
+    () =>
+      companyView.data?.available && techTree
+        ? {
+            entries: buildCompanyDirectory(
+              companyView.data.companies,
+              companyView.data.mappings,
+              techTree,
+              { searchTerm: '', region: 'All', category: 'All', primaryOnly: true },
+              'name',
+            ),
+            mappings: companyView.data.mappings,
+          }
+        : undefined,
+    [companyView.data, techTree],
+  );
   // Lifted so ChatView can route a past answer's mentions to the tree panel.
   const [chatMentions, setChatMentions] = useState<ChatMention[]>([]);
   // Lifted so the technology picker's step counts follow the same relation
@@ -140,10 +160,8 @@ function ExplorerWorkspaceContent({
   );
 
   useEffect(() => {
-    if (viewMode === 'company' || viewMode === 'world') {
-      setCompanyDataRequested(true);
-    }
-  }, [viewMode]);
+    if (needsCompanyData) setCompanyDataRequested(true);
+  }, [needsCompanyData]);
 
   useEffect(() => {
     writeOnboardingState({ lastTopic: topic });
@@ -385,6 +403,7 @@ function ExplorerWorkspaceContent({
             chatViewActive={viewMode === 'chat'}
             chatMentions={chatMentions}
             onChatMentionsChange={setChatMentions}
+            chatCompanies={chatCompanies}
             customTreeId={urlState.tree}
             onOpenCustomTree={handleOpenCustomTree}
             onCloseCustomTree={handleCloseCustomTree}
