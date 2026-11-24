@@ -129,6 +129,11 @@ interface TechTreeProps {
   onExitPathway?: (focusNodeId?: string) => void;
   /** Opens the technology picker. */
   onChooseTechnology?: () => void;
+  /** SMR relation filters, lifted so the technology picker can follow them. */
+  minRelevance: number;
+  onMinRelevanceChange: (value: number) => void;
+  sourceBackedOnly: boolean;
+  onSourceBackedOnlyChange: (value: boolean) => void;
   /** Side-panel tab from the URL (`panel=`). */
   panel?: 'details' | 'chat' | 'simulations' | null;
   onPanelChange?: (panel: 'details' | 'chat' | 'simulations') => void;
@@ -224,6 +229,10 @@ const TechTree: React.FC<TechTreeProps> = ({
   onPathwayStepChange,
   onExitPathway,
   onChooseTechnology,
+  minRelevance,
+  onMinRelevanceChange: setMinRelevance,
+  sourceBackedOnly,
+  onSourceBackedOnlyChange: setSourceBackedOnly,
   panel = null,
   onPanelChange,
   customTreeId = null,
@@ -316,9 +325,6 @@ const TechTree: React.FC<TechTreeProps> = ({
 
   // SMR-style trees (large, relevance-rated, provenance-tagged edges)
   const smrTree = useMemo(() => isSmrTree(techTree), [techTree]);
-  // Detail slider defaults to "all" (no relevance filtering).
-  const [minRelevance, setMinRelevance] = useState<number>(0);
-  const [sourceBackedOnly, setSourceBackedOnly] = useState<boolean>(true);
   const revealedFocusKeyRef = useRef<number | undefined>(undefined);
   const revealedHiddenFocusRef = useRef<string | null>(null);
   const appliedFocusRef = useRef<string | null>(null);
@@ -343,8 +349,10 @@ const TechTree: React.FC<TechTreeProps> = ({
   // but respects the SMR detail threshold.
   const pathwaySource = useMemo(() => {
     if (!techTree || !pathwayTargetId) return null;
-    return smrTree ? pathwaySourceTree(techTree, minRelevance) : techTree;
-  }, [techTree, pathwayTargetId, smrTree, minRelevance]);
+    return smrTree
+      ? pathwaySourceTree(techTree, minRelevance, sourceBackedOnly)
+      : techTree;
+  }, [techTree, pathwayTargetId, smrTree, minRelevance, sourceBackedOnly]);
   const pathwayMode = usePathwayMode({
     sourceTree: pathwaySource,
     targetId: pathwayTargetId,
@@ -2032,6 +2040,7 @@ const TechTree: React.FC<TechTreeProps> = ({
     findConnectedElements,
     techTree,
     minRelevance,
+    setMinRelevance,
     layoutInput,
   ]);
 

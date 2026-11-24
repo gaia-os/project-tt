@@ -1,6 +1,7 @@
 import { DataNode, TechTree } from '@/lib/types';
 import {
   DEFAULT_MIN_RELEVANCE,
+  PathwayFilters,
   filterSmrTechTree,
   isSmrTree,
 } from '@/lib/smrFilters';
@@ -104,11 +105,12 @@ export function summarizeBlurb(text: string): string | null {
 export function pathwaySourceTree(
   tree: TechTree,
   minRelevance: number = DEFAULT_MIN_RELEVANCE,
+  sourceBackedOnly = false,
 ): TechTree {
   return isSmrTree(tree)
     ? filterSmrTechTree(tree, {
         minRelevance,
-        sourceBackedOnly: false,
+        sourceBackedOnly,
         category: 'All',
       })
     : tree;
@@ -164,8 +166,13 @@ function disambiguate(entries: TechnologyCatalogEntry[]): TechnologyCatalogEntry
 }
 
 /** Pickable deployment concepts of a tree, in source order. */
-export function buildTechnologyCatalog(tree: TechTree): TechnologyCatalogEntry[] {
-  const index = createGraphIndex(pathwaySourceTree(tree));
+export function buildTechnologyCatalog(
+  tree: TechTree,
+  filters?: PathwayFilters,
+): TechnologyCatalogEntry[] {
+  const index = createGraphIndex(
+    pathwaySourceTree(tree, filters?.minRelevance, filters?.sourceBackedOnly),
+  );
   const entries = tree.nodes
     .filter((node) => node.data.nodeLabel === 'ReactorConcept')
     .map((node): TechnologyCatalogEntry => {

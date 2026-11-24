@@ -9,6 +9,7 @@ import {
   TechnologyCatalogEntry,
 } from '@/lib/technologyCatalog';
 import { useTechTree } from '@/hooks/useTechTree';
+import { PathwayFilters } from '@/lib/smrFilters';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +23,8 @@ interface TechnologyStepProps {
   onBack: () => void;
   onSkip: () => void;
   onSelectTechnology: (technologyId: string) => void;
+  /** Same relation filters the pathway uses, so step counts match it. */
+  pathwayFilters?: PathwayFilters;
 }
 
 export function TechnologyStep({
@@ -31,14 +34,15 @@ export function TechnologyStep({
   onBack,
   onSkip,
   onSelectTechnology,
+  pathwayFilters,
 }: TechnologyStepProps) {
   const { techTree, isLoading, error, retry } = useTechTree(topic);
   const [query, setQuery] = useState('');
   const [browsingAll, setBrowsingAll] = useState(false);
 
   const catalog = useMemo(
-    () => (techTree ? buildTechnologyCatalog(techTree) : []),
-    [techTree],
+    () => (techTree ? buildTechnologyCatalog(techTree, pathwayFilters) : []),
+    [techTree, pathwayFilters],
   );
   const suggested = useMemo(
     () => suggestTechnologies(catalog, lastTechnologyId, 5),

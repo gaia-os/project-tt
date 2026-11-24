@@ -17,6 +17,7 @@ import {
   writeOnboardingState,
 } from '@/lib/onboardingStorage';
 import { isReactorNode } from '@/lib/reactorEntities';
+import { PathwayFilters } from '@/lib/smrFilters';
 import { useTechTree } from '@/hooks/useTechTree';
 import { useTopics } from '@/hooks/useTopics';
 import { useCompanyView } from '@/hooks/useCompanyView';
@@ -105,6 +106,15 @@ function ExplorerWorkspaceContent({
   });
   // Lifted so ChatView can route a past answer's mentions to the tree panel.
   const [chatMentions, setChatMentions] = useState<ChatMention[]>([]);
+  // Lifted so the technology picker's step counts follow the same relation
+  // filters (detail slider, source-backed toggle) as the pathway it opens.
+  // Detail slider defaults to "all" (no relevance filtering).
+  const [minRelevance, setMinRelevance] = useState(0);
+  const [sourceBackedOnly, setSourceBackedOnly] = useState(true);
+  const pathwayFilters = useMemo<PathwayFilters>(
+    () => ({ minRelevance, sourceBackedOnly }),
+    [minRelevance, sourceBackedOnly],
+  );
   const [selection, setSelection] = useState<ExplorerSelection>();
   const [companyFocusNodeId, setCompanyFocusNodeId] = useState<string | null>(
     null,
@@ -377,6 +387,10 @@ function ExplorerWorkspaceContent({
             customTreeId={urlState.tree}
             onOpenCustomTree={handleOpenCustomTree}
             onCloseCustomTree={handleCloseCustomTree}
+            minRelevance={minRelevance}
+            onMinRelevanceChange={setMinRelevance}
+            sourceBackedOnly={sourceBackedOnly}
+            onSourceBackedOnlyChange={setSourceBackedOnly}
           />
         </ReactFlowProvider>
       </div>
@@ -474,6 +488,7 @@ function ExplorerWorkspaceContent({
           lastTechnologyId={lastTechnologyId}
           onSkip={handleWelcomeSkip}
           onChooseTechnology={handleChooseTechnology}
+          pathwayFilters={pathwayFilters}
         />
       )}
     </div>

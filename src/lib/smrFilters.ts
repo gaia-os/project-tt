@@ -12,6 +12,9 @@ export interface SmrTreeFilters {
   category: string;
 }
 
+/** The relation filters guided pathways (and their picker cards) follow. */
+export type PathwayFilters = Pick<SmrTreeFilters, 'minRelevance' | 'sourceBackedOnly'>;
+
 export function isSmrTree(techTree: TechTree | null | undefined): boolean {
   return !!techTree?.nodes.some((node) => node.data.smr);
 }

@@ -6,6 +6,7 @@ import { labelForTopic, TopicKey, TopicSummary } from '@/lib/topicConfig';
 import { Dialog, DialogOverlay, DialogPortal } from '@/components/ui/dialog';
 import { SectorStep } from './SectorStep';
 import { TechnologyStep } from './TechnologyStep';
+import { PathwayFilters } from '@/lib/smrFilters';
 
 export type WelcomeStep = 'sector' | 'technology';
 
@@ -17,6 +18,7 @@ interface WelcomeFlowProps {
   /** Closing without a choice (skip link, Esc). */
   onSkip: () => void;
   onChooseTechnology: (topic: TopicKey, technologyId: string) => void;
+  pathwayFilters?: PathwayFilters;
 }
 
 /**
@@ -30,6 +32,7 @@ export function WelcomeFlow({
   lastTechnologyId,
   onSkip,
   onChooseTechnology,
+  pathwayFilters,
 }: WelcomeFlowProps) {
   const [step, setStep] = useState<WelcomeStep>(initialStep);
   const [sector, setSector] = useState<TopicKey>(initialTopic);
@@ -71,6 +74,7 @@ export function WelcomeFlow({
                   onSelectTechnology={(technologyId) =>
                     onChooseTechnology(sector, technologyId)
                   }
+                  pathwayFilters={pathwayFilters}
                 />
               )}
             </div>
