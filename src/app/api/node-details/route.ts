@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { TopicKey } from '@/lib/topicConfig';
 import { getTopic } from '@/lib/topics.server';
+import { readSmrInfactAnalysis } from '@/lib/infactAnalysis.server';
 
 // GET ?topic=smr&nodeId=smr:bwrx-300 -> rich node payload from `node_details`
 // (404 when the topic has no details for that node).
@@ -26,7 +27,13 @@ export async function GET(request: NextRequest) {
     if (!details) {
       return NextResponse.json({ error: 'No details for this node' }, { status: 404 });
     }
-    return NextResponse.json(details, {
+
+    const responseDetails = { ...details };
+    if (details.kind === 'technology' && typeof details.name === 'string') {
+      responseDetails.infact_analysis = await readSmrInfactAnalysis(topic, details.name);
+    }
+
+    return NextResponse.json(responseDetails, {
       headers: { 'Cache-Control': 'public, max-age=300' },
     });
   } catch (error) {

@@ -153,6 +153,15 @@ export interface SmrReactorDetails {
   })[];
 }
 
+export interface SmrInfactAnalysis {
+  node_label: string;
+  trl_current: string;
+  probability: number;
+  interval: [number, number];
+  evidence_count: number;
+  has_report: boolean;
+}
+
 export interface SmrTechnologyDetails {
   id: string;
   kind: 'technology';
@@ -207,6 +216,7 @@ export interface SmrTechnologyDetails {
     /** Absent in datasets seeded before deployment evidence was carried through. */
     evidence?: SmrDeploymentEvidence[];
   } | null;
+  infact_analysis?: SmrInfactAnalysis | null;
 }
 
 export type SmrNodeDetails = SmrReactorDetails | SmrTechnologyDetails;

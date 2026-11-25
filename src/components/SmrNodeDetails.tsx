@@ -12,6 +12,10 @@ import {
 } from '@/lib/types';
 import { TopicKey } from '@/lib/topicConfig';
 import { topicImageUrl } from '@/lib/smrImages';
+import {
+  formatInfactPercent,
+  infactProbabilityColorClass,
+} from '@/lib/infactAnalysis';
 import { getCountryName } from '@/lib/geography';
 import {
   Accordion,
@@ -530,17 +534,22 @@ function ReactorDetails({
 
 function TechnologyDetails({
   details,
+  topic,
   onSelectNode,
   onSelectCompany,
 }: {
   details: SmrTechnologyDetails;
+  topic: TopicKey;
   onSelectNode?: (nodeId: string) => void;
   onSelectCompany?: (companyId: string) => void;
 }) {
   const { importance, deployment } = details;
+  const infactAnalysis = details.infact_analysis;
+  const infactReportUrl = `/investment-tech-tree/api/infact-analysis?topic=${encodeURIComponent(topic)}&nodeId=${encodeURIComponent(details.id)}`;
   const { sources, refNum, claimUrl } = useDeploymentSources(deployment);
   const [evidenceOpen, setEvidenceOpen] = useState<string>();
   const [highlightedSource, setHighlightedSource] = useState<number | null>(null);
+  const [infactReportOpen, setInfactReportOpen] = useState(false);
 
   const sourceAnchorId = useCallback(
     (n: number) => `ev-src-${details.id}-${n}`,
@@ -578,6 +587,38 @@ function TechnologyDetails({
             TRL {deployment.trl_band}
             <SourceRef source={refNum(claimUrl('trl_band'))} onShow={showSource} />
           </Badge>
+        )}
+        {infactAnalysis && (
+          <>
+            <Badge
+              variant="outline"
+              className={`tabular-nums ${infactProbabilityColorClass(infactAnalysis.probability)}`}
+              title={`InFact posterior probability that the current TRL is ${infactAnalysis.trl_current}, after ${infactAnalysis.evidence_count} inference step${infactAnalysis.evidence_count === 1 ? '' : 's'}`}
+            >
+              <span className="sr-only">InFact probability</span>
+              {formatInfactPercent(infactAnalysis.probability)}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="tabular-nums text-gray-700"
+              title="InFact confidence interval"
+            >
+              <span className="sr-only">InFact confidence interval</span>
+              {formatInfactPercent(infactAnalysis.interval[0])}–{formatInfactPercent(infactAnalysis.interval[1])}
+            </Badge>
+            {infactAnalysis.has_report && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-6 px-2 text-xs"
+                onClick={() => setInfactReportOpen(true)}
+                title="Open the full InFact HTML analysis"
+              >
+                View InFact analysis
+              </Button>
+            )}
+          </>
         )}
         {details.origin === 'llm_inferred' && (
           <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100" title="Node inferred by an LLM, not found in the source documents">
@@ -810,6 +851,29 @@ function TechnologyDetails({
           )}
         </Section>
       )}
+
+      {infactAnalysis?.has_report && (
+        <Dialog open={infactReportOpen} onOpenChange={setInfactReportOpen}>
+          <DialogContent className="flex h-[90vh] max-w-6xl flex-col overflow-hidden p-0">
+            <div className="border-b px-4 py-3 pr-12">
+              <DialogTitle className="truncate text-base">
+                InFact analysis: {details.name}
+              </DialogTitle>
+              <p className="mt-1 text-xs text-gray-500">
+                Probability {formatInfactPercent(infactAnalysis.probability)} that the current TRL is{' '}
+                {infactAnalysis.trl_current}; interval{' '}
+                {formatInfactPercent(infactAnalysis.interval[0])}–{formatInfactPercent(infactAnalysis.interval[1])}
+              </p>
+            </div>
+            <iframe
+              src={infactReportUrl}
+              title={`InFact analysis report for ${details.name}`}
+              className="min-h-0 w-full flex-1 border-0"
+              sandbox="allow-scripts"
+            />
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
@@ -847,6 +911,6 @@ export function SmrNodeDetails({ nodeId, topic, onSelectNode, onSelectCompany }:
   return details.kind === 'reactor' ? (
     <ReactorDetails details={details} topic={topic} onSelectNode={onSelectNode} />
   ) : (
-    <TechnologyDetails details={details} onSelectNode={onSelectNode} onSelectCompany={onSelectCompany} />
+    <TechnologyDetails details={details} topic={topic} onSelectNode={onSelectNode} onSelectCompany={onSelectCompany} />
   );
 }
