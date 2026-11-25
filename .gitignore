@@ -273,5 +273,10 @@ kg/neo4j/data/
 #==========================
 merge_fails.txt
 
+*.csv*
+*.html*
+*.pdf*
+*.json*
+
 presentation/
 outputs/infact-smr-analysis/
