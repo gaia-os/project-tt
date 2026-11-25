@@ -276,3 +276,4 @@ merge_fails.txt
 *.csv*
 *.html*
 *.pdf*
+*.json*
