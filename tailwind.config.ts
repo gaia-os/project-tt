@@ -15,6 +15,16 @@ export default {
     'border-red-500',
     'border-blue-500',
     'border-green-500',
+    'border-transparent',
+    'bg-red-600',
+    'bg-red-400',
+    'bg-yellow-300',
+    'bg-green-300',
+    'bg-green-600',
+    'text-white',
+    'text-red-950',
+    'text-yellow-950',
+    'text-green-950',
   ],
   theme: {
   	extend: {
