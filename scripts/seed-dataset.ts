@@ -591,6 +591,40 @@ for (const { fm } of techFiles) {
             source: e.source ?? null,
             verified: e.verified ?? null,
           })),
+          // Deep-research provenance, kept so downstream checks (InFact) can
+          // re-judge the TRL claim without reading deep-research.json.
+          sources: (deployment.sources ?? []).map((s: Yaml) => ({
+            label: s.label ?? null,
+            title: s.title ?? null,
+            url: s.url ?? null,
+          })),
+          confidence: deployment.confidence ?? null,
+          trl_basis: deployment.trl_basis ?? null,
+          trl_rationale: deployment.trl_rationale ?? null,
+          trl_family: deployment.trl_family ?? null,
+          trl_per_reactor: (deployment.trl_per_reactor ?? []).map((r: Yaml) => ({
+            id: r.id ?? null,
+            name: r.name ?? null,
+            trl: r.trl ?? null,
+            url: r.url ?? null,
+          })),
+          deep_research: deployment.deep_research
+            ? {
+                model: deployment.deep_research.model ?? null,
+                breadth: deployment.deep_research.breadth ?? null,
+                depth: deployment.deep_research.depth ?? null,
+                rounds: deployment.deep_research.rounds ?? null,
+                pages_read: deployment.deep_research.pages_read ?? null,
+                queries: deployment.deep_research.queries ?? [],
+                learnings: (deployment.deep_research.learnings ?? []).map((l: Yaml) => ({
+                  fact: l.fact ?? null,
+                  quote: l.quote ?? null,
+                  url: l.url ?? null,
+                  verified: l.verified ?? null,
+                  round: l.round ?? null,
+                })),
+              }
+            : null,
         }
       : null,
   });

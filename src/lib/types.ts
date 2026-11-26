@@ -215,6 +215,28 @@ export interface SmrTechnologyDetails {
     scaling_factors: string[];
     /** Absent in datasets seeded before deployment evidence was carried through. */
     evidence?: SmrDeploymentEvidence[];
+    /** Deep-research provenance; absent in datasets seeded before it was carried through. */
+    sources?: { label: string | null; title: string | null; url: string | null }[];
+    confidence?: string | null;
+    trl_basis?: string | null;
+    trl_rationale?: string | null;
+    trl_family?: string | null;
+    trl_per_reactor?: { id: string | null; name: string | null; trl: string | null; url: string | null }[];
+    deep_research?: {
+      model: string | null;
+      breadth: number | null;
+      depth: number | null;
+      rounds: number | null;
+      pages_read: number | null;
+      queries: string[];
+      learnings: {
+        fact: string | null;
+        quote: string | null;
+        url: string | null;
+        verified: string | null;
+        round: number | null;
+      }[];
+    } | null;
   } | null;
   infact_analysis?: SmrInfactAnalysis | null;
 }
