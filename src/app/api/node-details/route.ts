@@ -10,27 +10,40 @@ export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic') as TopicKey;
   const nodeId = request.nextUrl.searchParams.get('nodeId');
 
-  if (!topic || !(await getTopic(topic))) {
-    return NextResponse.json({ error: 'Invalid or missing topic parameter' }, { status: 400 });
+  const topicConfig = await getTopic(topic);
+  if (!topic || !topicConfig) {
+    return NextResponse.json(
+      { error: 'Invalid or missing topic parameter' },
+      { status: 400 },
+    );
   }
   if (!nodeId) {
-    return NextResponse.json({ error: 'Missing nodeId parameter' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Missing nodeId parameter' },
+      { status: 400 },
+    );
   }
 
   try {
     const client = await clientPromise;
     const details = await client
-      .db((await getTopic(topic))!.dbName)
+      .db(topicConfig.dbName)
       .collection('node_details')
       .findOne({ id: nodeId }, { projection: { _id: 0 } });
 
     if (!details) {
-      return NextResponse.json({ error: 'No details for this node' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'No details for this node' },
+        { status: 404 },
+      );
     }
 
     const responseDetails = { ...details };
-    if (details.kind === 'technology' && typeof details.name === 'string') {
-      responseDetails.infact_analysis = await readSmrInfactAnalysis(topic, details.name);
+    if (details.kind === 'technology') {
+      responseDetails.infact_analysis = await readSmrInfactAnalysis(
+        topicConfig.dbName,
+        nodeId,
+      );
     }
 
     return NextResponse.json(responseDetails, {
@@ -38,6 +51,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error fetching node details:', error);
-    return NextResponse.json({ error: 'Failed to fetch node details' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to fetch node details' },
+      { status: 500 },
+    );
   }
 }

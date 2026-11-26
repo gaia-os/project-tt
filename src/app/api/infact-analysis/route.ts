@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
 import { readSmrInfactAnalysisReport } from '@/lib/infactAnalysis.server';
 import { TopicKey } from '@/lib/topicConfig';
 import { getTopic } from '@/lib/topics.server';
@@ -8,7 +7,8 @@ export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic') as TopicKey;
   const nodeId = request.nextUrl.searchParams.get('nodeId');
 
-  if (!topic || !(await getTopic(topic))) {
+  const topicConfig = await getTopic(topic);
+  if (!topic || !topicConfig) {
     return NextResponse.json(
       { error: 'Invalid or missing topic parameter' },
       { status: 400 },
@@ -22,24 +22,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const client = await clientPromise;
-    const details = await client
-      .db((await getTopic(topic))!.dbName)
-      .collection('node_details')
-      .findOne({ id: nodeId }, { projection: { kind: 1, name: 1 } });
-
-    if (
-      !details ||
-      details.kind !== 'technology' ||
-      typeof details.name !== 'string'
-    ) {
-      return NextResponse.json(
-        { error: 'No technology details for this node' },
-        { status: 404 },
-      );
-    }
-
-    const report = await readSmrInfactAnalysisReport(topic, details.name);
+    const report = await readSmrInfactAnalysisReport(
+      topicConfig.dbName,
+      nodeId,
+    );
     if (!report) {
       return NextResponse.json(
         { error: 'No InFact report for this node' },

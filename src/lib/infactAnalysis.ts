@@ -51,6 +51,44 @@ export function extractLatestInfactAnalysis(
   };
 }
 
+export function parseSmrInfactAnalysis(
+  payload: unknown,
+): SmrInfactAnalysis | null {
+  if (!isRecord(payload)) return null;
+  const {
+    node_label: nodeLabel,
+    trl_current: trlCurrent,
+    probability,
+    interval,
+    evidence_count: evidenceCount,
+    has_report: hasReport,
+  } = payload;
+  if (
+    typeof nodeLabel !== 'string' ||
+    typeof trlCurrent !== 'string' ||
+    !unitIntervalNumber(probability) ||
+    !Array.isArray(interval) ||
+    interval.length < 2 ||
+    !unitIntervalNumber(interval[0]) ||
+    !unitIntervalNumber(interval[1]) ||
+    typeof evidenceCount !== 'number' ||
+    !Number.isInteger(evidenceCount) ||
+    evidenceCount < 1 ||
+    typeof hasReport !== 'boolean'
+  ) {
+    return null;
+  }
+
+  return {
+    node_label: nodeLabel,
+    trl_current: trlCurrent,
+    probability,
+    interval: [interval[0], interval[1]],
+    evidence_count: evidenceCount,
+    has_report: hasReport,
+  };
+}
+
 export function formatInfactPercent(probability: number): string {
   const percent = probability * 100;
   if (percent > 0 && percent < 0.05) return '<0.1%';

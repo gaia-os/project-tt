@@ -269,6 +269,7 @@ data/pdfs/
 data/extracted/
 kg/mongo/data/
 kg/neo4j/data/
+/mongodump_all/
 
 #==========================
 merge_fails.txt

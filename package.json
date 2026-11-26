@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "seed": "tsx --env-file=.env.local scripts/seed-dataset.ts"
+    "seed": "tsx --env-file=.env.local scripts/seed-dataset.ts",
+    "seed:infact": "tsx --env-file=.env.local scripts/seed-infact-analysis.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

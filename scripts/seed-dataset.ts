@@ -18,6 +18,7 @@
  *   nodes                    lean graph nodes (reactors + technologies)
  *   edges                    ENABLES relations (tech->tech, tech->reactor)
  *   node_details             rich per-node payload, fetched lazily by the UI
+ *   infact_analyses          InFact TRL assessments + HTML reports
  *   images                   IAEA figures + org logos as BSON Binary
  *   tt_companies             organisations in the CompanyInfo shape
  *   company_tech_tree_edges  DEVELOPS (org->reactor) / SUPPLIES (org->tech)
@@ -41,6 +42,7 @@ import { Binary, Document, MongoClient, ObjectId } from 'mongodb';
 import { parse as parseYaml } from 'yaml';
 import countries from 'i18n-iso-countries';
 import enLocale from 'i18n-iso-countries/langs/en.json';
+import { loadInfactAnalysisDocuments } from '@/lib/infactAnalysisIngestion.server';
 
 countries.registerLocale(enLocale);
 
@@ -305,6 +307,14 @@ const detailDocs: Document[] = [];
 const seededTechs = new Map(
   techFiles.filter(({ fm }) => fm.type === 'Technology' && fm.name).map(({ fm }) => [fm.id as string, fm]),
 );
+const technologyIdsByName = new Map<string, string>();
+for (const [id, tech] of seededTechs) {
+  if (!technologyIdsByName.has(tech.name as string)) {
+    technologyIdsByName.set(tech.name as string, id);
+  }
+}
+const infactIngestion = loadInfactAnalysisDocuments(DATA_DIR, technologyIdsByName);
+const infactDocs = infactIngestion.documents.map((document) => ({ ...document }) as Document);
 const reactorEnabledBy = new Map<string, Document[]>();
 for (const e of graph.edges) {
   if (e.type !== 'ENABLES' || !seededTechs.has(e.source)) continue;
@@ -809,6 +819,16 @@ async function main() {
   console.log(`  nodes            ${nodeDocs.length} (${reactorCount} reactors, ${nodeDocs.length - reactorCount} technologies)`);
   console.log(`  edges            ${edgeDocs.length} (${edgeDocs.filter((e) => e.source_backed).length} source-backed)`);
   console.log(`  node_details     ${detailDocs.length}`);
+  console.log(`  infact_analyses  ${infactDocs.length} (${infactDocs.filter((d) => d.has_report).length} reports)`);
+  if (infactIngestion.invalidFiles.length) {
+    console.warn(`  invalid InFact JSON files: ${infactIngestion.invalidFiles.length}`);
+  }
+  if (infactIngestion.unmatchedLabels.length) {
+    console.warn(`  InFact labels without a matching technology: ${infactIngestion.unmatchedLabels.length}`);
+  }
+  if (infactIngestion.duplicateLabels.length) {
+    console.warn(`  duplicate InFact labels skipped: ${infactIngestion.duplicateLabels.length}`);
+  }
   console.log(`  images           ${imageDocs.length} (${(imageBytes / 1e6).toFixed(1)} MB)`);
   console.log(`  companies        ${companyDocs.length} (${companyDocs.filter((c) => c.country_iso).length} with HQ country)`);
   console.log(`  company mappings ${mappingDocs.length}`);
@@ -827,6 +847,7 @@ async function main() {
       ['nodes', nodeDocs, { id: 1 }],
       ['edges', edgeDocs, { id: 1 }],
       ['node_details', detailDocs, { id: 1 }],
+      ['infact_analyses', infactDocs, { id: 1 }],
       ['images', imageDocs, { id: 1 }],
       ['tt_companies', companyDocs, { id: 1 }],
       ['company_tech_tree_edges', mappingDocs, { id: 1 }],
