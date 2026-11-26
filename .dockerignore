@@ -10,10 +10,17 @@ kg/dump
 .env*
 *.env
 
-# not needed at runtime (seeding/dev only)
+# not needed at runtime (seeding/dev only), except for the rendered
+# InFact v2 detail files which the app can read directly.
 # NOTE: data/ IS needed — imported by WorldExplorer.tsx at build time.
 docs
-outputs
+outputs/*
+!outputs/infact-v2
+outputs/infact-v2/*
+!outputs/infact-v2/node-infact-details
+outputs/infact-v2/node-infact-details/*
+!outputs/infact-v2/node-infact-details/*.json
+!outputs/infact-v2/node-infact-details/*.html
 scripts
 tests
 simulations

@@ -19,6 +19,7 @@ export function extractLatestInfactAnalysis(
   payload: unknown,
 ): SmrInfactAnalysisSummary | null {
   if (!isRecord(payload)) return null;
+  if (payload.method === 'infact-v2') return extractInfactV2Analysis(payload);
   const nodeLabel = payload.node_label;
   const trlCurrent = payload.trl_current;
   const evidence = payload.evidence;
@@ -51,6 +52,48 @@ export function extractLatestInfactAnalysis(
   };
 }
 
+export function extractInfactV2Analysis(
+  payload: unknown,
+): SmrInfactAnalysisSummary | null {
+  if (!isRecord(payload) || payload.method !== 'infact-v2') return null;
+  const nodeLabel = payload.node_label;
+  const trlCurrent = payload.trl_current;
+  const primary = payload.primary;
+  const results = payload.results;
+  const evidence = payload.evidence;
+  if (
+    typeof nodeLabel !== 'string' ||
+    typeof trlCurrent !== 'string' ||
+    (primary !== 'technology' && primary !== 'application') ||
+    !isRecord(results) ||
+    !Array.isArray(evidence) ||
+    evidence.length < 1
+  ) {
+    return null;
+  }
+
+  const result = results[primary];
+  if (!isRecord(result) || !unitIntervalNumber(result.probability)) return null;
+  const interval = result.interval;
+  if (
+    !Array.isArray(interval) ||
+    interval.length < 2 ||
+    !unitIntervalNumber(interval[0]) ||
+    !unitIntervalNumber(interval[1])
+  ) {
+    return null;
+  }
+
+  return {
+    node_label: nodeLabel,
+    trl_current: trlCurrent,
+    probability: result.probability,
+    interval: [interval[0], interval[1]],
+    evidence_count: evidence.length,
+    primary,
+  };
+}
+
 export function parseSmrInfactAnalysis(
   payload: unknown,
 ): SmrInfactAnalysis | null {
@@ -62,6 +105,7 @@ export function parseSmrInfactAnalysis(
     interval,
     evidence_count: evidenceCount,
     has_report: hasReport,
+    primary,
   } = payload;
   if (
     typeof nodeLabel !== 'string' ||
@@ -74,7 +118,10 @@ export function parseSmrInfactAnalysis(
     typeof evidenceCount !== 'number' ||
     !Number.isInteger(evidenceCount) ||
     evidenceCount < 1 ||
-    typeof hasReport !== 'boolean'
+    typeof hasReport !== 'boolean' ||
+    (primary !== undefined &&
+      primary !== 'technology' &&
+      primary !== 'application')
   ) {
     return null;
   }
@@ -86,6 +133,7 @@ export function parseSmrInfactAnalysis(
     interval: [interval[0], interval[1]],
     evidence_count: evidenceCount,
     has_report: hasReport,
+    ...(primary ? { primary } : {}),
   };
 }
 

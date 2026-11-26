@@ -545,7 +545,13 @@ function TechnologyDetails({
 }) {
   const { importance, deployment } = details;
   const infactAnalysis = details.infact_analysis;
-  const infactReportUrl = `/investment-tech-tree/api/infact-analysis?topic=${encodeURIComponent(topic)}&nodeId=${encodeURIComponent(details.id)}`;
+  const infactClaimLabel =
+    infactAnalysis?.primary === 'technology'
+      ? 'technology TRL'
+      : infactAnalysis?.primary === 'application'
+        ? 'application TRL'
+        : 'current TRL';
+  const infactReportUrl = `/investment-tech-tree/api/infact-analysis?topic=${encodeURIComponent(topic)}&nodeId=${encodeURIComponent(details.id)}&nodeLabel=${encodeURIComponent(details.name)}`;
   const { sources, refNum, claimUrl } = useDeploymentSources(deployment);
   const [evidenceOpen, setEvidenceOpen] = useState<string>();
   const [highlightedSource, setHighlightedSource] = useState<number | null>(null);
@@ -593,7 +599,7 @@ function TechnologyDetails({
             <Badge
               variant="outline"
               className={`tabular-nums ${infactProbabilityColorClass(infactAnalysis.probability)}`}
-              title={`InFact posterior probability that the current TRL is ${infactAnalysis.trl_current}, after ${infactAnalysis.evidence_count} inference step${infactAnalysis.evidence_count === 1 ? '' : 's'}`}
+              title={`InFact posterior probability that the ${infactClaimLabel} is ${infactAnalysis.trl_current}, after ${infactAnalysis.evidence_count} inference step${infactAnalysis.evidence_count === 1 ? '' : 's'}`}
             >
               <span className="sr-only">InFact probability</span>
               {formatInfactPercent(infactAnalysis.probability)}
@@ -860,9 +866,10 @@ function TechnologyDetails({
                 InFact analysis: {details.name}
               </DialogTitle>
               <p className="mt-1 text-xs text-gray-500">
-                Probability {formatInfactPercent(infactAnalysis.probability)} that the current TRL is{' '}
-                {infactAnalysis.trl_current}; interval{' '}
-                {formatInfactPercent(infactAnalysis.interval[0])}–{formatInfactPercent(infactAnalysis.interval[1])}
+                Probability {formatInfactPercent(infactAnalysis.probability)}{' '}
+                that the {infactClaimLabel} is {infactAnalysis.trl_current};
+                interval {formatInfactPercent(infactAnalysis.interval[0])}–
+                {formatInfactPercent(infactAnalysis.interval[1])}
               </p>
             </div>
             <iframe

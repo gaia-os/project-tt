@@ -128,8 +128,8 @@ The platform includes an edit interface for the technology tree, dataset seeding
 - **Five-level color coding**: 0-19.9% dark red, 20-39.9% light red, 40-59.9% yellow, 60-79.9% light green, and 80-100% dark green.
 - **Confidence interval**: a neutral badge shows the lower and upper probability bounds as percentages.
 - **Full reports**: `View InFact analysis` opens the complete HTML assessment in a sandboxed modal, including the evidence rationale and belief-evolution chart.
-- **MongoDB-backed runtime**: the complete source JSON and HTML report are stored in the dataset database's `infact_analyses` collection. The running application does not read `data/extracted` or the analysis files directly.
-- **Per-dataset data**: the pipeline is dataset-specific; currently only the `merged` dataset contains curated InFact outputs. Technologies without an assessment render without the additional badges.
+- **Hybrid runtime**: a matching InFact v2 JSON/HTML pair under `outputs/infact-v2/node-infact-details/` takes precedence. Technologies without a v2 file fall back to the v1 assessment stored in the dataset database's `infact_analyses` collection.
+- **Per-node data**: v2 files are matched by the technology-label filename and validated against the technology id when the file contains one. Technologies without an assessment render without the additional badges.
 
 ## Technology Stack
 
@@ -222,7 +222,7 @@ kg/                           # self-hosted app + MongoDB + Neo4j + Ollama stack
 tests/                        # node:test unit/projection tests
 ```
 
-The details panel loads `node_details` lazily instead of putting the full rich payload into the graph response. InFact summaries are joined from `infact_analyses` when technology details are requested; report HTML is fetched only when the report popup is opened.
+The details panel loads `node_details` lazily instead of putting the full rich payload into the graph response. InFact summaries are read from a matching InFact v2 file when available and otherwise joined from `infact_analyses`; report HTML is fetched only when the report popup is opened.
 
 ### State Management
 
@@ -273,16 +273,17 @@ The details panel loads `node_details` lazily instead of putting the full rich p
 
 ### Environment Variables
 
-| Variable               | Description                                                                                       | Required                |
-| ---------------------- | ------------------------------------------------------------------------------------------------- | ----------------------- |
-| `MONGODB_URI`          | MongoDB connection string. For server development this normally points at forwarded port `33335`. | Yes                     |
-| `ADMIN_PASSWORD`       | Password for tree editing and literature curation.                                                | For admin features      |
-| `KG_SERVICE_URL`       | Base URL of the kg-service, normally `http://localhost:33336` through the dev tunnel.             | For chat/model features |
-| `KG_API_KEY`           | Shared key sent as `X-API-Key` to the kg-service.                                                 | For chat/model features |
-| `VOTE_SECRET`          | HMAC secret signing anonymous literature-voter cookies.                                           | For voting              |
-| `EXCLUDED_TOPICS`      | Comma-separated MongoDB database names hidden from the topic selector.                            | No                      |
-| `KG_REASONING_DISPLAY` | `true`/`false` server default for showing one-line KG lookup reasons in chat.                     | No                      |
-| `INFACT_API_KEY`       | Optional key used only by the local InFact generation scripts, not by the Next.js app.            | No                      |
+| Variable                | Description                                                                                       | Required                |
+| ----------------------- | ------------------------------------------------------------------------------------------------- | ----------------------- |
+| `MONGODB_URI`           | MongoDB connection string. For server development this normally points at forwarded port `33335`. | Yes                     |
+| `ADMIN_PASSWORD`        | Password for tree editing and literature curation.                                                | For admin features      |
+| `KG_SERVICE_URL`        | Base URL of the kg-service, normally `http://localhost:33336` through the dev tunnel.             | For chat/model features |
+| `KG_API_KEY`            | Shared key sent as `X-API-Key` to the kg-service.                                                 | For chat/model features |
+| `VOTE_SECRET`           | HMAC secret signing anonymous literature-voter cookies.                                           | For voting              |
+| `EXCLUDED_TOPICS`       | Comma-separated MongoDB database names hidden from the topic selector.                            | No                      |
+| `KG_REASONING_DISPLAY`  | `true`/`false` server default for showing one-line KG lookup reasons in chat.                     | No                      |
+| `INFACT_V2_DETAILS_DIR` | Optional override for the runtime InFact v2 detail directory.                                     | No                      |
+| `INFACT_API_KEY`        | Optional key used only by legacy local InFact generation scripts, not by the Next.js app.         | No                      |
 
 `NEXT_PUBLIC_ENVIRONMENT` and `GEMINI_API_KEY` are not used by the current application. Chat no longer calls Gemini directly.
 
@@ -384,15 +385,18 @@ Runtime data is stored in MongoDB — in the current reference deployment, the s
 
 #### InFact generation and ingestion
 
-The ingestion pipeline consumes InFact output from the dataset folder. The generation scripts are separate from the web runtime and require Python/`uv` plus a reachable local InFact API at `http://127.0.0.1:8007`:
+The current InFact v2 generator re-judges the deep-research technology and application TRL claims. It requires Python/`uv` and a reachable Ollama model; Tavily follow-up search is optional. See `scripts/infact/infact_doc.md` for the evidence and scoring semantics:
 
 ```bash
-uv run scripts/infact/check_node_refs.py merged
-uv run scripts/infact/analyze_all_nodes.py --db merged
-uv run scripts/infact/render_reports.py
+uv run python -u scripts/infact/analyze_all_nodes.py --db merged
+uv run python -u scripts/infact/render_reports.py
 ```
 
-`analyze_all_nodes.py` writes JSON assessments beneath `outputs/node-infact-details/`; `render_reports.py` writes the companion HTML files there. See `scripts/infact/infact_doc.md` for the chained evidence/API semantics. Stage the resulting pairs in the dataset-specific layout expected by the seeder:
+`analyze_all_nodes.py` writes `outputs/infact-v2/node-infact-results.csv` and per-node JSON assessments under `outputs/infact-v2/node-infact-details/`; `render_reports.py` writes the companion HTML files next to them. At runtime the Next.js API checks that directory first: the filename is the lowercased technology label with spaces and `/` replaced by `-` (other characters such as parentheses and `&` are retained), and the JSON `node_label`/`node_id` must match the requested technology. If no valid v2 file exists, the API falls back to the v1 document in MongoDB. Set `INFACT_V2_DETAILS_DIR` when the directory lives somewhere other than `<app root>/outputs/infact-v2/node-infact-details`. The production Dockerfile copies the JSON/HTML detail files present at image build time; mount the directory into the app container instead if reports need to be updated without rebuilding the image.
+
+The HTML reports load Chart.js from `cdn.jsdelivr.net`; the report API permits that CDN in its content-security policy, so browser access to the CDN is needed for the belief-evolution chart.
+
+MongoDB ingestion remains the source for v1 fallback data and can also freeze a v2 run into a dataset. Stage the JSON/HTML pairs in the dataset-specific layout expected by the seeder:
 
 ```text
 data/extracted/<dataset>/
@@ -404,26 +408,17 @@ data/extracted/<dataset>/
             └── <node-slug>.html
 ```
 
-For example, after a generation run:
+For example:
 
 ```bash
 mkdir -p data/extracted/<dataset>/infact-smr-analysis/nodes/node-infact-details
-cp outputs/node-infact-details/*.json outputs/node-infact-details/*.html \
+cp outputs/infact-v2/node-infact-details/*.json outputs/infact-v2/node-infact-details/*.html \
   data/extracted/<dataset>/infact-smr-analysis/nodes/node-infact-details/
-cp outputs/node-infact-results.csv data/extracted/<dataset>/infact-smr-analysis/   # optional
-```
-
-The HTML reports load Chart.js from `cdn.jsdelivr.net`; the report API permits that CDN in its content-security policy, so browser access to the CDN is needed for the belief-evolution chart.
-
-The generator's node slug is the lowercased technology label with spaces and `/` replaced by `-` (other characters such as parentheses and `&` are retained). Ingestion nevertheless matches assessments by the JSON `node_label`, not by filename alone; the companion HTML must use the same slug basename.
-
-Then ingest them into that dataset's MongoDB database:
-
-```bash
+cp outputs/infact-v2/node-infact-results.csv data/extracted/<dataset>/infact-smr-analysis/   # optional
 npm run seed:infact -- <dataset>
 ```
 
-The targeted seeder validates each JSON payload, matches `node_label` exactly to an existing technology name, reports and skips invalid/unmatched/duplicate inputs, stores the complete JSON and companion HTML in `infact_analyses`, upserts current documents, and removes stale documents only from that derived collection. A full `npm run seed -- <dataset>` also includes the same ingestion step, but replaces all managed dataset collections; if the optional InFact folder is absent, the full seed writes an empty `infact_analyses` collection.
+The targeted seeder validates each JSON payload, matches `node_label` exactly to an existing technology name, reports and skips invalid/unmatched/duplicate inputs, stores the complete JSON and companion HTML in `infact_analyses`, upserts current documents, and removes stale documents only from that derived collection. A full `npm run seed -- <dataset>` also includes the same ingestion step, but replaces all managed dataset collections; if the optional InFact folder is absent, the full seed writes an empty `infact_analyses` collection. Runtime files in the InFact v2 output directory still take precedence over MongoDB documents for the same technologies.
 
 ### Code Quality
 

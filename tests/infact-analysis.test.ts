@@ -4,6 +4,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import test from 'node:test';
 import {
+  extractInfactV2Analysis,
   extractLatestInfactAnalysis,
   formatInfactPercent,
   infactAnalysisSlug,
@@ -11,6 +12,10 @@ import {
   parseSmrInfactAnalysis,
 } from '@/lib/infactAnalysis';
 import { loadInfactAnalysisDocuments } from '@/lib/infactAnalysisIngestion.server';
+import {
+  loadSmrInfactV2Analysis,
+  readSmrInfactV2Report,
+} from '@/lib/infactAnalysisV2.server';
 
 test('the InFact slug follows the report generator filename convention', () => {
   assert.equal(infactAnalysisSlug('7LiF-UF4 fuel salt'), '7lif-uf4-fuel-salt');
@@ -101,12 +106,155 @@ test('stored InFact summaries are validated before being exposed by the API', ()
     has_report: true,
   };
   assert.deepEqual(parseSmrInfactAnalysis(stored), stored);
+  assert.deepEqual(
+    parseSmrInfactAnalysis({ ...stored, primary: 'technology' }),
+    { ...stored, primary: 'technology' },
+  );
+  assert.equal(
+    parseSmrInfactAnalysis({ ...stored, primary: 'unknown' }),
+    null,
+  );
   assert.equal(
     parseSmrInfactAnalysis({ ...stored, has_report: undefined }),
     null,
   );
   assert.equal(parseSmrInfactAnalysis({ ...stored, interval: [0.2] }), null);
   assert.equal(parseSmrInfactAnalysis({ ...stored, probability: 1.2 }), null);
+});
+
+test('InFact v2 summaries come from the primary technology/application result', () => {
+  const analysis = extractInfactV2Analysis({
+    method: 'infact-v2',
+    node_id: 'tech:steam-turbine',
+    node_label: 'Steam turbine',
+    primary: 'technology',
+    trl_current: '9',
+    results: {
+      technology: { probability: 0.9139, interval: [0.706, 0.9822] },
+      application: { probability: 0.6002, interval: [0.2832, 0.7169] },
+    },
+    evidence: [{}, {}, {}],
+  });
+
+  assert.deepEqual(analysis, {
+    node_label: 'Steam turbine',
+    trl_current: '9',
+    probability: 0.9139,
+    interval: [0.706, 0.9822],
+    evidence_count: 3,
+    primary: 'technology',
+  });
+});
+
+test('malformed InFact v2 payloads are rejected', () => {
+  const valid = {
+    method: 'infact-v2',
+    node_label: 'Natural circulation',
+    primary: 'application',
+    trl_current: '9',
+    results: {
+      application: { probability: 0.25, interval: [0.08, 0.76] },
+    },
+    evidence: [{}],
+  };
+  assert.equal(
+    extractInfactV2Analysis({ ...valid, method: 'infact-v1' }),
+    null,
+  );
+  assert.equal(
+    extractInfactV2Analysis({ ...valid, primary: 'technology' }),
+    null,
+  );
+  assert.equal(extractInfactV2Analysis({ ...valid, evidence: [] }), null);
+  assert.equal(
+    extractInfactV2Analysis({
+      ...valid,
+      results: { application: { probability: 1.2, interval: [0, 1] } },
+    }),
+    null,
+  );
+});
+
+test('the filesystem loader matches v2 files by node label and validates the node id', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'infact-v2-runtime-'));
+  try {
+    const slug = 'high-assay-low-enriched-uranium-(haleu)';
+    fs.writeFileSync(
+      path.join(root, `${slug}.json`),
+      JSON.stringify({
+        method: 'infact-v2',
+        node_id: 'tech:haleu',
+        node_label: 'High-assay low-enriched uranium (HALEU)',
+        primary: 'application',
+        trl_current: '7-8',
+        results: {
+          application: { probability: 0.0584, interval: [0.0055, 0.3723] },
+        },
+        evidence: [{}, {}],
+      }),
+    );
+    fs.writeFileSync(path.join(root, `${slug}.html`), '<html>v2 report</html>');
+
+    const loaded = loadSmrInfactV2Analysis(
+      'tech:haleu',
+      'High-assay low-enriched uranium (HALEU)',
+      root,
+    );
+
+    assert.equal(loaded?.slug, slug);
+    assert.deepEqual(loaded?.analysis, {
+      node_label: 'High-assay low-enriched uranium (HALEU)',
+      trl_current: '7-8',
+      probability: 0.0584,
+      interval: [0.0055, 0.3723],
+      evidence_count: 2,
+      has_report: true,
+      primary: 'application',
+    });
+    assert.equal(readSmrInfactV2Report(loaded!), '<html>v2 report</html>');
+    assert.equal(
+      loadSmrInfactV2Analysis(
+        'tech:other-id',
+        'High-assay low-enriched uranium (HALEU)',
+        root,
+      ),
+      null,
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('a valid v2 analysis without a rendered report still has a v2 summary', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'infact-v2-runtime-'));
+  try {
+    fs.writeFileSync(
+      path.join(root, 'hastelloy-n-alloy.json'),
+      JSON.stringify({
+        method: 'infact-v2',
+        node_id: 'tech:hastelloy-n-alloy',
+        node_label: 'Hastelloy N alloy',
+        primary: 'technology',
+        trl_current: '9',
+        results: {
+          technology: { probability: 0.4, interval: [0.2, 0.7] },
+        },
+        evidence: [{}],
+      }),
+    );
+
+    const loaded = loadSmrInfactV2Analysis(
+      'tech:hastelloy-n-alloy',
+      'Hastelloy N alloy',
+      root,
+    );
+
+    assert.equal(loaded?.analysis.has_report, false);
+    assert.equal(loaded?.analysis.probability, 0.4);
+    assert.equal(readSmrInfactV2Report(loaded!), null);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('ingestion stores the full analysis and HTML report under the matched technology id', () => {

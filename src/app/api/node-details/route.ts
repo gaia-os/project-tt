@@ -3,6 +3,7 @@ import clientPromise from '@/lib/mongodb';
 import { TopicKey } from '@/lib/topicConfig';
 import { getTopic } from '@/lib/topics.server';
 import { readSmrInfactAnalysis } from '@/lib/infactAnalysis.server';
+import { loadSmrInfactV2Analysis } from '@/lib/infactAnalysisV2.server';
 
 // GET ?topic=smr&nodeId=smr:bwrx-300 -> rich node payload from `node_details`
 // (404 when the topic has no details for that node).
@@ -40,10 +41,13 @@ export async function GET(request: NextRequest) {
 
     const responseDetails = { ...details };
     if (details.kind === 'technology') {
-      responseDetails.infact_analysis = await readSmrInfactAnalysis(
-        topicConfig.dbName,
-        nodeId,
-      );
+      const infactV2 =
+        typeof details.name === 'string'
+          ? loadSmrInfactV2Analysis(nodeId, details.name)
+          : null;
+      responseDetails.infact_analysis =
+        infactV2?.analysis ??
+        (await readSmrInfactAnalysis(topicConfig.dbName, nodeId));
     }
 
     return NextResponse.json(responseDetails, {

@@ -160,6 +160,7 @@ export interface SmrInfactAnalysis {
   interval: [number, number];
   evidence_count: number;
   has_report: boolean;
+  primary?: 'technology' | 'application';
 }
 
 export interface SmrTechnologyDetails {
